@@ -33,6 +33,7 @@
   --ease:cubic-bezier(.22,1,.36,1);
   --nav-h:64px;
   --paper-veil:rgba(244,237,223,.94);
+  --card-bg:rgba(237,227,206,.8);
 }
 /* ---------- 墨夜主题（多风格切换 · M8） ---------- */
 :root[data-theme="night"]{
@@ -50,6 +51,7 @@
   --line:rgba(237,227,206,.16);
   --line-soft:rgba(237,227,206,.09);
   --paper-veil:rgba(25,21,18,.92);
+  --card-bg:rgba(44,36,29,.78);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -131,8 +133,135 @@ nav.main-nav a.on::after{width:100%}
 
 /* ---------- 视图容器 ---------- */
 main{position:relative}
-.view{display:none;min-height:100vh}
+.view{display:none;min-height:100vh;position:relative;isolation:isolate}
 .view.active{display:block;animation:viewIn .7s var(--ease) both}
+
+/* ============================================================
+   视图氛围背景层 · 每视图一个场景身份
+   展厅长卷 / 藏品画框 / 舆图远山 / 星图点阵 / 信笺墨池 / 印坊印阵
+   巨幅主题字水印压底 + 场景渐变 + 装饰纹样，全部 CSS 生成：
+   零图片、零 blur、零动画，性能与视觉兼得
+   ============================================================ */
+.view::before,.view::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1}
+
+/* 巨幅水印字：博物馆级展厅语言 */
+.view[data-view="hall"]::before,
+.view[data-view="item"]::before,
+.view[data-view="graph"]::before,
+.view[data-view="ask"]::before,
+.view[data-view="create"]::before,
+.view[data-view="immerse"]::before,
+.view[data-view="map"]::after{
+  position:absolute;
+  font-family:var(--serif);font-weight:900;
+  font-size:clamp(150px,25vw,330px);
+  color:rgba(33,29,24,.14);
+  letter-spacing:.1em;line-height:1;
+  white-space:nowrap;user-select:none;
+}
+
+/* 展品总览 —— 展开的长卷：巨字「珍宝」横排居中偏上 + 顶部墨韵 + 金轴杆 */
+.view[data-view="hall"]::before{
+  content:"珍宝";
+  top:40%;left:50%;transform:translate(-50%,-50%);
+  background:
+    radial-gradient(ellipse 66% 38% at 50% 5%, rgba(33,29,24,.13), transparent 70%),
+    radial-gradient(ellipse 46% 28% at 90% 82%, rgba(176,58,46,.09), transparent 72%),
+    radial-gradient(ellipse 50% 30% at 6% 60%, rgba(166,124,46,.10), transparent 70%);
+}
+.view[data-view="hall"]::after{
+  background:
+    linear-gradient(90deg, transparent calc(50% - 574px), rgba(166,124,46,.34) calc(50% - 574px) calc(50% - 572.5px), transparent calc(50% - 572.5px)),
+    linear-gradient(90deg, transparent calc(50% + 572.5px), rgba(166,124,46,.34) calc(50% + 572.5px) calc(50% + 574px), transparent calc(50% + 574px));
+}
+
+/* 详情 —— 藏品画框：巨字「鉴」右竖 + 聚光 + 四角装裱金线 */
+.view[data-view="item"]::before{
+  content:"鉴";
+  writing-mode:vertical-rl;
+  top:50%;right:1%;transform:translateY(-50%);
+  background:
+    radial-gradient(ellipse 56% 44% at 50% 36%, rgba(33,29,24,.10), transparent 72%),
+    linear-gradient(0deg, rgba(33,29,24,.06), transparent 16%, transparent 84%, rgba(33,29,24,.06));
+}
+.view[data-view="item"]::after{
+  background:
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) 26px 26px / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) 26px 26px / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) calc(100% - 56px) 26px / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) calc(100% - 26px) 26px / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) 26px calc(100% - 26px) / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) 26px calc(100% - 56px) / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) calc(100% - 56px) calc(100% - 26px) / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.55),rgba(166,124,46,.55)) calc(100% - 26px) calc(100% - 56px) / 1px 30px no-repeat;
+}
+
+/* 非遗地图 —— 舆图：巨字「舆图」右上 + 经纬网格 + 底部两道远山 */
+.view[data-view="map"]::before{
+  background:
+    repeating-linear-gradient(0deg, transparent 0 46px, rgba(33,29,24,.07) 46px 47px),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(33,29,24,.07) 46px 47px),
+    radial-gradient(ellipse 60% 40% at 50% 30%, rgba(255,252,240,.5), transparent 75%);
+}
+.view[data-view="map"]::after{
+  content:"舆图";
+  top:4%;right:1.5%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 180'%3E%3Cpath d='M0 150 Q150 60 300 110 T600 90 T900 120 T1200 80 V180 H0 Z' fill='%23211D18' opacity='.10'/%3E%3Cpath d='M0 162 Q180 100 360 138 T720 118 T1080 142 T1200 122 V180 H0 Z' fill='%23211D18' opacity='.07'/%3E%3C/svg%3E") center bottom / 1400px auto no-repeat;
+}
+
+/* 知识图谱 —— 星图：巨字「网」居中 + 点阵 + 中心墨晕 + 放射金芒 */
+.view[data-view="graph"]::before{
+  content:"网";
+  top:44%;left:50%;transform:translate(-50%,-50%);
+  background:
+    radial-gradient(ellipse 60% 42% at 50% 40%, rgba(33,29,24,.11), transparent 70%),
+    conic-gradient(from 210deg at 50% 46%, transparent 0 36deg, rgba(166,124,46,.10) 38deg 40deg, transparent 42deg 96deg, rgba(166,124,46,.09) 98deg 100deg, transparent 102deg 156deg, rgba(166,124,46,.10) 158deg 160deg, transparent 162deg 216deg, rgba(166,124,46,.09) 218deg 220deg, transparent 222deg 276deg, rgba(166,124,46,.10) 278deg 280deg, transparent 282deg 336deg, rgba(166,124,46,.09) 338deg 340deg, transparent 342deg 360deg);
+}
+.view[data-view="graph"]::after{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='1' fill='%23211D18' opacity='.52'/%3E%3Ccircle cx='2' cy='5' r='.8' fill='%23211D18' opacity='.38'/%3E%3Ccircle cx='20' cy='18' r='.8' fill='%23211D18' opacity='.38'/%3E%3Ccircle cx='7' cy='21' r='.7' fill='%23A67C2E' opacity='.55'/%3E%3C/svg%3E") repeat;
+  background-size:26px 26px;
+}
+
+/* 问·AI —— 书案信笺：巨字「问」左侧 + 竖栏 + 右上墨块 + 底部一池墨 */
+.view[data-view="ask"]::before{
+  content:"问";
+  top:42%;left:1.5%;
+  background:
+    radial-gradient(ellipse 34% 30% at 90% 8%, rgba(33,29,24,.12), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 122px, rgba(33,29,24,.06) 122px 123px);
+}
+.view[data-view="ask"]::after{
+  background:radial-gradient(ellipse 46% 38% at 50% 112%, rgba(33,29,24,.12), transparent 68%);
+}
+
+/* 文创工坊 —— 印坊：巨字「印」左竖 + 暖光 + 朱砂印阵 */
+.view[data-view="create"]::before{
+  content:"印";
+  writing-mode:vertical-rl;
+  top:50%;left:1.2%;transform:translateY(-50%);
+  background:
+    radial-gradient(ellipse 52% 34% at 50% 0%, rgba(166,124,46,.12), transparent 70%),
+    radial-gradient(ellipse 44% 32% at 10% 90%, rgba(176,58,46,.09), transparent 72%);
+}
+.view[data-view="create"]::after{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='4' y='4' width='14' height='14' fill='none' stroke='%23B03A2E' stroke-width='1' opacity='.62'/%3E%3Ccircle cx='11' cy='11' r='1.6' fill='%23B03A2E' opacity='.55'/%3E%3C/svg%3E") repeat;
+  background-size:44px 44px;
+}
+
+/* 沉浸演绎 —— 夜戏台：巨字「戏」右下 + 顶部墨幕垂落 + 台口朱砂暖光 */
+.view[data-view="immerse"]::before{
+  content:"戏";
+  bottom:6%;right:1.5%;
+  background:
+    radial-gradient(ellipse 74% 48% at 50% -4%, rgba(33,29,24,.18), transparent 66%),
+    radial-gradient(ellipse 50% 30% at 50% 106%, rgba(176,58,46,.12), transparent 68%);
+}
+
+/* 墨夜主题：墨色氛围自动提亮为夜色金墨 */
+:root[data-theme="night"] .view::before,
+:root[data-theme="night"] .view::after{filter:brightness(1.9) opacity(.82)}
+
 @keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .section-wrap{max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
 .section-head{margin-bottom:clamp(36px,6vh,72px)}
@@ -285,7 +414,7 @@ body.vt-on .view.active{animation:none}
   display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,28px);
 }
 .card{
-  position:relative;overflow:hidden;background:var(--paper-2);
+  position:relative;overflow:hidden;background:var(--card-bg);
   border:1px solid var(--line-soft);border-radius:2px;
   transition:border-color .35s,transform .35s var(--ease);
 }
@@ -386,8 +515,8 @@ body.vt-on .view.active{animation:none}
 .map-layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,64px);align-items:start}
 .map-canvas{
   position:relative;border:1px solid var(--line-soft);background:
-    radial-gradient(ellipse at 50% 40%,rgba(255,252,240,.7),transparent 70%),
-    var(--paper-2);
+    radial-gradient(ellipse at 50% 40%,rgba(255,252,240,.55),transparent 70%),
+    var(--card-bg);
   border-radius:2px;
 }
 .map-canvas svg{width:100%;height:auto;display:block}
@@ -421,7 +550,7 @@ body.vt-on .view.active{animation:none}
 /* ---------- 图谱 ---------- */
 .graph-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 .graph-stage{
-  position:relative;border:1px solid var(--line-soft);background:var(--paper-2);border-radius:2px;
+  position:relative;border:1px solid var(--line-soft);background:var(--card-bg);border-radius:2px;
   min-height:560px;
 }
 .graph-stage svg{width:100%;height:auto;display:block}
@@ -443,7 +572,7 @@ body.vt-on .view.active{animation:none}
 .ask-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 .ask-layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,64px);align-items:start}
 .ask-panel{
-  border:1px solid var(--line);background:var(--paper);border-radius:2px;
+  border:1px solid var(--line);background:var(--card-bg);border-radius:2px;
   display:flex;flex-direction:column;height:min(640px,74vh);
 }
 .ask-head{
@@ -459,7 +588,7 @@ body.vt-on .view.active{animation:none}
 .msg.user{align-self:flex-end;flex-direction:row-reverse}
 .msg.user .who{background:var(--ink);color:var(--paper)}
 .msg.ai .who{background:var(--cinnabar);color:var(--paper);font-family:var(--serif);font-weight:700}
-.msg .bubble{background:var(--paper-2);border:1px solid var(--line-soft);padding:12px 18px;border-radius:2px;font-size:14px;font-weight:300;line-height:1.85}
+.msg .bubble{background:var(--card-bg);border:1px solid var(--line-soft);padding:12px 18px;border-radius:2px;font-size:14px;font-weight:300;line-height:1.85}
 .msg.user .bubble{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .msg .bubble .src{margin-top:10px;font-size:11px;color:var(--ink-3);letter-spacing:.16em;border-top:1px dashed var(--line-soft);padding-top:8px}
 /* AI 思考状态可视化（评审点名的响应提示） */
@@ -483,7 +612,7 @@ body.vt-on .view.active{animation:none}
   font-size:13px;letter-spacing:.2em;transition:background .3s;
 }
 .ask-input button:hover{background:var(--cinnabar-2)}
-.ask-side .note{border:1px solid var(--line-soft);padding:22px;border-radius:2px;background:var(--paper-2)}
+.ask-side .note{border:1px solid var(--line-soft);padding:22px;border-radius:2px;background:var(--card-bg)}
 .ask-side .note h4{font-size:13px;letter-spacing:.26em;color:var(--gold);font-weight:500;margin-bottom:12px}
 .ask-side .note p{font-size:13px;font-weight:300;color:var(--ink-2);line-height:1.9}
 .ask-side .note code{font-family:var(--sans);background:rgba(33,29,24,.06);padding:1px 6px;border-radius:2px;font-size:12px}
@@ -547,7 +676,7 @@ body.vt-on .view.active{animation:none}
 /* ---------- 文创生成（AI 文创工坊 · M7 本地合成 + 远程接口预留） ---------- */
 .create-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 .create-layout{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,64px);align-items:start}
-.create-panel{border:1px solid var(--line);background:var(--paper-2);border-radius:2px;padding:26px}
+.create-panel{border:1px solid var(--line);background:var(--card-bg);border-radius:2px;padding:26px}
 .create-panel h3{font-family:var(--serif);font-weight:700;font-size:16px;letter-spacing:.16em;margin-bottom:20px;display:flex;align-items:center;gap:10px}
 .create-panel h3::before{content:"";width:18px;height:1px;background:var(--cinnabar)}
 .create-field{margin-bottom:20px}
@@ -569,7 +698,7 @@ body.vt-on .view.active{animation:none}
 .btn-save{border:1px solid var(--gold);color:var(--gold)}
 .btn-save:hover{background:var(--gold);color:var(--paper)}
 .create-stage{position:sticky;top:calc(var(--nav-h) + 24px)}
-.poster-wrap{position:relative;border:1px solid var(--line-soft);padding:14px;background:var(--paper);border-radius:2px}
+.poster-wrap{position:relative;border:1px solid var(--line-soft);padding:14px;background:var(--card-bg);border-radius:2px}
 .poster-wrap canvas{width:100%;height:auto;display:block;border-radius:1px}
 .poster-caption{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:11px;color:var(--ink-3);letter-spacing:.2em}
 .poster-caption em{font-style:normal;color:var(--gold)}

@@ -3,3 +3,4 @@ _backup/
 *.log
 .DS_Store
 Thumbs.db
+_git_msgs/

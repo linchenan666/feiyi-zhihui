@@ -209,6 +209,10 @@
         raf = null;
       });
     }, { passive: true });
+    function clearParallax() {
+      bg.style.transform = ""; inner.style.transform = "";
+    }
+    window.addEventListener("scroll", clearParallax, { passive: true });
     hero.addEventListener("pointerleave", function () {
       if (raf) return;
       raf = requestAnimationFrame(function () {
@@ -1215,6 +1219,8 @@
     var hd = $("#site-header");
     window.addEventListener("scroll", function () {
       hd.classList.toggle("scrolled", window.scrollY > 40);
+      var hs = document.querySelector(".hero-scroll");
+      if (hs) hs.classList.toggle("gone", window.scrollY > 60);
     }, { passive: true });
 
     var burger = $("#nav-burger"), nav = $("#main-nav");

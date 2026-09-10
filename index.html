@@ -282,8 +282,8 @@ main{position:relative}
   position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
   overflow:hidden;isolation:isolate;
 }
-.hero-bg-zone{position:absolute;inset:-4%;z-index:-2;will-change:transform}
-.hero-bg{position:absolute;inset:0;background:url(assets/hero.jpg) center/cover no-repeat;animation:kenburns 26s var(--ease) both}
+.hero-bg-zone{position:absolute;inset:-4%;z-index:-2}
+.hero-bg{position:absolute;inset:0;background:url(assets/hero.jpg) center/cover no-repeat;animation:kenburns 14s var(--ease) forwards}
 @keyframes kenburns{from{transform:scale(1.02) translateY(0)}to{transform:scale(1.12) translateY(-1.5%)}}
 .hero-veil{position:absolute;inset:0;z-index:-1;
   background:
@@ -350,6 +350,7 @@ main{position:relative}
   opacity:0;animation:riseIn 1.4s var(--ease) 1.2s forwards;
 }
 .hero-scroll::after{content:"";width:1px;height:44px;background:linear-gradient(var(--gold-2),transparent);animation:drop 2.2s var(--ease) infinite}
+.hero-scroll.gone{opacity:0!important;visibility:hidden;animation:none;transition:opacity .5s var(--ease),visibility .5s}
 @keyframes drop{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
 /* ============================================================
@@ -364,8 +365,7 @@ main{position:relative}
 /* 滚动揭示：进入视口时渐显上浮（IO 触发，克制 stagger） */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
 .rv.in{opacity:1;transform:none}
-/* 磁性元素 */
-.mag{will-change:transform}
+/* 磁性元素：hover 过渡时浏览器自动提升，不常驻合成层 */
 /* 卡片 3D 倾斜：仅在 hover 时开合成层，避免 15 个常驻层 */
 .tilt{transform-style:preserve-3d}
 .tilt:hover{will-change:transform}
@@ -397,6 +397,7 @@ body.vt-on .view.active{animation:none}
 @media (prefers-reduced-motion:reduce){
   .rv{opacity:1;transform:none;transition:none}
   .tilt,.mag{transform:none!important}
+  .hero-bg{animation:none;transform:scale(1.06)}
   ::view-transition-old(root),::view-transition-new(root){animation:none}
 }
 
@@ -633,7 +634,7 @@ body.vt-on .view.active{animation:none}
   position:relative;margin-top:clamp(28px,4vh,40px);overflow:hidden;border:1px solid var(--line-soft);border-radius:2px;
   aspect-ratio:16/9;background:var(--ink);
 }
-.immerse-stage .stage-img{position:absolute;inset:0;background-size:cover;background-position:center;animation:kenburns 24s var(--ease) infinite alternate}
+.immerse-stage .stage-img{position:absolute;inset:0;background-size:cover;background-position:center;animation:kenburns 16s var(--ease) forwards}
 .immerse-stage .stage-veil{position:absolute;inset:0;background:
   linear-gradient(0deg,rgba(33,29,24,.82),transparent 40%,transparent 55%,rgba(33,29,24,.5))}
 .immerse-stage .stage-num{position:absolute;top:26px;left:30px;font-family:var(--serif);color:var(--gold-2);font-size:14px;letter-spacing:.3em}

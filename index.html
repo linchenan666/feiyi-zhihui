@@ -34,6 +34,7 @@
   --nav-h:64px;
   --paper-veil:rgba(244,237,223,.94);
   --card-bg:rgba(237,227,206,.8);
+  --map-label:#8A6218;
 }
 /* ---------- 墨夜主题（多风格切换 · M8） ---------- */
 :root[data-theme="night"]{
@@ -52,6 +53,7 @@
   --line-soft:rgba(237,227,206,.09);
   --paper-veil:rgba(25,21,18,.92);
   --card-bg:rgba(44,36,29,.78);
+  --map-label:#D9BC74;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -525,14 +527,15 @@ body.vt-on .view.active{animation:none}
 .map-cities path{fill:rgba(166,124,46,.05);stroke:rgba(122,88,36,.6);stroke-width:.16;transition:fill .35s var(--ease),stroke .35s var(--ease)}
 .map-city{cursor:pointer}
 .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.16);stroke:rgba(176,58,46,.8)}
-.map-city text{font-size:2px;fill:var(--ink-2);font-weight:600;letter-spacing:.06em;pointer-events:none}
+.map-city text{font-size:3px;fill:var(--ink);font-weight:800;letter-spacing:.1em;paint-order:stroke;stroke:var(--paper);stroke-width:.7px;pointer-events:none}
 .map-city.hot text{fill:var(--cinnabar)}
 :root[data-theme="night"] .map-cities path{fill:rgba(166,124,46,.10);stroke:rgba(199,162,84,.75)}
 :root[data-theme="night"] .map-city text{fill:rgba(244,237,223,.72)}
 :root[data-theme="night"] .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.22)}
 .map-dot{cursor:pointer}
 .map-dot circle{fill:var(--cinnabar);stroke:var(--paper);stroke-width:1.4;transition:r .25s,fill .25s}
-.map-dot text{font-size:2.7px;fill:var(--gold-2);font-weight:700;letter-spacing:.06em;paint-order:stroke;stroke:var(--paper);stroke-width:.5px}
+.map-dot text{font-size:2.4px;fill:var(--map-label);font-weight:700;letter-spacing:.05em;paint-order:stroke;stroke:var(--paper);stroke-width:.5px;transition:fill .25s}
+.map-dot:hover text,.map-dot.hot text{fill:var(--cinnabar)}
 .map-dot:hover circle,.map-dot.hot circle{fill:var(--gold);r:2.6}
 .map-label-card{
   position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);

@@ -475,7 +475,7 @@
     var arr = CITY_OFFSET[it.region] || (CITY_OFFSET[it.region] = []);
     var k = arr.length;
     arr.push(it.id);
-    var offs = [[0, 0], [-2.1, -1.7], [2.1, 1.5], [0, 2.4], [-2.4, 1.1]];
+    var offs = [[0, -3.6], [0, 0], [0, 3.6], [0, -6.6], [0, 6.6]];
     var o = offs[k % offs.length];
     return { x: c.x + o[0], y: c.y + o[1] };
   }

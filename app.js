@@ -501,7 +501,12 @@
         '</div>' +
         '<div class="map-layout">' +
           '<div class="rv" style="--d:.1s">' +
-            '<div class="map-canvas" id="map-canvas"></div>' +
+            '<div class="map-zoom-wrap">' +
+              '<div class="map-canvas" id="map-canvas"></div>' +
+              '<button class="map-zoom-btn" type="button" id="map-zoom-btn" aria-label="放大地图交互查看" aria-haspopup="dialog">' +
+                '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/><path d="M10.5 8v5M8 10.5h5"/></svg>放大' +
+              '</button>' +
+            '</div>' +
             '<div class="map-legend">' +
               '<span><i style="background:#B03A2E"></i>国家级非遗项目</span>' +
               '<span><i style="background:#A67C2E"></i>悬停高亮</span>' +
@@ -519,13 +524,132 @@
         '</div>' +
       '</div>';
     drawMap();
-    bindMap();
+    bindMapZoom();
     observeReveals(el);
   }
+  function bindMapZoom() {
+    var btn = $("#map-zoom-btn");
+    if (!btn) return;
+    btn.addEventListener("click", openMapZoom);
+  }
+  /* ===== 地图放大查看器：滚轮缩放（光标锚点）· 拖拽平移 · 原有点选保留 ===== */
+  var zoomModal = null, zoomStage = null, zoomView = null;
+  var zs = 1.7, ztx = 0, zty = 0;
+  var drag = null;
+  function openMapZoom() {
+    if (zoomModal) { closeMapZoom(); return; }
+    zoomModal = document.createElement("div");
+    zoomModal.className = "map-zoom-modal";
+    zoomModal.setAttribute("role", "dialog");
+    zoomModal.setAttribute("aria-modal", "true");
+    zoomModal.setAttribute("aria-label", "河南非遗地图放大查看");
+    zoomModal.innerHTML =
+      '<button class="zoom-close" type="button" aria-label="关闭放大地图"></button>' +
+      '<div class="map-zoom-stage">' +
+        '<div class="map-zoom-view">' + mapSvgHtml() + '</div>' +
+        '<div class="map-label-card"></div>' +
+        '<div class="zoom-ctrl">' +
+          '<button type="button" class="zoom-in" aria-label="放大">+</button>' +
+          '<button type="button" class="zoom-out" aria-label="缩小">−</button>' +
+          '<button type="button" class="zoom-reset" aria-label="复位">复位</button>' +
+        '</div>' +
+        '<div class="zoom-hint">滚轮缩放 · 拖拽平移</div>' +
+      '</div>';
+    document.body.appendChild(zoomModal);
+    zoomStage = zoomModal.querySelector(".map-zoom-stage");
+    zoomView = zoomModal.querySelector(".map-zoom-view");
+    bindMapInteractions(zoomStage);
+    requestAnimationFrame(function () { zoomModal.classList.add("show"); });
+    document.body.style.overflow = "hidden";
+    var was = document.activeElement;
+    zoomModal.querySelector(".zoom-close").focus();
+    /* 关闭路径 */
+    function close() { closeMapZoom(was); }
+    zoomModal.querySelector(".zoom-close").addEventListener("click", close);
+    zoomModal.addEventListener("click", function (ev) { if (ev.target === zoomModal) close(); });
+    document.addEventListener("keydown", zoomEsc);
+    /* 初始居中：scale 以左上为原点放大，translate 回补一半溢出量 */
+    var rect = zoomStage.getBoundingClientRect();
+    ztx = rect.width / 2 * (1 - zs);
+    zty = rect.height / 2 * (1 - zs);
+    applyZoom();
+    /* 滚轮缩放：以光标为锚点 */
+    zoomStage.addEventListener("wheel", function (ev) {
+      ev.preventDefault();
+      var r = zoomStage.getBoundingClientRect();
+      var cx = ev.clientX - r.left, cy = ev.clientY - r.top;
+      var ns = Math.min(5, Math.max(1, zs * (ev.deltaY < 0 ? 1.18 : 1 / 1.18)));
+      ztx = cx - (cx - ztx) * (ns / zs);
+      zty = cy - (cy - zty) * (ns / zs);
+      zs = ns;
+      applyZoom();
+    }, { passive: false });
+    /* 拖拽平移 */
+    zoomStage.addEventListener("pointerdown", function (ev) {
+      drag = { sx: ev.clientX, sy: ev.clientY, tx: ztx, ty: zty };
+      zoomStage.classList.add("dragging");
+      zoomStage.setPointerCapture(ev.pointerId);
+    });
+    zoomStage.addEventListener("pointermove", function (ev) {
+      if (!drag) return;
+      ztx = drag.tx + (ev.clientX - drag.sx);
+      zty = drag.ty + (ev.clientY - drag.sy);
+      applyZoom();
+    });
+    zoomStage.addEventListener("pointerup", function () {
+      drag = null; zoomStage.classList.remove("dragging");
+    });
+    zoomStage.addEventListener("pointercancel", function () {
+      drag = null; zoomStage.classList.remove("dragging");
+    });
+    zoomModal.querySelector(".zoom-in").addEventListener("click", function () {
+      var r = zoomStage.getBoundingClientRect();
+      var cx = r.width / 2, cy = r.height / 2;
+      var ns = Math.min(5, zs * 1.25);
+      ztx = cx - (cx - ztx) * (ns / zs);
+      zty = cy - (cy - zty) * (ns / zs);
+      zs = ns; applyZoom();
+    });
+    zoomModal.querySelector(".zoom-out").addEventListener("click", function () {
+      var r = zoomStage.getBoundingClientRect();
+      var cx = r.width / 2, cy = r.height / 2;
+      var ns = Math.max(1, zs / 1.25);
+      ztx = cx - (cx - ztx) * (ns / zs);
+      zty = cy - (cy - zty) * (ns / zs);
+      zs = ns; applyZoom();
+    });
+    zoomModal.querySelector(".zoom-reset").addEventListener("click", function () {
+      zs = 1.7;
+      var r = zoomStage.getBoundingClientRect();
+      ztx = r.width / 2 * (1 - zs);
+      zty = r.height / 2 * (1 - zs);
+      applyZoom();
+    });
+  }
+  function zoomEsc(ev) {
+    if (ev.key === "Escape") closeMapZoom();
+  }
+  function applyZoom() {
+    if (!zoomView) return;
+    zoomView.style.transform = "translate(" + ztx + "px," + zty + "px) scale(" + zs + ")";
+  }
+  function closeMapZoom(restoreFocus) {
+    if (!zoomModal) return;
+    document.removeEventListener("keydown", zoomEsc);
+    document.body.style.overflow = "";
+    zoomModal.classList.remove("show");
+    var m = zoomModal;
+    zoomModal = zoomStage = zoomView = null;
+    drag = null; zs = 1.7; ztx = 0; zty = 0;
+    setTimeout(function () {
+      if (m.parentNode) m.parentNode.removeChild(m);
+      if (restoreFocus && restoreFocus.focus) restoreFocus.focus();
+      else { var b = $("#map-zoom-btn"); if (b) b.focus(); }
+    }, 420);
+  }
 
-  function drawMap() {
-    var box = $("#map-canvas");
-    if (!box) return;
+
+  function mapSvgHtml() {
     var cityG = Object.keys(HENAN_CITY_PATHS).map(function (ck) {
       var lb = HENAN_CITY_LABELS[ck];
       return '<g class="map-city" data-city="' + ck + '" tabindex="0" role="button" aria-label="' + ck + '">' +
@@ -538,18 +662,21 @@
       return '<g class="map-dot" data-id="' + it.id + '" tabindex="0" role="button" aria-label="' + it.name + '，' + it.category + '，点击查看详情" transform="translate(' + p.x + ',' + p.y + ')">' +
         '<circle r="1.9"></circle><text y="-3.6" text-anchor="middle">' + it.name + '</text></g>';
     }).join("");
-    box.innerHTML =
-      '<svg viewBox="0 0 ' + HENAN_VIEW.w + ' ' + HENAN_VIEW.h + '" role="img" aria-label="河南非遗分布地图（真实行政区划）">' +
+    return '<svg viewBox="0 0 ' + HENAN_VIEW.w + ' ' + HENAN_VIEW.h + '" role="img" aria-label="河南非遗分布地图（真实行政区划）">' +
         '<g class="map-cities">' + cityG + '</g>' +
         dots +
-      '</svg>' +
-      '<div class="map-label-card" id="map-label"></div>';
+      '</svg>';
   }
-
-  function bindMap() {
+  function drawMap() {
     var box = $("#map-canvas");
     if (!box) return;
-    var label = $("#map-label");
+    box.innerHTML = mapSvgHtml() + '<div class="map-label-card" id="map-label"></div>';
+    bindMapInteractions(box);
+  }
+
+  function bindMapInteractions(box) {
+    if (!box) return;
+    var label = box.querySelector(".map-label-card");
     var dots = $$(".map-dot", box);
     var citiesG = $$(".map-city", box);
     function cityHot(region) {

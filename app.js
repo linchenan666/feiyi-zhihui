@@ -33,7 +33,7 @@
   byId.forEach(function (it) { itemById[it.id] = it; });
 
   /* ================= 路由 ================= */
-  var routes = ["home", "hall", "item", "map", "graph", "ask", "create", "immerse"];
+  var routes = ["home", "hall", "item", "map", "region", "graph", "ask", "create", "immerse"];
 
   function parseHash() {
     var h = location.hash.replace(/^#\/?/, "") || "home";
@@ -72,7 +72,7 @@
     /* 渲染当前视图 */
     var R = {
       home: renderHome, hall: renderHall, item: function () { renderItem(r.id); },
-      map: renderMap, graph: renderGraph, ask: renderAsk,
+      map: renderMap, region: function () { renderRegion(r.id); }, graph: renderGraph, ask: renderAsk,
       create: renderCreate, immerse: renderImmerse
     };
     if (R[r.view]) R[r.view]();
@@ -488,6 +488,70 @@
     return m;
   }
 
+  function regionItems(ck) {
+    var short = ck.replace("市", "");
+    return byId.filter(function (it) { return it.region === short; });
+  }
+  function renderRegion(id) {
+    var el = $("#view-region");
+    if (id) { try { id = decodeURIComponent(id); } catch (e) {} }
+    if (!id || !REGION_DATA[id]) { renderRegionList(el); return; }
+    renderRegionDetail(el, id);
+    observeReveals(el);
+  }
+  function renderRegionList(el) {
+    var cards = REGION_ORDER.map(function (ck, i) {
+      var r = REGION_DATA[ck];
+      var items = regionItems(ck);
+      var badge = items.length ? '<span class="badge">非遗 ' + items.length + ' 项</span>' : "";
+      return '<a class="region-card rv" style="--d:' + (i * 0.03 + 0.05) + 's" href="#/region/' + encodeURIComponent(ck) + '">' +
+        '<span class="no">' + String(i + 1).padStart(2, "0") + '</span>' + badge +
+        '<h3>' + ck + '</h3>' +
+        '<div class="tag">' + r.tag + '</div>' +
+        '<p>' + r.intro + '</p>' +
+        '</a>';
+    }).join("");
+    el.innerHTML =
+      '<div class="section-wrap region-view">' +
+        '<div class="section-head rv">' +
+          '<div class="kicker">06 · 省份介绍</div>' +
+          '<h2 class="section-title">一城一脉 · 中原十八城</h2>' +
+          '<p class="section-sub">点击地市板块或卡片，走进每一座城的文化底色；带「非遗」角标的城市藏有招牌项目。</p>' +
+        '</div>' +
+        '<div class="region-grid">' + cards + '</div>' +
+      '</div>';
+    observeReveals(el);
+  }
+  function renderRegionDetail(el, ck) {
+    var r = REGION_DATA[ck];
+    var items = regionItems(ck);
+    var itemHtml = items.length
+      ? items.map(function (it) {
+          return '<a class="region-item rv" href="#/item/' + it.id + '">' +
+            '<span class="dot"></span>' +
+            '<span class="nm"><b>' + it.name + '</b><span>' + it.place + '</span></span>' +
+            '<span class="cat">' + it.category + '</span>' +
+            '</a>';
+        }).join("")
+      : '<div class="region-empty">该市暂无招牌非遗点位，可从地图或展品总览探索其他城市的非遗。</div>';
+    el.innerHTML =
+      '<div class="section-wrap region-detail">' +
+        '<a class="item-back rv" href="#/region">返回省份介绍</a>' +
+        '<div class="region-hero">' +
+          '<div class="main rv">' +
+            '<div class="kicker">' + ck.replace("市", "") + ' · 城市档案</div>' +
+            '<h2>' + ck + '</h2>' +
+            '<div class="tag">' + r.tag + '</div>' +
+            '<p>' + r.intro + '</p>' +
+            '<div class="spots">' + r.spots.map(function (s) { return '<span>' + s + '</span>'; }).join("") + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="region-items">' +
+          '<h3>招牌非遗 <b>' + items.length + '</b> 项</h3>' + itemHtml +
+        '</div>' +
+      '</div>';
+  }
+
   function renderMap() {
     var el = $("#view-map");
     var groups = cityItems();
@@ -720,8 +784,7 @@
       g.addEventListener("click", function (ev) {
         ev.stopPropagation();
         var ck = g.getAttribute("data-city");
-        var off = g.classList.contains("sel");
-        citySelect(ck, !off);
+        location.hash = "#/region/" + encodeURIComponent(ck);
       });
     });
     var svgEl = box.querySelector("svg");
@@ -770,6 +833,9 @@
           d.classList.toggle("hot", it.region === ck);
         });
         cityHot(ck);
+      });
+      row.addEventListener("click", function () {
+        location.hash = "#/region/" + encodeURIComponent(row.getAttribute("data-city") + "市");
       });
       row.addEventListener("mouseleave", function () {
         dots.forEach(function (d) { d.classList.remove("hot"); });

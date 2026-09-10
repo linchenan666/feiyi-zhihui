@@ -515,6 +515,70 @@ body.vt-on .view.active{animation:none}
 
 /* ---------- 地图 ---------- */
 .map-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
+
+/* ============================================================
+   省份介绍 · M8.5 新大类：一城一脉，中原十八城
+   水印"城"压底 + 场景渐变 + 金线角饰，与全站氛围层同语言
+   ============================================================ */
+.view[data-view="region"]::before{
+  content:"城";
+  top:44%;left:50%;transform:translate(-50%,-50%);
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 28%, rgba(33,29,24,.11), transparent 72%),
+    radial-gradient(ellipse 40% 26% at 86% 82%, rgba(176,58,46,.08), transparent 70%);
+}
+.view[data-view="region"]::after{
+  background:
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) 26px 26px / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) 26px 26px / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) calc(100% - 56px) 26px / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) calc(100% - 56px) 26px / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) 26px calc(100% - 56px) / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) 26px calc(100% - 56px) / 1px 30px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) calc(100% - 56px) calc(100% - 56px) / 30px 1px no-repeat,
+    linear-gradient(rgba(166,124,46,.5),rgba(166,124,46,.5)) calc(100% - 56px) calc(100% - 56px) / 1px 30px no-repeat;
+}
+.region-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
+.region-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,28px)}
+.region-card{
+  position:relative;overflow:hidden;background:var(--card-bg);
+  border:1px solid var(--line-soft);border-radius:2px;padding:26px 24px 24px;display:block;
+  transition:border-color .35s,transform .35s var(--ease);
+}
+.region-card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.region-card .no{font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:.24em;color:var(--gold)}
+.region-card h3{font-family:var(--serif);font-weight:800;font-size:24px;letter-spacing:.1em;margin:10px 0 4px}
+.region-card .tag{font-size:12px;letter-spacing:.18em;color:var(--cinnabar);margin-bottom:14px}
+.region-card p{font-size:13px;font-weight:300;color:var(--ink-2);line-height:1.75;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.region-card .badge{position:absolute;top:22px;right:22px;font-size:11px;letter-spacing:.14em;
+  color:var(--gold-2);border:1px solid rgba(166,124,46,.45);padding:3px 10px;border-radius:999px}
+.region-detail{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
+.region-hero{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:flex-start;margin-bottom:clamp(44px,7vh,84px)}
+.region-hero .main{flex:1 1 420px}
+.region-hero h2{font-family:var(--serif);font-weight:900;font-size:clamp(44px,7vw,84px);letter-spacing:.06em;line-height:1.1}
+.region-hero .tag{font-size:13px;letter-spacing:.4em;color:var(--cinnabar);margin:14px 0 22px}
+.region-hero p{font-size:15px;font-weight:300;color:var(--ink-2);line-height:2;max-width:66ch}
+.region-hero .spots{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.region-hero .spots span{font-size:12px;letter-spacing:.16em;color:var(--ink-2);
+  border:1px solid var(--line);padding:6px 14px;border-radius:999px}
+.region-items h3{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.2em;margin-bottom:22px}
+.region-items h3 b{color:var(--cinnabar);font-weight:800}
+.region-item{
+  display:flex;align-items:center;gap:18px;padding:18px 22px;margin-bottom:12px;
+  background:var(--card-bg);border:1px solid var(--line-soft);border-radius:2px;
+  transition:border-color .3s,transform .3s var(--ease);
+}
+.region-item:hover{border-color:var(--gold);transform:translateX(6px)}
+.region-item .dot{width:8px;height:8px;border-radius:50%;background:var(--cinnabar);flex:none}
+.region-item .nm{flex:1}
+.region-item .nm b{font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:.08em}
+.region-item .nm span{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;letter-spacing:.08em}
+.region-item .cat{font-size:11px;letter-spacing:.3em;color:var(--gold);border:1px solid rgba(166,124,46,.4);padding:3px 10px;border-radius:999px}
+.region-empty{font-size:13px;color:var(--ink-3);padding:22px;border:1px dashed var(--line);border-radius:2px;letter-spacing:.1em}
+@media (max-width:980px){.region-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.region-grid{grid-template-columns:1fr;gap:16px}}
+
 .map-layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,64px);align-items:start}
 .map-canvas{
   position:relative;border:1px solid var(--line-soft);background:
@@ -854,6 +918,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
   <nav class="main-nav" id="main-nav" aria-label="主导航">
     <a href="#/hall" data-nav="hall">展品总览</a>
     <a href="#/map" data-nav="map">非遗地图</a>
+    <a href="#/region" data-nav="region">省份介绍</a>
     <a href="#/graph" data-nav="graph">知识图谱</a>
     <a href="#/ask" data-nav="ask">问·AI</a>
     <a href="#/create" data-nav="create">文创生成</a>
@@ -873,6 +938,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
   <section class="view" id="view-hall" data-view="hall"></section>
   <section class="view" id="view-item" data-view="item"></section>
   <section class="view" id="view-map" data-view="map"></section>
+  <section class="view" id="view-region" data-view="region"></section>
   <section class="view" id="view-graph" data-view="graph"></section>
   <section class="view" id="view-ask" data-view="ask"></section>
   <section class="view" id="view-create" data-view="create"></section>
@@ -898,6 +964,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
 <script src="data.js"></script>
 <script src="map-data.js"></script>
+<script src="regions-data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -470,11 +470,12 @@
 
   var CITY_OFFSET = {};
   function dotPos(it) {
-    var c = cities[it.region] || { x: 50, y: 50 };
+    /* 真实坐标优先（HENAN_ITEM_LOC 经纬度投影），无则落城市质心 */
+    var c = HENAN_ITEM_LOC[it.id] || HENAN_CITY_LABELS[it.region] || { x: 50, y: 50 };
     var arr = CITY_OFFSET[it.region] || (CITY_OFFSET[it.region] = []);
     var k = arr.length;
     arr.push(it.id);
-    var offs = [[0, 0], [-3.2, -2.4], [3.2, 2.2], [0, 3.4], [-3.4, 1.6]];
+    var offs = [[0, 0], [-2.1, -1.7], [2.1, 1.5], [0, 2.4], [-2.4, 1.1]];
     var o = offs[k % offs.length];
     return { x: c.x + o[0], y: c.y + o[1] };
   }
@@ -504,7 +505,7 @@
             '<div class="map-legend">' +
               '<span><i style="background:#B03A2E"></i>国家级非遗项目</span>' +
               '<span><i style="background:#A67C2E"></i>悬停高亮</span>' +
-              '<span>示意地图 · 坐标近似</span>' +
+              '<span>真实行政区划 · 坐标基于公开地理数据</span>' +
             '</div>' +
           '</div>' +
           '<div class="city-list rv" style="--d:.18s" id="city-list">' +
@@ -525,14 +526,21 @@
   function drawMap() {
     var box = $("#map-canvas");
     if (!box) return;
+    var cityG = Object.keys(HENAN_CITY_PATHS).map(function (ck) {
+      var lb = HENAN_CITY_LABELS[ck];
+      return '<g class="map-city" data-city="' + ck + '" tabindex="0" role="button" aria-label="' + ck + '">' +
+        '<path d="' + HENAN_CITY_PATHS[ck] + '"></path>' +
+        '<text x="' + lb.x + '" y="' + lb.y + '" text-anchor="middle">' + ck.replace("市", "") + '</text>' +
+      '</g>';
+    }).join("");
     var dots = byId.map(function (it) {
       var p = dotPos(it);
       return '<g class="map-dot" data-id="' + it.id + '" tabindex="0" role="button" aria-label="' + it.name + '，' + it.category + '，点击查看详情" transform="translate(' + p.x + ',' + p.y + ')">' +
         '<circle r="1.9"></circle><text y="-3.6" text-anchor="middle">' + it.name + '</text></g>';
     }).join("");
     box.innerHTML =
-      '<svg viewBox="0 0 100 100" role="img" aria-label="河南非遗分布示意图">' +
-        '<path class="henan-land" d="' + HENAN_LAND + '"></path>' +
+      '<svg viewBox="0 0 ' + HENAN_VIEW.w + ' ' + HENAN_VIEW.h + '" role="img" aria-label="河南非遗分布地图（真实行政区划）">' +
+        '<g class="map-cities">' + cityG + '</g>' +
         dots +
       '</svg>' +
       '<div class="map-label-card" id="map-label"></div>';
@@ -543,6 +551,13 @@
     if (!box) return;
     var label = $("#map-label");
     var dots = $$(".map-dot", box);
+    var citiesG = $$(".map-city", box);
+    function cityHot(region) {
+      citiesG.forEach(function (g) {
+        g.classList.toggle("hot", g.getAttribute("data-city") === region);
+      });
+    }
+    function cityClear() { citiesG.forEach(function (g) { g.classList.remove("hot"); }); }
     dots.forEach(function (d) {
       var it = itemById[d.getAttribute("data-id")];
       d.addEventListener("mouseenter", function (ev) {
@@ -558,10 +573,12 @@
         $$(".city-row").forEach(function (row) {
           row.classList.toggle("on", row.getAttribute("data-city") === it.region);
         });
+        cityHot(it.region);
       });
       d.addEventListener("mouseleave", function () {
         d.classList.remove("hot");
         label.classList.remove("show");
+        cityClear();
       });
       d.addEventListener("click", function () { location.hash = "#/item/" + it.id; });
       d.addEventListener("keydown", function (ev) {
@@ -575,9 +592,30 @@
           var it = itemById[d.getAttribute("data-id")];
           d.classList.toggle("hot", it.region === ck);
         });
+        cityHot(ck);
       });
       row.addEventListener("mouseleave", function () {
         dots.forEach(function (d) { d.classList.remove("hot"); });
+        cityClear();
+      });
+    });
+    citiesG.forEach(function (g) {
+      var ck = g.getAttribute("data-city");
+      g.addEventListener("mouseenter", function () {
+        dots.forEach(function (d) {
+          var it = itemById[d.getAttribute("data-id")];
+          d.classList.toggle("hot", it.region === ck);
+        });
+        $$(".city-row").forEach(function (row) {
+          row.classList.toggle("on", row.getAttribute("data-city") === ck);
+        });
+      });
+      g.addEventListener("mouseleave", function () {
+        dots.forEach(function (d) { d.classList.remove("hot"); });
+        $$(".city-row").forEach(function (row) { row.classList.remove("on"); });
+      });
+      g.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); g.click(); }
       });
     });
   }

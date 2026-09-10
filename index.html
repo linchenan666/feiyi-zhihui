@@ -521,8 +521,15 @@ body.vt-on .view.active{animation:none}
   border-radius:2px;
 }
 .map-canvas svg{width:100%;height:auto;display:block}
-.henan-land{fill:var(--paper);stroke:var(--ink-2);stroke-width:.5;transition:fill .5s}
-.henan-land:hover{fill:var(--paper-3)}
+/* 真实行政区划地图：18 地市边界，悬停/联动高亮 */
+.map-cities path{fill:rgba(166,124,46,.05);stroke:rgba(122,88,36,.6);stroke-width:.16;transition:fill .35s var(--ease),stroke .35s var(--ease)}
+.map-city{cursor:pointer}
+.map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.16);stroke:rgba(176,58,46,.8)}
+.map-city text{font-size:2px;fill:var(--ink-2);font-weight:600;letter-spacing:.06em;pointer-events:none}
+.map-city.hot text{fill:var(--cinnabar)}
+:root[data-theme="night"] .map-cities path{fill:rgba(166,124,46,.10);stroke:rgba(199,162,84,.75)}
+:root[data-theme="night"] .map-city text{fill:rgba(244,237,223,.72)}
+:root[data-theme="night"] .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.22)}
 .map-dot{cursor:pointer}
 .map-dot circle{fill:var(--cinnabar);stroke:var(--paper);stroke-width:1.4;transition:r .25s,fill .25s}
 .map-dot text{font-size:3.4px;fill:var(--ink-2);letter-spacing:.08em}
@@ -809,6 +816,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
 
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
 <script src="data.js"></script>
+<script src="map-data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

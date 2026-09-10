@@ -672,6 +672,22 @@
     if (!box) return;
     box.innerHTML = mapSvgHtml() + '<div class="map-label-card" id="map-label"></div>';
     bindMapInteractions(box);
+    setTimeout(function () {
+      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
+      if (d) d.dispatchEvent(new MouseEvent('mouseenter'));
+    }, 1000); /* TEMP-FOCUS */
+    setTimeout(function () {
+      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
+      if (d) d.dispatchEvent(new MouseEvent('mouseleave'));
+    }, 9900); /* TEMP-FOCUS-OFF */
+    setTimeout(function () {
+      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
+      if (d) d.dispatchEvent(new MouseEvent('mouseenter'));
+    }, 1600); /* TEMP-FOCUS */
+    setTimeout(function () {
+      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
+      if (d) d.dispatchEvent(new MouseEvent('mouseleave'));
+    }, 3600); /* TEMP-FOCUS-OFF */
   }
 
   function bindMapInteractions(box) {
@@ -687,9 +703,16 @@
     function cityClear() { citiesG.forEach(function (g) { g.classList.remove("hot"); }); }
     dots.forEach(function (d) {
       var it = itemById[d.getAttribute("data-id")];
+      function setFocus(active) {
+        dots.forEach(function (x) {
+          if (active) x.classList.toggle("dim", x !== active);
+          else x.classList.remove("dim");
+        });
+      }
       d.addEventListener("mouseenter", function (ev) {
         dots.forEach(function (x) { x.classList.remove("hot"); });
         d.classList.add("hot");
+        setFocus(d);
         label.innerHTML = "<b>" + it.name + "</b><span>" + it.category + " · " + it.region + "</span>";
         label.classList.add("show");
         var p = d.getAttribute("transform").match(/translate\(([\d.-]+),([\d.-]+)\)/);
@@ -703,10 +726,12 @@
         cityHot(it.region);
       });
       d.addEventListener("mouseleave", function () {
+        setFocus(null);
         d.classList.remove("hot");
         label.classList.remove("show");
         cityClear();
       });
+      d.addEventListener("blur", function () { setFocus(null); });
       d.addEventListener("click", function () { location.hash = "#/item/" + it.id; });
       d.addEventListener("keydown", function (ev) {
         if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); location.hash = "#/item/" + it.id; }

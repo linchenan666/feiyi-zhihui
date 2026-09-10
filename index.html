@@ -532,7 +532,8 @@ body.vt-on .view.active{animation:none}
 :root[data-theme="night"] .map-cities path{fill:rgba(166,124,46,.10);stroke:rgba(199,162,84,.75)}
 :root[data-theme="night"] .map-city text{fill:rgba(244,237,223,.72)}
 :root[data-theme="night"] .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.22)}
-.map-dot{cursor:pointer}
+.map-dot{cursor:pointer;transition:opacity .3s var(--ease)}
+.map-dot.dim{opacity:0;pointer-events:none}
 .map-dot circle{fill:var(--cinnabar);stroke:var(--paper);stroke-width:1.4;transition:r .25s,fill .25s}
 .map-dot text{font-size:2.4px;fill:var(--map-label);font-weight:700;letter-spacing:.05em;paint-order:stroke;stroke:var(--paper);stroke-width:.5px;transition:fill .25s}
 .map-dot:hover text,.map-dot.hot text{fill:var(--cinnabar)}

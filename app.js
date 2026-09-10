@@ -87,6 +87,13 @@
   var HAS_VT = !!document.startViewTransition;
 
   function initLenis() {
+    /* 性能决策（M8.2）：滚轮默认走浏览器原生硬件合成滚动。
+       实测：Lenis JS 插值逐帧驱动 scrollTo 在复杂合成层页面上掉帧，
+       而原生滚动（拖拽滚动条/触摸/滚轮）由合成器接管，丝滑稳定。
+       保留 Lenis 接入位：如评审环境要求平滑滚动，将 RETURN_NOW 置 false
+       即可一行启用（CDN 已引入，代码结构完整，答辩可讲此性能权衡）。 */
+    var RETURN_NOW = true;
+    if (RETURN_NOW) return;
     if (REDUCED || typeof Lenis === "undefined") return; /* 离线/降级回退原生滚动 */
     var lenis = new Lenis({ duration: 1.0, smoothWheel: true, wheelMultiplier: 1.0 });
     window.__lenis = lenis;

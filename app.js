@@ -673,6 +673,10 @@
     box.innerHTML = mapSvgHtml() + '<div class="map-label-card" id="map-label"></div>';
     bindMapInteractions(box);
     setTimeout(function () {
+      var g = document.querySelector('.map-city[data-city="南阳"]');
+      if (g) g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }, 1000); /* TEMP-CITYSEL */
+    setTimeout(function () {
       var d = document.querySelector('.map-dot[data-id="huaiyang"]');
       if (d) d.dispatchEvent(new MouseEvent('mouseenter'));
     }, 1000); /* TEMP-FOCUS */
@@ -701,6 +705,27 @@
       });
     }
     function cityClear() { citiesG.forEach(function (g) { g.classList.remove("hot"); }); }
+    function citySelect(ck, on) {
+      citiesG.forEach(function (g) { g.classList.toggle("sel", on && g.getAttribute("data-city") === ck); });
+      dots.forEach(function (d) {
+        var it = itemById[d.getAttribute("data-id")];
+        d.classList.toggle("hot", on && it.region === ck);
+      });
+      $$(".city-row").forEach(function (row) {
+        row.classList.toggle("on", on && row.getAttribute("data-city") === ck);
+      });
+      cityHot(on ? ck : null);
+    }
+    citiesG.forEach(function (g) {
+      g.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var ck = g.getAttribute("data-city");
+        var off = g.classList.contains("sel");
+        citySelect(ck, !off);
+      });
+    });
+    var svgEl = box.querySelector("svg");
+    if (svgEl) svgEl.addEventListener("click", function () { citySelect(null, false); });
     dots.forEach(function (d) {
       var it = itemById[d.getAttribute("data-id")];
       function setFocus(active) {

@@ -526,12 +526,16 @@ body.vt-on .view.active{animation:none}
 /* 真实行政区划地图：18 地市边界，悬停/联动高亮 */
 .map-cities path{fill:rgba(166,124,46,.05);stroke:rgba(122,88,36,.6);stroke-width:.16;transition:fill .35s var(--ease),stroke .35s var(--ease)}
 .map-city{cursor:pointer}
+.map-city path{transition:fill .3s var(--ease),stroke .3s var(--ease),filter .3s var(--ease)}
+.map-city.sel path{fill:rgba(176,58,46,.18);stroke:var(--cinnabar);stroke-width:1.8;filter:drop-shadow(0 0 2.5px rgba(176,58,46,.5))}
+.map-city.sel text{fill:var(--cinnabar)}
 .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.16);stroke:rgba(176,58,46,.8)}
 .map-city text{font-size:3px;fill:var(--ink);font-weight:800;letter-spacing:.1em;paint-order:stroke;stroke:var(--paper);stroke-width:.7px;pointer-events:none}
 .map-city.hot text{fill:var(--cinnabar)}
 :root[data-theme="night"] .map-cities path{fill:rgba(166,124,46,.10);stroke:rgba(199,162,84,.75)}
 :root[data-theme="night"] .map-city text{fill:rgba(244,237,223,.72)}
 :root[data-theme="night"] .map-city:hover path,.map-city.hot path{fill:rgba(176,58,46,.22)}
+.map-city.sel path{fill:rgba(196,83,66,.3);stroke:var(--cinnabar);stroke-width:1.8;filter:drop-shadow(0 0 2.5px rgba(196,83,66,.55))}
 .map-dot{cursor:pointer;transition:opacity .3s var(--ease)}
 .map-dot.dim{opacity:0;pointer-events:none}
 .map-dot circle{fill:var(--cinnabar);stroke:var(--paper);stroke-width:1.4;transition:r .25s,fill .25s}

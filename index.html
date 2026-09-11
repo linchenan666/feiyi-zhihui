@@ -106,6 +106,9 @@ header.scrolled{background:var(--paper-veil);box-shadow:0 1px 0 var(--line-soft)
 .brand-name{font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:.18em}
 .brand-name em{font-style:normal;color:var(--cinnabar)}
 nav.main-nav{display:flex;gap:clamp(14px,3vw,36px)}
+/* 汉堡菜单装饰元素：桌面横排隐藏，窄屏面板显示 */
+nav.main-nav .nav-head,nav.main-nav .nav-foot,
+nav.main-nav a .nav-ic,nav.main-nav a .nav-no,nav.main-nav a .nav-ar{display:none}
 nav.main-nav a{
   font-size:14px;letter-spacing:.14em;color:var(--ink-2);
   padding:6px 2px;position:relative;transition:color .25s;white-space:nowrap;flex:none;
@@ -951,6 +954,76 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
   .immerse-stage .stage-title{bottom:64px}
   .section-wrap{padding:0 18px}
 }
+
+/* ========== 汉堡菜单面板 · 新中式绚丽版（覆盖历史 980/640 nav 块） ========== */
+@media (max-width:980px){
+  nav.main-nav{
+    position:fixed;top:var(--nav-h);left:0;right:0;z-index:60;
+    flex-direction:column;align-items:stretch;gap:0;padding:0 0 20px;
+    transform:translateY(-130%);transition:transform .55s var(--ease);
+    background:
+      radial-gradient(120% 50% at 50% 0%,var(--cinnabar-soft),transparent 60%),
+      radial-gradient(150% 80% at 50% 108%,rgba(166,124,46,.13),transparent 68%),
+      repeating-linear-gradient(0deg,rgba(33,29,24,.015) 0 1px,transparent 1px 4px),
+      var(--paper);
+    box-shadow:0 34px 70px rgba(33,29,24,.18);
+    overflow:hidden;
+  }
+  nav.main-nav.open{transform:none}
+  nav.main-nav::before{
+    content:"豫";position:absolute;right:-44px;bottom:-86px;z-index:0;
+    font-family:var(--serif);font-size:330px;font-weight:900;line-height:1;
+    color:transparent;-webkit-text-stroke:1.5px var(--cinnabar);opacity:.07;
+    pointer-events:none;
+  }
+  nav.main-nav::after{
+    content:"";position:absolute;right:26px;top:22px;width:40px;height:40px;z-index:0;
+    border:1.5px solid rgba(176,58,46,.5);transform:rotate(45deg);
+    background:linear-gradient(135deg,var(--cinnabar) 0 46%,transparent 46% 54%,var(--cinnabar) 54%);
+    opacity:.16;pointer-events:none;
+  }
+  nav.main-nav .nav-head{
+    display:flex;align-items:baseline;gap:12px;margin:0 26px;padding:24px 0 16px;
+    border-bottom:1px solid var(--line-soft);position:relative;z-index:1;
+  }
+  nav.main-nav .nav-head::after{
+    content:"";position:absolute;left:0;bottom:-1px;width:46px;height:2px;background:var(--cinnabar);
+  }
+  .nh-logo{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--ink)}
+  .nh-sub{font-size:10.5px;letter-spacing:.34em;color:var(--gold)}
+  nav.main-nav a{
+    display:flex;align-items:center;gap:14px;margin:0 18px;padding:14px 10px;
+    font-size:15px;letter-spacing:.14em;color:var(--ink-2);position:relative;z-index:1;
+    border-bottom:1px dashed rgba(33,29,24,.07);
+    transition:color .25s,padding-left .35s var(--ease);
+  }
+  nav.main-nav a::after{display:none}
+  nav.main-nav a .nav-ic{
+    width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(166,124,46,.4);border-radius:50%;
+    color:var(--gold);background:rgba(255,255,255,.5);
+    transition:background .3s,color .3s,border-color .3s,transform .35s var(--ease),box-shadow .3s;
+  }
+  nav.main-nav a .nav-ic svg{width:17px;height:17px}
+  nav.main-nav a .nav-no{display:block;font-family:var(--serif);font-size:12px;letter-spacing:.06em;color:var(--ink-3);transition:color .25s}
+  nav.main-nav a .nav-tx{flex:1}
+  nav.main-nav a .nav-ar{display:block;width:13px;height:13px;color:var(--ink-3);opacity:.5;transition:transform .35s var(--ease),color .25s,opacity .25s}
+  nav.main-nav a .nav-ar svg{width:13px;height:13px}
+  nav.main-nav a:hover{color:var(--cinnabar);padding-left:16px}
+  nav.main-nav a:hover .nav-ic{background:var(--cinnabar-soft);border-color:var(--cinnabar);color:var(--cinnabar);transform:scale(1.08)}
+  nav.main-nav a:hover .nav-no{color:var(--cinnabar)}
+  nav.main-nav a:hover .nav-ar{transform:translateX(4px);color:var(--cinnabar);opacity:1}
+  nav.main-nav a.on{color:var(--cinnabar)}
+  nav.main-nav a.on .nav-ic{background:var(--cinnabar);border-color:var(--cinnabar);color:var(--paper);box-shadow:0 6px 16px rgba(176,58,46,.32)}
+  nav.main-nav a.on .nav-no{color:var(--cinnabar)}
+  nav.main-nav a.on .nav-ar{color:var(--cinnabar);opacity:1}
+  nav.main-nav .nav-foot{
+    display:flex;justify-content:space-between;align-items:center;
+    margin:20px 26px 0;padding-top:14px;border-top:1px solid var(--line-soft);position:relative;z-index:1;
+  }
+  .nf-tag{font-size:11px;letter-spacing:.3em;color:var(--gold)}
+  .nf-ver{font-size:10px;letter-spacing:.12em;color:var(--ink-3)}
+}
 </style>
 </head>
 <body>
@@ -964,12 +1037,20 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
     <span class="brand-name">非遗智汇<em>·</em>河南</span>
   </a>
   <nav class="main-nav" id="main-nav" aria-label="主导航">
-    <a href="#/hall" data-nav="hall">展品总览</a>
-    <a href="#/map" data-nav="map">非遗地图</a>
-    <a href="#/region" data-nav="region">城市介绍</a>
-    <a href="#/graph" data-nav="graph">知识图谱</a>
-    <a href="#/ask" data-nav="ask">问·AI</a>
-    <a href="#/create" data-nav="create">文创生成</a>
+    <div class="nav-head">
+      <span class="nh-logo">非遗智汇</span>
+      <span class="nh-sub">河南非遗 · AI 数字展厅</span>
+    </div>
+    <a href="#/hall" data-nav="hall"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9.2L12 4l8 5.2V20"/><path d="M8.5 20v-5.5h7V20"/></svg></span><span class="nav-no">01</span><span class="nav-tx">展品总览</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <a href="#/map" data-nav="map"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S6 15.2 6 10.4a6 6 0 1 1 12 0c0 4.8-6 10.1-6 10.1z"/><circle cx="12" cy="10.2" r="2.2"/></svg></span><span class="nav-no">02</span><span class="nav-tx">非遗地图</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <a href="#/region" data-nav="region"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5h18"/><path d="M5.5 9.5V5h13v4.5"/><path d="M8.5 16.5h7"/><path d="M8 16.5V21h8v-4.5"/></svg></span><span class="nav-no">03</span><span class="nav-tx">城市介绍</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <a href="#/graph" data-nav="graph"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7.3 10.9l9.6-4M7.3 13.1l9.6 4"/></svg></span><span class="nav-no">04</span><span class="nav-tx">知识图谱</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <a href="#/ask" data-nav="ask"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8.5 8.5 0 0 1-8.5 8.5H4.5L6.6 18A8.5 8.5 0 1 1 20 12z"/><circle cx="9.4" cy="12" r=".9"/><circle cx="12.6" cy="12" r=".9"/><circle cx="15.8" cy="12" r=".9"/></svg></span><span class="nav-no">05</span><span class="nav-tx">问·AI</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <a href="#/create" data-nav="create"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 19.6l2.6-.9L17.9 8.4l-2.3-2.3L5.3 16.5 5.2 19.6z"/><path d="M13.9 7.8l2.3 2.3"/></svg></span><span class="nav-no">06</span><span class="nav-tx">文创生成</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
+    <div class="nav-foot">
+      <span class="nf-tag">豫见非遗 · 一眼千年</span>
+      <span class="nf-ver">Vibe Coding 参赛作品</span>
+    </div>
   </nav>
   <div style="display:flex;align-items:center;gap:14px">
     <button class="theme-btn" id="theme-btn" type="button" aria-label="切换主题" title="切换主题"></button>

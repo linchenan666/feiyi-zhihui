@@ -427,10 +427,22 @@ body.vt-on .view.active{animation:none}
   opacity:0;will-change:transform,opacity;
   animation:hbCycle 24s var(--ease) infinite;
 }
-.hh-l:nth-child(1){background-image:url(assets/cats/cat-minsu.jpg)}
-.hh-l:nth-child(2){background-image:url(assets/cats/cat-jiyi.jpg);animation-delay:6s}
-.hh-l:nth-child(3){background-image:url(assets/cats/cat-xiqu.jpg);animation-delay:12s}
-.hh-l:nth-child(4){background-image:url(assets/cats/cat-meishu.jpg);animation-delay:18s}
+.hh-l:nth-child(1){background:
+    radial-gradient(80% 60% at 18% 22%, rgba(96,64,150,.9), transparent 62%),
+    radial-gradient(70% 55% at 82% 30%, rgba(64,96,168,.88), transparent 62%),
+    linear-gradient(150deg,#2b1d4d 0%,#3a2a6a 46%,#1d2c55 100%)}
+.hh-l:nth-child(2){background:
+    radial-gradient(80% 60% at 20% 25%, rgba(196,92,40,.92), transparent 62%),
+    radial-gradient(70% 55% at 80% 35%, rgba(224,172,62,.85), transparent 62%),
+    linear-gradient(150deg,#5c1f16 0%,#8a3a20 46%,#5e4310 100%);animation-delay:6s}
+.hh-l:nth-child(3){background:
+    radial-gradient(80% 60% at 22% 20%, rgba(34,122,112,.9), transparent 62%),
+    radial-gradient(70% 55% at 78% 32%, rgba(64,86,164,.88), transparent 62%),
+    linear-gradient(150deg,#123c44 0%,#1d5a63 46%,#16264d 100%);animation-delay:12s}
+.hh-l:nth-child(4){background:
+    radial-gradient(80% 60% at 18% 24%, rgba(164,52,62,.92), transparent 62%),
+    radial-gradient(70% 55% at 82% 30%, rgba(204,142,52,.88), transparent 62%),
+    linear-gradient(150deg,#4a1218 0%,#7a2530 46%,#4a3410 100%);animation-delay:18s}
 @keyframes hbCycle{
   0%{opacity:0;transform:scale(1.03)}
   9%,22%{opacity:1}
@@ -438,7 +450,7 @@ body.vt-on .view.active{animation:none}
 }
 .hh-veil{
   position:fixed;left:0;right:0;bottom:0;top:var(--nav-h);z-index:1;
-  background:linear-gradient(180deg, rgba(15,10,6,.88) 0%, rgba(15,10,6,.66) 34%, rgba(15,10,6,.78) 100%);
+  background:linear-gradient(180deg, rgba(15,10,6,.68) 0%, rgba(15,10,6,.44) 34%, rgba(15,10,6,.58) 100%);
 }
 .hh-seal{
   position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:1;

@@ -39,6 +39,25 @@
     "民俗": "assets/cats/cat-minsu.jpg"
   };
 
+  /* 展品卡片背景图（M8.12） */
+  var ITEM_BG = {
+    "yuju": "assets/cats/cat-xiqu.jpg",
+    "quju": "assets/items/item-quju.jpg",
+    "zhuizi": "assets/cats/cat-quyi.jpg",
+    "shuhui": "assets/items/item-shuhui.jpg",
+    "jun": "assets/cats/cat-jiyi.jpg",
+    "ru": "assets/items/item-ruci.jpg",
+    "sancai": "assets/items/item-sancai.jpg",
+    "shuixi": "assets/items/item-shuixi.jpg",
+    "bianxiu": "assets/items/item-bianxiu.jpg",
+    "nianhua": "assets/cats/cat-meishu.jpg",
+    "gugu": "assets/items/item-gugu.jpg",
+    "ninigou": "assets/items/item-ninigou.jpg",
+    "shaolin": "assets/cats/cat-tiyu.jpg",
+    "taiji": "assets/items/item-taiji.jpg",
+    "tiehua": "assets/cats/cat-minsu.jpg"
+  };
+
   var itemById = {};
   byId.forEach(function (it) { itemById[it.id] = it; });
 
@@ -360,14 +379,13 @@
     else list = byId.filter(function (i) { return i.category === hallFilter; });
     grid.innerHTML = list.map(function (it, k) {
       var g = byId.indexOf(it);
-      return '<a class="card tilt rv" style="--d:' + (k * 0.06).toFixed(2) + 's" href="#/item/' + it.id + '" data-cat="' + it.category + '">' +
-        '<div class="frame"><span class="num">' + pad(g + 1) + '</span>' +
-        '<img src="' + it.img + '" alt="' + it.name + '" loading="lazy" decoding="async">' +
+      return '<a class="card tilt rv card-photo" style="--d:' + (k * 0.06).toFixed(2) + 's;--bg:url(' + (ITEM_BG[it.id] || it.img) + ')" href="#/item/' + it.id + '" data-cat="' + it.category + '" aria-label="' + it.name + '">' +
+        '<span class="num">' + pad(g + 1) + '</span>' +
         '<span class="cat">' + it.category + '</span>' +
-        '<span class="more">查看详情</span></div>' +
         '<div class="meta"><h3>' + it.name + '</h3>' +
         '<div class="en">' + esc(it.en) + '</div>' +
         '<p>' + esc(it.tagline.slice(0, 44)) + '…</p></div>' +
+        '<span class="more">查看详情</span>' +
       '</a>';
     }).join("");
     observeReveals(grid);

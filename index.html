@@ -478,6 +478,45 @@ body.vt-on .view.active{animation:none}
 .card .frame{position:relative;aspect-ratio:3/4;overflow:hidden}
 .card .frame img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease),filter .8s}
 .card:hover .frame img{transform:scale(1.05)}
+
+/* ---------- 展品卡片：文化图背景（M8.12） ---------- */
+.card-photo{
+  background:var(--bg) center/cover no-repeat;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  min-height:clamp(280px,38vh,400px);padding:0;
+}
+.card-photo::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background:linear-gradient(182deg, rgba(16,11,7,.10) 0%, rgba(16,11,7,.30) 42%, rgba(16,11,7,.86) 100%);
+  transition:opacity .35s var(--ease);
+}
+.card-photo .num{
+  position:absolute;top:16px;left:18px;z-index:2;color:rgba(251,247,238,.92);
+  font-family:"Noto Serif SC",serif;font-size:13px;letter-spacing:.12em;
+  background:rgba(12,8,5,.42);border:1px solid rgba(251,247,238,.28);
+  padding:4px 10px;border-radius:999px;
+}
+.card-photo .cat{
+  position:absolute;top:16px;right:16px;z-index:2;color:#FBF7EE;
+  font-size:11px;letter-spacing:.22em;padding:4px 10px;border-radius:999px;
+  background:rgba(176,58,46,.88);
+}
+.card-photo .meta{z-index:1;position:relative;padding:44px 18px 18px;color:#FBF7EE}
+.card-photo .meta h3{font-size:clamp(20px,2vw,24px);letter-spacing:.1em;color:#FBF7EE;text-shadow:0 2px 14px rgba(0,0,0,.55)}
+.card-photo .meta .en{
+  font-size:11px;letter-spacing:.3em;color:rgba(251,247,238,.78);margin:5px 0 9px;
+  text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5);
+}
+.card-photo .meta p{font-size:13px;line-height:1.75;color:rgba(251,247,238,.86);text-shadow:0 1px 8px rgba(0,0,0,.5);margin:0}
+.card-photo .more{
+  position:absolute;right:16px;bottom:16px;z-index:2;font-size:12px;letter-spacing:.18em;
+  color:#F7E7C8;border-bottom:1px solid rgba(247,231,200,.5);padding-bottom:2px;
+}
+.card-photo:hover::before{background:linear-gradient(182deg, rgba(16,11,7,.06) 0%, rgba(16,11,7,.22) 42%, rgba(16,11,7,.78) 100%)}
+@media (prefers-reduced-motion: reduce){
+  .card-photo{transition:none}
+}
+
 .card .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(33,29,24,.55),transparent 42%)}
 .card .num{
   position:absolute;top:14px;left:16px;z-index:2;

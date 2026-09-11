@@ -532,16 +532,11 @@
     }).join("");
     el.innerHTML =
       '<div class="section-wrap region-view">' +
-'<div class="page-hero ph-city rv">' +
-'          <div class="ph-bg" aria-hidden="true"><i class="ph-l"></i><i class="ph-l"></i><i class="ph-l"></i></div>' +
-'          <div class="ph-veil" aria-hidden="true"></div>' +
-'          <div class="ph-amb" aria-hidden="true"><i></i><i></i><i></i></div>' +
-        '<div class="section-head">' +
+        '<div class="section-head rv">' +
           '<div class="kicker">06 · 城市介绍</div>' +
           '<h2 class="section-title">一城一脉 · 中原十八城</h2>' +
           '<p class="section-sub">点击地市板块或卡片，走进每一座城的文化底色；带「非遗」角标的城市藏有招牌项目。</p>' +
         '</div>' +
-        '</div>'
         '<div class="region-grid">' + cards + '</div>' +
       '</div>';
     observeReveals(el);
@@ -582,16 +577,11 @@
     var cityKeys = Object.keys(groups);
     el.innerHTML =
       '<div class="section-wrap map-view">' +
-'<div class="page-hero ph-map rv">' +
-'          <div class="ph-bg" aria-hidden="true"><i class="ph-l"></i><i class="ph-l"></i><i class="ph-l"></i></div>' +
-'          <div class="ph-veil" aria-hidden="true"></div>' +
-'          <div class="ph-amb" aria-hidden="true"><i></i><i></i><i></i></div>' +
-        '<div class="section-head">' +
+        '<div class="section-head rv">' +
           '<div class="kicker">02 · 非遗地图</div>' +
           '<h2 class="section-title">河南版图上的文化坐标</h2>' +
           '<p class="section-sub">十五项招牌非遗分布在中原大地的十个地市。悬停标点查看项目，点击进入详情。</p>' +
         '</div>' +
-        '</div>'
         '<div class="map-layout">' +
           '<div class="rv" style="--d:.1s">' +
             '<div class="map-zoom-wrap">' +
@@ -975,16 +965,11 @@
     var el = $("#view-graph");
     el.innerHTML =
       '<div class="section-wrap graph-view">' +
-'<div class="page-hero ph-graph rv">' +
-'          <div class="ph-bg" aria-hidden="true"><i class="ph-l"></i><i class="ph-l"></i><i class="ph-l"></i></div>' +
-'          <div class="ph-veil" aria-hidden="true"></div>' +
-'          <div class="ph-amb" aria-hidden="true"><i></i><i></i><i></i></div>' +
-        '<div class="section-head">' +
+        '<div class="section-head rv">' +
           '<div class="kicker">03 · 知识图谱</div>' +
           '<h2 class="section-title">一张网，看懂非遗的关联</h2>' +
           '<p class="section-sub">项目连着门类与地域，门类与地域之间又有亲缘——悬停任意节点，看它牵动谁；点击项目节点进入详情。</p>' +
         '</div>' +
-        '</div>'
         '<div class="graph-stage rv" style="--d:.1s" id="graph-stage">' +
           '<div class="graph-legend">' +
             cats.map(function (c) { return '<span class="lg"><i style="background:' + CAT_COLOR[c.id] + '"></i>' + c.label + '</span>'; }).join("") +
@@ -1123,16 +1108,11 @@
     var hot = ["什么是非物质文化遗产", "河南有多少项国家级非遗", "第一次来，推荐先看什么", "钧瓷为什么每件都不一样", "打铁花是怎么打的", "太极拳是陈家沟发明的吗"];
     el.innerHTML =
       '<div class="section-wrap ask-view">' +
-'<div class="page-hero ph-ask rv">' +
-'          <div class="ph-bg" aria-hidden="true"><i class="ph-l"></i><i class="ph-l"></i><i class="ph-l"></i></div>' +
-'          <div class="ph-veil" aria-hidden="true"></div>' +
-'          <div class="ph-amb" aria-hidden="true"><i></i><i></i><i></i></div>' +
-        '<div class="section-head">' +
+        '<div class="section-head rv">' +
           '<div class="kicker">04 · AI 智能讲解</div>' +
           '<h2 class="section-title">问它 · 河南非遗</h2>' +
           '<p class="section-sub">内置知识库离线作答，随问随答；接入豆包/千问 API 后自动升级为真·大模型回答（双层架构已预留）。</p>' +
         '</div>' +
-        '</div>'
         '<div class="ask-layout">' +
           '<div class="ask-panel rv" style="--d:.1s">' +
             '<div class="ask-head">' +
@@ -1396,16 +1376,11 @@
     var el = $("#view-create");
     el.innerHTML =
       '<div class="section-wrap create-view">' +
-'<div class="page-hero ph-create rv">' +
-'          <div class="ph-bg" aria-hidden="true"><i class="ph-l"></i><i class="ph-l"></i><i class="ph-l"></i></div>' +
-'          <div class="ph-veil" aria-hidden="true"></div>' +
-'          <div class="ph-amb" aria-hidden="true"><i></i><i></i><i></i></div>' +
-        '<div class="section-head">' +
+        '<div class="section-head rv">' +
           '<div class="kicker">06 · AI 文创工坊</div>' +
           '<h2 class="section-title">生成一张非遗海报</h2>' +
           '<p class="section-sub">选一件珍宝、定一种风格，本地算法即时合成可下载的文创海报；接入图像生成 API 后可升级为真·AI 创作（接口已预留）。</p>' +
         '</div>' +
-        '</div>'
         '<div class="create-layout">' +
           '<div class="create-panel rv" style="--d:.1s">' +
             '<h3>创作台</h3>' +

@@ -328,10 +328,11 @@
     var el = $("#view-hall");
     el.innerHTML =
       '<div class="section-wrap hall">' +
+        '<div class="hall-amb" aria-hidden="true"><i class="ha ha1"></i><i class="ha ha2"></i><i class="ha ha3"></i><i class="ha ha4"></i></div>' +
         '<div class="hall-hero rv">' +
           '<div class="hh-bg" aria-hidden="true"><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i></div>' +
           '<div class="hh-veil" aria-hidden="true"></div>' +
-          '<span class="hh-seal" aria-hidden="true">珍宝</span>' +
+          '<span class="hh-seal" aria-hidden="true"><b>珍</b><b>宝</b></span>' +
           '<div class="section-head">' +
             '<div class="kicker">01 · 展品总览</div>' +
             '<h2 class="section-title">十五件河南珍宝</h2>' +

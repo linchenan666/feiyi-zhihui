@@ -514,7 +514,7 @@
     el.innerHTML =
       '<div class="section-wrap region-view">' +
         '<div class="section-head rv">' +
-          '<div class="kicker">06 · 省份介绍</div>' +
+          '<div class="kicker">06 · 城市介绍</div>' +
           '<h2 class="section-title">一城一脉 · 中原十八城</h2>' +
           '<p class="section-sub">点击地市板块或卡片，走进每一座城的文化底色；带「非遗」角标的城市藏有招牌项目。</p>' +
         '</div>' +
@@ -536,7 +536,7 @@
       : '<div class="region-empty">该市暂无招牌非遗点位，可从地图或展品总览探索其他城市的非遗。</div>';
     el.innerHTML =
       '<div class="section-wrap region-detail">' +
-        '<a class="item-back rv" href="#/region">返回省份介绍</a>' +
+        '<a class="item-back rv" href="#/region">返回城市介绍</a>' +
         '<div class="region-hero">' +
           '<div class="main rv">' +
             '<div class="kicker">' + ck.replace("市", "") + ' · 城市档案</div>' +
@@ -892,49 +892,50 @@
 
   function layoutGraph(nodes, edges) {
     var n = nodes.length;
+    var W = 1000, H = 680, CX = W / 2, CY = H / 2;
     var pos = nodes.map(function (nd, i) {
-      var a = i / n * Math.PI * 2;
-      return { x: 50 + Math.cos(a) * 26, y: 46 + Math.sin(a) * 26, vx: 0, vy: 0 };
+      var rr = nd.type === "city" ? 42 : nd.type === "cat" ? 34 : 24;
+      var a = i / n * Math.PI * 2 + (i % 5) * 0.31;
+      return { x: CX + Math.cos(a) * rr, y: CY + Math.sin(a) * rr, vx: 0, vy: 0 };
     });
-    var map = {};
-    nodes.forEach(function (nd, i) { map[nd.id] = i; });
-    var byType = {};
-    nodes.forEach(function (nd, i) { (byType[nd.type] = byType[nd.type] || []).push(i); });
-
+    function lab(nd) { return Math.max(nd.label.length * 1.5, nd.r * 2.2); }
     function iter() {
-      var i, j, dx, dy, d2, f;
-      /* 斥力 */
+      var i, j, dx, dy, d2, d, fx, fy;
+      /* 斥力：按节点占用面积（圆 + 文字宽）计算，标签不重叠 */
       for (i = 0; i < n; i++) {
         for (j = i + 1; j < n; j++) {
           dx = pos[j].x - pos[i].x; dy = pos[j].y - pos[i].y;
           d2 = Math.max(dx * dx + dy * dy, 1);
-          var rep = 220 / d2;
-          var fx = dx / Math.sqrt(d2) * rep, fy = dy / Math.sqrt(d2) * rep;
+          var R = lab(nodes[i]) + lab(nodes[j]);
+          var rep = R * R * 1.5 / d2;
+          d = Math.sqrt(d2);
+          fx = dx / d * rep; fy = dy / d * rep;
           pos[i].vx -= fx; pos[i].vy -= fy; pos[j].vx += fx; pos[j].vy += fy;
         }
       }
-      /* 弹簧 */
+      /* 弹簧：亲缘短且强，门类/地域连线松弛 */
       edges.forEach(function (e) {
         var a = pos[e.a], b = pos[e.b];
         dx = b.x - a.x; dy = b.y - a.y;
-        var d = Math.max(Math.sqrt(dx * dx + dy * dy), .5);
-        var k = (d - 9) * 0.045 * e.w;
-        var fx = dx / d * k, fy = dy / d * k;
+        d = Math.max(Math.sqrt(dx * dx + dy * dy), .5);
+        var rest = e.w >= 2 ? 9 : 15;
+        var k = (d - rest) * 0.05 * e.w;
+        fx = dx / d * k; fy = dy / d * k;
         a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
       });
-      /* 中心引力 + 类型分层 */
+      /* 中心引力 + 类型分环：项目内环 / 门类中环 / 地市外环 */
       for (i = 0; i < n; i++) {
         var nd = nodes[i], p = pos[i];
-        var targetR = nd.type === "item" ? 26 : nd.type === "cat" ? 36 : 40;
-        var ang = Math.atan2(p.y - 46, p.x - 50);
-        var tx = 50 + Math.cos(ang) * targetR, ty = 46 + Math.sin(ang) * targetR;
-        p.vx += (tx - p.x) * 0.012;
-        p.vy += (ty - p.y) * 0.012;
-        p.vx *= 0.72; p.vy *= 0.72;
+        var targetR = nd.type === "item" ? 23 : nd.type === "cat" ? 33 : 41;
+        var ang = Math.atan2(p.y - CY, p.x - CX);
+        var tx = CX + Math.cos(ang) * targetR, ty = CY + Math.sin(ang) * targetR;
+        p.vx += (tx - p.x) * 0.016;
+        p.vy += (ty - p.y) * 0.016;
+        p.vx *= 0.7; p.vy *= 0.7;
         p.x += p.vx; p.y += p.vy;
       }
     }
-    for (var t = 0; t < 320; t++) iter();
+    for (var t = 0; t < 420; t++) iter();
     return pos;
   }
 
@@ -948,6 +949,11 @@
           '<p class="section-sub">项目连着门类与地域，门类与地域之间又有亲缘——悬停任意节点，看它牵动谁；点击项目节点进入详情。</p>' +
         '</div>' +
         '<div class="graph-stage rv" style="--d:.1s" id="graph-stage">' +
+          '<div class="graph-legend">' +
+            cats.map(function (c) { return '<span class="lg"><i style="background:' + CAT_COLOR[c.id] + '"></i>' + c.label + '</span>'; }).join("") +
+            '<span class="lg"><span class="ln-k"></span>亲缘</span>' +
+            '<span class="lg"><span class="ln-c"></span>地域·门类</span>' +
+          '</div>' +
           '<span class="hint">悬停节点 · 点亮关联 · 点击进入详情</span>' +
         '</div>' +
       '</div>';
@@ -967,18 +973,22 @@
         ' transform="translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')">';
       if (nd.type === "cat") {
         el += '<circle r="' + nd.r + '" fill="none" stroke="' + nd.color + '" stroke-width="1"></circle>';
+        el += '<text y="3.6" text-anchor="middle" font-size="3.1">' + esc(nd.label) + '</text>';
       } else {
         el += '<circle r="' + nd.r + '" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1"></circle>';
+        var ty = nd.type === "item" ? nd.r + 3 : nd.r + 2.8;
+        var fs = nd.type === "item" ? 2.8 : 2.4;
+        el += '<text y="' + ty + '" text-anchor="middle" font-size="' + fs + '">' + esc(nd.label) + '</text>';
       }
-      el += '<text y="' + (nd.type === "cat" ? 3.4 : nd.type === "city" ? 3.2 : 2.6) + '" text-anchor="middle" font-size="' +
-        (nd.type === "cat" ? 3 : 2.6) + '">' + esc(nd.label) + '</text></g>';
+      el += '</g>';
       return el;
     }).join("");
     var edgeList = G.edges.map(function (e) {
       var a = pos[e.a], b = pos[e.b];
-      return '<line class="g-link" data-a="' + e.a + '" data-b="' + e.b + '" x1="' + a.x.toFixed(2) + '" y1="' + a.y.toFixed(2) + '" x2="' + b.x.toFixed(2) + '" y2="' + b.y.toFixed(2) + '"></line>';
+      var kin = e.w >= 2 ? ' g-link-kin' : '';
+      return '<line class="g-link' + kin + '" data-a="' + e.a + '" data-b="' + e.b + '" x1="' + a.x.toFixed(2) + '" y1="' + a.y.toFixed(2) + '" x2="' + b.x.toFixed(2) + '" y2="' + b.y.toFixed(2) + '"></line>';
     }).join("");
-    var W = 800, H = 620;
+    var W = 1000, H = 680;
     stage.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="非遗知识图谱">' + edgeList + nodeList + '</svg>';
 
     var nodes = $$(".g-node", stage), links = $$(".g-link", stage);

@@ -108,7 +108,7 @@ header.scrolled{background:var(--paper-veil);box-shadow:0 1px 0 var(--line-soft)
 nav.main-nav{display:flex;gap:clamp(14px,3vw,36px)}
 nav.main-nav a{
   font-size:14px;letter-spacing:.14em;color:var(--ink-2);
-  padding:6px 2px;position:relative;transition:color .25s;
+  padding:6px 2px;position:relative;transition:color .25s;white-space:nowrap;flex:none;
 }
 nav.main-nav a::after{
   content:"";position:absolute;left:0;bottom:0;width:0;height:1.5px;background:var(--cinnabar);
@@ -517,7 +517,7 @@ body.vt-on .view.active{animation:none}
 .map-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 
 /* ============================================================
-   省份介绍 · M8.5 新大类：一城一脉，中原十八城
+   城市介绍 · M8.5 新大类：一城一脉，中原十八城
    水印"城"压底 + 场景渐变 + 金线角饰，与全站氛围层同语言
    ============================================================ */
 .view[data-view="region"]::before{
@@ -577,6 +577,20 @@ body.vt-on .view.active{animation:none}
 .region-item .cat{font-size:11px;letter-spacing:.3em;color:var(--gold);border:1px solid rgba(166,124,46,.4);padding:3px 10px;border-radius:999px}
 .region-empty{font-size:13px;color:var(--ink-3);padding:22px;border:1px dashed var(--line);border-radius:2px;letter-spacing:.1em}
 @media (max-width:980px){.region-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* 中宽屏：导航项放不下时提前收入汉堡菜单（防"省份介绍"式拆行） */
+@media (max-width:980px){
+  nav.main-nav{
+    position:fixed;top:var(--nav-h);left:0;right:0;background:var(--paper);
+    flex-direction:column;padding:16px 24px 26px;gap:4px;
+    transform:translateY(-130%);transition:transform .45s var(--ease);
+    box-shadow:0 20px 40px rgba(33,29,24,.12);z-index:60;
+  }
+  nav.main-nav.open{transform:none}
+  nav.main-nav a{padding:12px 0;font-size:15px;border-bottom:1px dashed var(--line-soft)}
+  .nav-burger{display:block}
+  .cta-enter{display:none}
+}
 @media (max-width:640px){.region-grid{grid-template-columns:1fr;gap:16px}}
 
 .map-layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,64px);align-items:start}
@@ -679,6 +693,20 @@ body.vt-on .view.active{animation:none}
   position:absolute;right:22px;bottom:26px;z-index:6;
   font-size:11px;letter-spacing:.3em;color:rgba(244,237,223,.5);pointer-events:none;
 }
+
+/* 中宽屏：导航项放不下时提前收入汉堡菜单（防"省份介绍"式拆行） */
+@media (max-width:980px){
+  nav.main-nav{
+    position:fixed;top:var(--nav-h);left:0;right:0;background:var(--paper);
+    flex-direction:column;padding:16px 24px 26px;gap:4px;
+    transform:translateY(-130%);transition:transform .45s var(--ease);
+    box-shadow:0 20px 40px rgba(33,29,24,.12);z-index:60;
+  }
+  nav.main-nav.open{transform:none}
+  nav.main-nav a{padding:12px 0;font-size:15px;border-bottom:1px dashed var(--line-soft)}
+  .nav-burger{display:block}
+  .cta-enter{display:none}
+}
 @media (max-width:640px){
   .map-zoom-stage{width:96vw;height:78vh}
   .zoom-hint{display:none}
@@ -702,6 +730,11 @@ body.vt-on .view.active{animation:none}
 
 /* ---------- 图谱 ---------- */
 .graph-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
+.graph-legend{position:absolute;top:14px;left:16px;right:16px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11px;letter-spacing:.16em;color:var(--ink-3);pointer-events:none;z-index:2}
+.graph-legend .lg{display:inline-flex;align-items:center;gap:6px}
+.graph-legend .lg i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.graph-legend .lg .ln-k{width:20px;height:0;border-top:1.5px solid rgba(166,124,46,.65);display:inline-block}
+.graph-legend .lg .ln-c{width:16px;height:0;border-top:1px solid rgba(33,29,24,.25);display:inline-block}
 .graph-stage{
   position:relative;border:1px solid var(--line-soft);background:var(--card-bg);border-radius:2px;
   min-height:560px;
@@ -713,11 +746,12 @@ body.vt-on .view.active{animation:none}
 }
 .g-node{cursor:pointer}
 .g-node circle{transition:r .25s,fill .25s}
-.g-node text{font-size:10px;fill:var(--ink);letter-spacing:.05em;pointer-events:none}
+.g-node text{fill:var(--ink);letter-spacing:.05em;pointer-events:none;paint-order:stroke;stroke:var(--paper);stroke-width:.4px}
 .g-node:hover circle,.g-node.hot circle{fill:var(--cinnabar)!important;r:7}
 .g-node:hover text,.g-node.hot text{font-weight:700;fill:var(--cinnabar)}
 .g-label{font-family:var(--serif);letter-spacing:.2em;fill:var(--ink-2)}
-.g-link{stroke:rgba(33,29,24,.2);stroke-width:1}
+.g-link{stroke:rgba(33,29,24,.18);stroke-width:1}
+.g-link-kin{stroke:rgba(166,124,46,.6);stroke-width:1.3}
 .g-link.hot{stroke:var(--cinnabar);stroke-width:1.6}
 .g-link.dim,.g-node.dim{opacity:.12}
 
@@ -882,6 +916,20 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
   .create-stage{position:static}
   .hero-side{display:none}
 }
+
+/* 中宽屏：导航项放不下时提前收入汉堡菜单（防"省份介绍"式拆行） */
+@media (max-width:980px){
+  nav.main-nav{
+    position:fixed;top:var(--nav-h);left:0;right:0;background:var(--paper);
+    flex-direction:column;padding:16px 24px 26px;gap:4px;
+    transform:translateY(-130%);transition:transform .45s var(--ease);
+    box-shadow:0 20px 40px rgba(33,29,24,.12);z-index:60;
+  }
+  nav.main-nav.open{transform:none}
+  nav.main-nav a{padding:12px 0;font-size:15px;border-bottom:1px dashed var(--line-soft)}
+  .nav-burger{display:block}
+  .cta-enter{display:none}
+}
 @media (max-width:640px){
   nav.main-nav{
     position:fixed;top:var(--nav-h);left:0;right:0;background:var(--paper);
@@ -918,7 +966,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
   <nav class="main-nav" id="main-nav" aria-label="主导航">
     <a href="#/hall" data-nav="hall">展品总览</a>
     <a href="#/map" data-nav="map">非遗地图</a>
-    <a href="#/region" data-nav="region">省份介绍</a>
+    <a href="#/region" data-nav="region">城市介绍</a>
     <a href="#/graph" data-nav="graph">知识图谱</a>
     <a href="#/ask" data-nav="ask">问·AI</a>
     <a href="#/create" data-nav="create">文创生成</a>

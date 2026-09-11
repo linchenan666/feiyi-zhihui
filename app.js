@@ -892,7 +892,7 @@
       }
     });
     var pos = nodes.map(function (nd, i) {
-      var rr = nd.type === "city" ? 98 : nd.type === "cat" ? 72 : 50;
+      var rr = nd.type === "city" ? 102 : nd.type === "cat" ? 76 : 54;
       var a;
       if (nd.type === "item") {
         a = catIdx[nd.cat + "_" + nd.id] !== undefined ? catIdx[nd.cat + "_" + nd.id] : (i / n * Math.PI * 2);
@@ -929,7 +929,7 @@
       /* 中心引力 + 类型分环：项目内环 / 门类中环 / 地市外环 */
       for (i = 0; i < n; i++) {
         var nd = nodes[i], p = pos[i];
-        var targetR = nd.type === "item" ? 50 : nd.type === "cat" ? 72 : 98;
+        var targetR = nd.type === "item" ? 54 : nd.type === "cat" ? 76 : 102;
         var ang = Math.atan2(p.y - CY, p.x - CX);
         var tx = CX + Math.cos(ang) * targetR, ty = CY + Math.sin(ang) * targetR;
         p.vx += (tx - p.x) * 0.016;
@@ -958,6 +958,11 @@
             '<span class="lg sep"><span class="ln-c"></span>地域·门类</span>' +
             '<span class="graph-meta">' + byId.length + ' 项招牌 · ' + cats.length + ' 大门类 · ' + Object.keys(cities).length + ' 地市 · ' + Object.keys(kin).length + ' 组亲缘</span>' +
           '</div>' +
+          '<div class="graph-zoom" aria-label="图谱缩放">' +
+            '<button class="gz-out" title="缩小">−</button>' +
+            '<button class="gz-in" title="放大">+</button>' +
+            '<button class="gz-r" title="复位">↻</button>' +
+          '</div>' +
           '<span class="hint">悬停节点 · 点亮关联 · 点击进入详情</span>' +
         '</div>' +
       '</div>';
@@ -977,19 +982,19 @@
         ' transform="translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')">';
       if (nd.type === "cat") {
         /* 门类：双环徽章 + 内芯 */
-        el += '<circle r="12.5" fill="none" stroke="' + nd.color + '" stroke-width="1.3"></circle>';
-        el += '<circle r="9.7" fill="' + nd.color + '" opacity=".14"></circle>';
-        el += '<circle r="4.1" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width=".9"></circle>';
-        el += '<text y="6.8" text-anchor="middle" font-size="7.2">' + esc(nd.label) + '</text>';
+        el += '<circle r="13.5" fill="none" stroke="' + nd.color + '" stroke-width="1.3"></circle>';
+        el += '<circle r="10.4" fill="' + nd.color + '" opacity=".14"></circle>';
+        el += '<circle r="4.4" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width=".9"></circle>';
+        el += '<text y="7.2" text-anchor="middle" font-size="7.8">' + esc(nd.label) + '</text>';
       } else if (nd.type === "city") {
         /* 地市：菱形方标 */
-        el += '<rect x="-5.5" y="-5.5" width="11" height="11" transform="rotate(45)" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></rect>';
-        el += '<text y="10.6" text-anchor="middle" font-size="5.6">' + esc(nd.label) + '</text>';
+        el += '<rect x="-5.9" y="-5.9" width="11.8" height="11.8" transform="rotate(45)" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></rect>';
+        el += '<text y="11.2" text-anchor="middle" font-size="6.2">' + esc(nd.label) + '</text>';
       } else {
         /* 项目：外晕 + 实心 */
-        el += '<circle r="9.7" fill="' + nd.color + '" opacity=".16"></circle>';
-        el += '<circle r="5.9" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></circle>';
-        el += '<text y="13.8" text-anchor="middle" font-size="6.4">' + esc(nd.label) + '</text>';
+        el += '<circle r="10.5" fill="' + nd.color + '" opacity=".16"></circle>';
+        el += '<circle r="6.4" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></circle>';
+        el += '<text y="14.6" text-anchor="middle" font-size="7">' + esc(nd.label) + '</text>';
       }
       el += '</g>';
       return el;
@@ -1008,6 +1013,21 @@
     svg.setAttribute('aria-label', '非遗知识图谱');
     svg.innerHTML = edgeList + nodeList;
     stage.appendChild(svg);
+
+    /* 图谱缩放控件：窄屏可放大细读 */
+    var zb = stage.querySelector('.graph-zoom');
+    var svgEl = stage.querySelector('svg');
+    if (zb && svgEl) {
+      if (!zb._z) zb._z = 1;
+      function gzSet(v) {
+        zb._z = Math.max(1, Math.min(3.2, Math.round(v * 10) / 10));
+        svgEl.style.width = (1000 * zb._z) + 'px';
+        svgEl.style.height = 'auto';
+      }
+      zb.querySelector('.gz-in').onclick = function () { gzSet(zb._z * 1.25); };
+      zb.querySelector('.gz-out').onclick = function () { gzSet(zb._z / 1.25); };
+      zb.querySelector('.gz-r').onclick = function () { gzSet(1); };
+    }
 
     var nodes = $$(".g-node", stage), links = $$(".g-link", stage);
     nodes.forEach(function (g) {

@@ -29,6 +29,16 @@
     "美术": "#5E7A78", "体育": "#4E5B4E", "民俗": "#C2702D"
   };
 
+  /* 门类文化图背景（M8.11） */
+  var CAT_IMG = {
+    "戏曲": "assets/cats/cat-xiqu.jpg",
+    "曲艺": "assets/cats/cat-quyi.jpg",
+    "技艺": "assets/cats/cat-jiyi.jpg",
+    "美术": "assets/cats/cat-meishu.jpg",
+    "体育": "assets/cats/cat-tiyu.jpg",
+    "民俗": "assets/cats/cat-minsu.jpg"
+  };
+
   var itemById = {};
   byId.forEach(function (it) { itemById[it.id] = it; });
 
@@ -328,7 +338,10 @@
           '<button class="' + (hallFilter === "fav" ? "on" : "") + '" data-f="fav">已收藏 · ' + favs.length + '</button>' +
           cats.map(function (c) {
             var n = byId.filter(function (i) { return i.category === c.id; }).length;
-            return '<button class="' + (hallFilter === c.id ? "on" : "") + '" data-f="' + c.id + '">' + c.label + ' · ' + n + '</button>';
+            return '<button class="f-cat ' + (hallFilter === c.id ? "on" : "") + '" style="--img:url(' + (CAT_IMG[c.id] || "") + ')" data-f="' + c.id + '" aria-label="筛选：' + c.label + '">' +
+              '<span class="f-img" aria-hidden="true"></span>' +
+              '<span class="f-cap">' + c.label + '<i>' + n + '</i></span>' +
+              '</button>';
           }).join("") +
         '</div>' +
         '<div class="grid" id="hall-grid"></div>' +

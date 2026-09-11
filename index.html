@@ -416,6 +416,56 @@ body.vt-on .view.active{animation:none}
 }
 .filter-bar button:hover{border-color:var(--cinnabar);color:var(--cinnabar)}
 .filter-bar button.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+/* ---------- 门类文化图卡片（M8.11） ---------- */
+.filter-bar .f-cat{
+  position:relative;width:clamp(118px,13vw,142px);height:clamp(66px,9vh,80px);
+  border:none;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;
+  background:#211D18;color:#FBF7EE;font-family:inherit;
+  box-shadow:0 5px 16px rgba(33,29,18,.14);
+  transition:transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+.filter-bar .f-cat .f-img{
+  position:absolute;inset:0;background-image:var(--img);
+  background-size:cover;background-position:center;
+  transform:scale(1.03);
+  animation:catDrift 16s var(--ease) infinite alternate;
+  will-change:transform;
+}
+@keyframes catDrift{
+  from{transform:scale(1.03) translate(0,0)}
+  to{transform:scale(1.16) translate(-2%,-1.6%)}
+}
+.filter-bar .f-cat::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(168deg, rgba(18,13,8,.10) 0%, rgba(18,13,8,.34) 58%, rgba(18,13,8,.72) 100%);
+}
+.filter-bar .f-cat .f-cap{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;text-align:left;
+  padding:30px 12px 9px;font-size:14.5px;font-weight:700;letter-spacing:.08em;
+  background:linear-gradient(180deg, transparent, rgba(12,8,5,.66));
+  text-shadow:0 1px 6px rgba(0,0,0,.5);
+}
+.filter-bar .f-cat .f-cap i{
+  font-style:normal;font-weight:500;font-size:11.5px;opacity:.88;margin-left:3px;letter-spacing:.04em;
+}
+.filter-bar .f-cat:hover{
+  transform:translateY(-5px);
+  box-shadow:0 16px 34px rgba(33,29,18,.26);
+}
+.filter-bar .f-cat:hover .f-img{animation-duration:7s}
+.filter-bar .f-cat.on{
+  box-shadow:0 0 0 2px var(--gold), 0 14px 30px rgba(166,124,46,.30);
+}
+.filter-bar .f-cat.on::after{
+  background:linear-gradient(168deg, rgba(18,13,8,.06) 0%, rgba(18,13,8,.26) 58%, rgba(18,13,8,.62) 100%);
+}
+.filter-bar .f-cat:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){
+  .filter-bar .f-cat .f-img{animation:none;transform:scale(1.04)}
+  .filter-bar .f-cat:hover{transform:none}
+}
+
 .grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,28px);
 }

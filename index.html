@@ -90,13 +90,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 /* ---------- 导航 ---------- */
 header{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
+  position:fixed;top:0;left:0;right:0;z-index:2000;
   height:var(--nav-h);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 clamp(20px,5vw,56px);
   background:var(--paper);
   transition:background .4s var(--ease),box-shadow .4s var(--ease);
 }
+header .brand,header .main-nav,header .header-acts,header .brand-seal{position:relative;z-index:3}
 header.scrolled{background:var(--paper-veil);box-shadow:0 1px 0 var(--line-soft)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-seal{

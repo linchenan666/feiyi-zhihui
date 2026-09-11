@@ -736,26 +736,7 @@
     if (!box) return;
     box.innerHTML = mapSvgHtml() + '<div class="map-label-card" id="map-label"></div>';
     bindMapInteractions(box);
-    setTimeout(function () {
-      var g = document.querySelector('.map-city[data-city="南阳"]');
-      if (g) g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    }, 1000); /* TEMP-CITYSEL */
-    setTimeout(function () {
-      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
-      if (d) d.dispatchEvent(new MouseEvent('mouseenter'));
-    }, 1000); /* TEMP-FOCUS */
-    setTimeout(function () {
-      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
-      if (d) d.dispatchEvent(new MouseEvent('mouseleave'));
-    }, 9900); /* TEMP-FOCUS-OFF */
-    setTimeout(function () {
-      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
-      if (d) d.dispatchEvent(new MouseEvent('mouseenter'));
-    }, 1600); /* TEMP-FOCUS */
-    setTimeout(function () {
-      var d = document.querySelector('.map-dot[data-id="huaiyang"]');
-      if (d) d.dispatchEvent(new MouseEvent('mouseleave'));
-    }, 3600); /* TEMP-FOCUS-OFF */
+
   }
 
   function bindMapInteractions(box) {

@@ -558,6 +558,12 @@ body.vt-on .view.active{animation:none}
   border:1px solid var(--line-soft);border-radius:2px;
   transition:border-color .35s,transform .35s var(--ease);
 }
+.region-card{padding:0 0 24px}
+.region-pic{display:block;height:168px;background-size:cover;background-position:center;margin-bottom:22px;position:relative}
+.region-pic::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(33,29,24,.5))}
+.region-card .no,.region-card h3,.region-card .tag,.region-card p{margin-left:24px;margin-right:24px}
+.region-card .no{margin-top:0}
+.region-card .badge{top:16px;right:16px;background:rgba(15,10,6,.55);border-color:rgba(166,124,46,.6)}
 .card:hover{border-color:var(--gold);transform:translateY(-4px)}
 .card .frame{position:relative;aspect-ratio:3/4;overflow:hidden}
 .card .frame img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease),filter .8s}
@@ -805,6 +811,33 @@ body.vt-on .view.active{animation:none}
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .region-card .badge{position:absolute;top:22px;right:22px;font-size:11px;letter-spacing:.14em;
   color:var(--gold-2);border:1px solid rgba(166,124,46,.45);padding:3px 10px;border-radius:999px}
+.region-view,.region-detail{position:relative;z-index:2}
+.region-bg{position:fixed;left:-5%;right:-5%;bottom:-5%;top:var(--nav-h);z-index:0}
+.region-bg .rb-l{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;will-change:transform,opacity;
+  animation:hbCycle 24s var(--ease) infinite;
+}
+.region-bg .rb-l:nth-child(1){background-image:url(assets/region/r-luoyang.jpg)}
+.region-bg .rb-l:nth-child(2){background-image:url(assets/region/r-zhengzhou.jpg);animation-delay:6s}
+.region-bg .rb-l:nth-child(3){background-image:url(assets/region/r-kaifeng.jpg);animation-delay:12s}
+.region-bg .rb-l:nth-child(4){background-image:url(assets/region/r-zhoukou.jpg);animation-delay:18s}
+.region-veil{
+  position:fixed;left:0;right:0;bottom:0;top:var(--nav-h);z-index:1;
+  background:linear-gradient(180deg, rgba(15,10,6,.86) 0%, rgba(15,10,6,.6) 35%, rgba(15,10,6,.78) 100%);
+}
+.region-hero-pic{
+  flex:0 1 420px;height:clamp(200px,34vh,320px);border-radius:2px;
+  background-size:cover;background-position:center;position:relative;
+  border:1px solid rgba(244,237,223,.18);
+}
+.region-hero-pic::after{content:"";position:absolute;inset:0;border-radius:2px;
+  box-shadow:inset 0 -60px 80px rgba(15,10,6,.45)}
+body:has(.region-bg) footer{border-top-color:rgba(244,237,223,.16);background:rgba(15,10,6,.55)}
+body:has(.region-bg) footer .foot-brand b{color:#FBF7EE}
+body:has(.region-bg) footer .foot-brand p{color:rgba(251,247,238,.72)}
+body:has(.region-bg) footer .foot-meta{color:rgba(251,247,238,.72)}
+body:has(.region-bg) footer .foot-meta b{color:#F3D9A4}
 .region-detail{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 .region-hero{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:flex-start;margin-bottom:clamp(44px,7vh,84px)}
 .region-hero .main{flex:1 1 420px}

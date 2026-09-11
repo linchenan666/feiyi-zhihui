@@ -523,7 +523,8 @@
       var r = REGION_DATA[ck];
       var items = regionItems(ck);
       var badge = items.length ? '<span class="badge">非遗 ' + items.length + ' 项</span>' : "";
-      return '<a class="region-card rv" style="--d:' + (i * 0.03 + 0.05) + 's" href="#/region/' + encodeURIComponent(ck) + '">' +
+      var rim = REGION_IMG && REGION_IMG[ck] ? '<span class="region-pic" style="background-image:url(\'' + REGION_IMG[ck] + '\')"></span>' : "";
+      return '<a class="region-card rv" style="--d:' + (i * 0.03 + 0.05) + 's" href="#/region/' + encodeURIComponent(ck) + '">' + rim +
         '<span class="no">' + String(i + 1).padStart(2, "0") + '</span>' + badge +
         '<h3>' + ck + '</h3>' +
         '<div class="tag">' + r.tag + '</div>' +
@@ -531,6 +532,8 @@
         '</a>';
     }).join("");
     el.innerHTML =
+      '<div class="region-bg" aria-hidden="true"><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i></div>' +
+      '<div class="region-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap region-view">' +
         '<div class="section-head rv">' +
           '<div class="kicker">06 · 城市介绍</div>' +
@@ -554,9 +557,14 @@
         }).join("")
       : '<div class="region-empty">该市暂无招牌非遗点位，可从地图或展品总览探索其他城市的非遗。</div>';
     el.innerHTML =
+      '<div class="region-bg" aria-hidden="true"><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i></div>' +
+      '<div class="region-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap region-detail">' +
         '<a class="item-back rv" href="#/region">返回城市介绍</a>' +
         '<div class="region-hero">' +
+          (REGION_IMG && REGION_IMG[ck]
+            ? '<div class="region-hero-pic rv" style="background-image:url(\'' + REGION_IMG[ck] + '\')"></div>'
+            : '') +
           '<div class="main rv">' +
             '<div class="kicker">' + ck.replace("市", "") + ' · 城市档案</div>' +
             '<h2>' + ck + '</h2>' +

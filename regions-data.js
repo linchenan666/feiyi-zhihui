@@ -104,3 +104,25 @@ var REGION_ORDER = [
   "商丘市", "许昌市", "漯河市", "平顶山市", "周口市",
   "驻马店市", "南阳市", "信阳市"
 ];
+
+/* 城市标志性建筑图（M8.32 新增） */
+var REGION_IMG = {
+  "郑州市": "assets/region/r-zhengzhou.jpg",
+  "开封市": "assets/region/r-kaifeng.jpg",
+  "洛阳市": "assets/region/r-luoyang.jpg",
+  "平顶山市": "assets/region/r-pingdingshan.jpg",
+  "许昌市": "assets/region/r-xuchang.jpg",
+  "漯河市": "assets/region/r-luohe.jpg",
+  "南阳市": "assets/region/r-nanyang.jpg",
+  "信阳市": "assets/region/r-xinyang.jpg",
+  "三门峡市": "assets/region/r-sanmenxia.jpg",
+  "商丘市": "assets/region/r-shangqiu.jpg",
+  "济源市": "assets/region/r-jiyuan.jpg",
+  "焦作市": "assets/region/r-jiaozuo.jpg",
+  "新乡市": "assets/region/r-xinxiang.jpg",
+  "安阳市": "assets/region/r-anyang.jpg",
+  "濮阳市": "assets/region/r-puyang.jpg",
+  "鹤壁市": "assets/region/r-hebi.jpg",
+  "周口市": "assets/region/r-zhoukou.jpg",
+  "驻马店市": "assets/region/r-zhumadian.jpg"
+};

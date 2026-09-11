@@ -113,7 +113,7 @@
   <table>
     <tr><th>真实痛点</th><th>本项目解法</th></tr>
     <tr><td>非遗知识散、难查、看不懂</td><td>15 项招牌非遗 × 4 维结构化内容（要点/深挖/待核清单/问答），覆盖 6 大门类、10 地市</td></tr>
-    <tr><td>缺少"能问"的入口</td><td>内置知识库离线问答（双层架构），随问随答、演示永不断线</td></tr>
+    <tr><td>缺少"能问"的入口</td><td>内置知识库离线问答（双层架构），随问随答、演示永不断线；支持多轮指代追问（「它 / 这个 / 那」自动回指上一主题）</td></tr>
     <tr><td>缺少"能玩、能关联"的入口</td><td>非遗地图（地域坐标）+ 知识图谱（项目↔门类↔地域亲缘）</td></tr>
     <tr><td>缺少"能带走"的传播物</td><td>AI 文创工坊本地合成 4 风格海报，一键下载分享</td></tr>
     <tr><td>隐私顾虑</td><td>纯本地、零上传、无第三方脚本，收藏与主题偏好仅存于本地浏览器</td></tr>
@@ -185,7 +185,7 @@
   </table>
 
   <h3>3.2 路由与视图</h3>
-  <p>原生 hash 路由驱动 8 个视图（home/hall/item/map/graph/ask/create/immerse），无框架、无构建。视图切换采用 <strong>View Transitions API</strong>（原生支持时启用编排过渡，不支持自动回退），保证"页面切换"这一高频动作的流畅与优雅。</p>
+  <p>原生 hash 路由驱动 8 个视图（home/hall/item/map/graph/ask/create/immerse），无框架、无构建。视图切换采用 <strong>View Transitions API</strong>（原生支持时启用编排过渡，不支持自动回退），保证"页面切换"这一高频动作的流畅与优雅。</p><p><strong>地图视图</strong>：写实河南 SVG 轮廓 + 10 地市标点；点击「放大」进入大图交互模态（拖动 / 缩放），悬浮标点只显当前项（其余淡出），点击地市以省份轮廓选中并联动城市介绍。<strong>图谱视图</strong>：力导向布局 + 六门类扇区化 + 氛围画布（纸纹 / 晕染 / 水印），节点分批入场动画，缩放控件保证窄屏可读。</p>
 
   <h3>3.3 双层问答架构（核心创新点）</h3>
   <p>为解决"演示断线"与"真 AI"的矛盾，问答系统设计为双层架构：</p>
@@ -195,16 +195,17 @@
 │  第一层 · 内置知识库（离线，默认启用）            │
 │  关键词打分匹配：命中 ≥4 字词条 3 分、其余 2 分， │
 │  最高分 ≥2 命中，否则兜底话术                    │
-│  → 保证演示 100% 不断线、零网络依赖              │
+│  + 多轮上下文：记录上一主题，指代词自动回指       │
+│  → 保证演示 100% 不断线、支持连续追问            │
 ├─────────────────────────────────────────────┤
 │  第二层 · 远程大模型（可选，一键点亮）            │
 │  app.js 顶部 REMOTE_API 填 url/key/model 即升级  │
 │  → 有 key 时回答切换为大模型生成                  │
 └─────────────────────────────────────────────┘</code></pre>
-  <div class="box"><b>设计意图</b>：离线层保证"任何时候都能演示"，在线层兑现"真·AI"；评审看到的是可解释、可升级的架构，而非黑盒。</div>
+  <div class="box"><b>设计意图</b>：离线层保证"任何时候都能演示"，在线层兑现"真·AI"；多轮上下文让离线问答也可连续追问，评审看到的是可解释、可升级、真能用的架构，而非黑盒。</div>
 
   <h3>3.4 动效引擎（统一收口）</h3>
-  <p>所有指针类动效收口为<strong>单一事件委托处理器</strong> <code>initPointerFX()</code>：磁性按钮 + 卡片 3D 倾斜共用一次 <code>pointermove</code> 监听，rAF 节流保证每帧至多一次布局读取；滚动揭示（IntersectionObserver）、页面过渡（View Transitions）、惯性滚动（Lenis，含隐藏时暂停）各司其职。<code>prefers-reduced-motion</code> 全局兜底，无障碍用户自动获得静止版。</p>
+  <p>所有指针类动效收口为<strong>单一事件委托处理器</strong> <code>initPointerFX()</code>：磁性按钮 + 卡片 3D 倾斜共用一次 <code>pointermove</code> 监听，rAF 节流保证每帧至多一次布局读取；滚动揭示（IntersectionObserver）、页面过渡（View Transitions）各司其职；惯性平滑滚动库（Lenis）经实测性能权衡后<strong>已从运行时禁用</strong>，回退原生滚动（滚轮手感最稳、零额外开销）。<code>prefers-reduced-motion</code> 全局兜底，无障碍用户自动获得静止版。</p>
 </div>
 
 <!-- ============ 04 工程质量 ============ -->
@@ -215,7 +216,7 @@
   <table>
     <tr><th>风险面</th><th>对策</th></tr>
     <tr><td>XSS（所有动态内容经 innerHTML 注入）</td><td>统一 <code>esc()</code> 转义：<code>&amp; &lt; &gt; "</code>；所有用户输入、数据字段注入前必过</td></tr>
-    <tr><td>第三方脚本供应链</td><td>仅 2 个静态 CDN（字体镜像 + Lenis），零追踪、零遥测；断网自动降级</td></tr>
+    <tr><td>第三方脚本供应链</td><td>仅 1 个静态 CDN（字体镜像），零追踪、零遥测；Lenis 已移除，断网自动降级系统字体</td></tr>
     <tr><td>本地存储</td><td>localStorage 读写全部 try/catch，隐私数据仅存本机</td></tr>
     <tr><td>API 密钥泄露</td><td>REMOTE_API 默认关闭，文档明确"请勿提交密钥到公开仓库"</td></tr>
   </table>
@@ -227,14 +228,16 @@
     <tr><td>双 pointermove 监听无节流、强制同步布局</td><td>合并单监听 + rAF 节流</td><td>每帧至多一次布局读</td></tr>
     <tr><td>毛玻璃滚动逐帧重绘</td><td>移除 backdrop-filter，提高背景不透明度</td><td>滚动不再卡顿</td></tr>
     <tr><td>15 个常驻 GPU 合成层</td><td>will-change 改 hover 触发</td><td>GPU 内存释放</td></tr>
-    <tr><td>Lenis 后台空转 / 定时器泄漏</td><td>visibilitychange 暂停；视图切换即清理</td><td>空闲 CPU 归零</td></tr>
+    <tr><td>定时器泄漏</td><td>视图切换即清理（打字机 / 沉浸轮播 / 问答）</td><td>空闲 CPU 归零</td></tr>
+    <tr><td>图谱大图重绘卡顿</td><td>缩放控件只改 SVG 渲染宽度（transform 层），入场动画 opacity 过渡</td><td>滚动与缩放均不卡顿</td></tr>
+    <tr><td>窄屏图谱文字缩到不可读</td><td>SVG 最小渲染 1000px + 横向滚动 + 缩放控件（1x–3.2x）</td><td>任意窗口文字可读</td></tr>
   </table>
 
   <h3>4.3 无障碍</h3>
   <ul>
     <li>键盘可达：地图标点、图谱节点、收藏按钮全部 <code>tabindex</code> + <code>aria</code> + Enter/Space 响应</li>
     <li><code>:focus-visible</code> 全局焦点环，不隐藏 outline</li>
-    <li><code>prefers-reduced-motion</code>：动效、打字机、思考动画、视差全部关闭</li>
+    <li><code>prefers-reduced-motion</code>：动效、打字机、思考动画、视差、图谱入场动画全部关闭</li>
     <li>语义化标签 + aria-label；对比度正文 ≥ 4.5:1</li>
   </ul>
 </div>
@@ -256,6 +259,8 @@
     <tr><td>004</td><td>地图与图谱</td><td>力导向布局、标点偏移、键盘可达</td><td>无头截图 + 无障碍检查</td></tr>
     <tr><td>005</td><td>沉浸 + 终版整合</td><td>沉浸舞台、收藏、双主题、文创工坊</td><td>8 视图全量回归</td></tr>
     <tr><td>006</td><td>性能优化</td><td>7 项性能根因的修复链（见 4.2）</td><td>自检 consoleErrors 全空</td></tr>
+    <tr><td>007–011</td><td>地图全链路</td><td>写实河南地图 → 放大模态 → 悬浮聚焦 → 选中态 → 城市介绍</td><td>多视口无头截图</td></tr>
+    <tr><td>012–024</td><td>图谱四连升级 + 打磨</td><td>大字扇区 → 氛围画布 → 核心放大 → 窄屏可读（缩放控件）→ 入场动画；AI 多轮上下文；单文件版合成</td><td>窄窗/宽屏/放大三态截图 + 多轮追问注入回归</td></tr>
   </table>
 
   <h3>5.3 数据可追溯</h3>
@@ -279,18 +284,22 @@
     <tr><td>操作系统</td><td>Windows / macOS / Linux 任一</td></tr>
     <tr><td>浏览器</td><td>Chrome / Edge 114+</td></tr>
     <tr><td>字体</td><td>Noto Serif SC / Noto Sans SC（miaoda.feishu.cn 自托管镜像，失败回退系统字体）</td></tr>
-    <tr><td>平滑滚动</td><td>Lenis 1.1.18（cdn.jsdelivr.net，失败回退原生滚动）</td></tr>
+    <tr><td>平滑滚动</td><td>无（已禁用 Lenis，回退原生滚动，滚轮性能最优）</td></tr>
     <tr><td>构建</td><td>无（原生 HTML/CSS/JS，无包管理器）</td></tr>
+    <tr><td>单文件版</td><td>非遗智汇·多彩面板版.html（全内联、零网络依赖，演示首选）</td></tr>
   </table>
 
   <h3>6.2 目录结构</h3>
   <pre><code>feiyi-zhihui/
-├── index.html        # 骨架 + 设计系统 + 动效质感层
-├── data.js           # 数据层：15 项非遗 + 知识库 + 图谱 + 坐标
-├── app.js            # 视图与交互层：8 视图 + 动效引擎 + 问答
-├── assets/           # 16 张统一水墨风格素材
-├── docs/             # 技术文档 / Prompt历史 / 演示脚本 / 设计规范
-└── README.md         # 10 分钟极速复现指南</code></pre>
+├── index.html             # 骨架 + 设计系统 + 动效质感层
+├── 非遗智汇·多彩面板版.html # 单文件交付版（全内联，零依赖，演示推荐）
+├── data.js                # 数据层：15 项非遗 + 知识库 + 图谱 + 坐标
+├── map-data.js            # 地图层：写实河南地图 + 地市坐标 + 城市介绍
+├── regions-data.js        # 地域层：地市 → 非遗映射
+├── app.js                 # 视图与交互层：8 视图 + 动效引擎 + 问答 + 图谱
+├── assets/                # 16 张统一水墨风格素材
+├── docs/                  # 技术文档 / Prompt历史 / 演示脚本 / 设计规范
+└── README.md              # 10 分钟极速复现指南</code></pre>
 
   <h3>6.3 环境变量模板</h3>
   <pre><code>// app.js 顶部 REMOTE_API（默认关闭）

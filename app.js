@@ -1029,6 +1029,22 @@
       zb.querySelector('.gz-r').onclick = function () { gzSet(1); };
     }
 
+    /* 入场动画：节点分批渐显 + 连线渐显（M8.10） */
+    if (!REDUCED) {
+      var _gn = stage.querySelectorAll(".g-node"), _gl = stage.querySelectorAll(".g-link");
+      for (var _gi = 0; _gi < _gn.length; _gi++) _gn[_gi].style.opacity = "0";
+      for (var _li = 0; _li < _gl.length; _li++) _gl[_li].style.opacity = "0";
+      _gn.forEach(function (g, i) {
+        var d = 120 + (i % 3) * 70 + Math.floor(i / 3) * 22;
+        g.style.transition = "opacity .5s cubic-bezier(.22,1,.36,1) " + d + "ms";
+        setTimeout(function () { g.style.opacity = "1"; }, 40);
+      });
+      _gl.forEach(function (l, i) {
+        l.style.transition = "opacity .55s ease " + (180 + i * 10) + "ms";
+        setTimeout(function () { l.style.opacity = "1"; }, 40);
+      });
+    }
+
     var nodes = $$(".g-node", stage), links = $$(".g-link", stage);
     nodes.forEach(function (g) {
       g.addEventListener("mouseenter", function () {
@@ -1126,6 +1142,7 @@
       var think = pushMsg("ai", null, null, false, true);
       setTimeout(function () {
         var ans = matchAnswer(text);
+        askHistory.push({ q: text, a: ans.a });
         typeInto(think, ans.a, ans.src);
       }, REDUCED ? 0 : 480);
     }
@@ -1187,16 +1204,27 @@
     }, 14);
   }
 
+  /* 多轮上下文（M8.10）：记录上一主题，支持「它/这个/那」等指代追问 */
+  var lastTopic = "";
+  function resolveAsk(q) {
+    var t = (q || "").trim();
+    var m = t.match(/^(它|他|她|这个|那个|这些|那些|这|那|其)(.+)$/);
+    if (lastTopic && m) return lastTopic + m[2];
+    if (t.length <= 4 && lastTopic && !/^(什么是|哪些|河南|非遗|介绍|推荐)/.test(t)) return lastTopic + t;
+    return t;
+  }
   function matchAnswer(q) {
+    var query = resolveAsk(q);
     var best = null, bestScore = 0;
     KB_ALL.forEach(function (k) {
       var score = 0;
       k.keywords.forEach(function (kw) {
-        if (q.indexOf(kw) >= 0) score += kw.length >= 4 ? 3 : 2;
+        if (query.indexOf(kw) >= 0) score += kw.length >= 4 ? 3 : 2;
       });
       if (score > bestScore) { bestScore = score; best = k; }
     });
     if (best && bestScore >= 2) {
+      lastTopic = best.itemName || best.title || "";
       var src = "来自内置知识库" + (best.itemName ? " · " + best.itemName + "条目" : " · 总览条目");
       return { a: best.a, src: src };
     }

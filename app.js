@@ -873,7 +873,7 @@
 
   function layoutGraph(nodes, edges) {
     var n = nodes.length;
-    var W = 1000, H = 680, CX = W / 2, CY = H / 2;
+    var W = 1000, H = 540, CX = W / 2, CY = H / 2;
     /* 门类扇区：6 类各占 60°，项目在所属扇区内均匀分布 */
     var catIdx = {};
     nodes.forEach(function (nd) { if (nd.type === "item" && !(nd.cat in catIdx)) catIdx[nd.cat] = 0; });
@@ -892,7 +892,7 @@
       }
     });
     var pos = nodes.map(function (nd, i) {
-      var rr = nd.type === "city" ? 82 : nd.type === "cat" ? 62 : 44;
+      var rr = nd.type === "city" ? 98 : nd.type === "cat" ? 72 : 50;
       var a;
       if (nd.type === "item") {
         a = catIdx[nd.cat + "_" + nd.id] !== undefined ? catIdx[nd.cat + "_" + nd.id] : (i / n * Math.PI * 2);
@@ -929,7 +929,7 @@
       /* 中心引力 + 类型分环：项目内环 / 门类中环 / 地市外环 */
       for (i = 0; i < n; i++) {
         var nd = nodes[i], p = pos[i];
-        var targetR = nd.type === "item" ? 44 : nd.type === "cat" ? 62 : 82;
+        var targetR = nd.type === "item" ? 50 : nd.type === "cat" ? 72 : 98;
         var ang = Math.atan2(p.y - CY, p.x - CX);
         var tx = CX + Math.cos(ang) * targetR, ty = CY + Math.sin(ang) * targetR;
         p.vx += (tx - p.x) * 0.016;
@@ -977,18 +977,18 @@
         ' transform="translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')">';
       if (nd.type === "cat") {
         /* 门类：双环徽章 + 内芯 */
-        el += '<circle r="11" fill="none" stroke="' + nd.color + '" stroke-width="1.3"></circle>';
-        el += '<circle r="7.5" fill="' + nd.color + '" opacity=".14"></circle>';
-        el += '<circle r="3.6" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width=".9"></circle>';
+        el += '<circle r="12.5" fill="none" stroke="' + nd.color + '" stroke-width="1.3"></circle>';
+        el += '<circle r="9.7" fill="' + nd.color + '" opacity=".14"></circle>';
+        el += '<circle r="4.1" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width=".9"></circle>';
         el += '<text y="6.8" text-anchor="middle" font-size="7.2">' + esc(nd.label) + '</text>';
       } else if (nd.type === "city") {
         /* 地市：菱形方标 */
-        el += '<rect x="-4.8" y="-4.8" width="9.6" height="9.6" transform="rotate(45)" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></rect>';
+        el += '<rect x="-5.5" y="-5.5" width="11" height="11" transform="rotate(45)" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></rect>';
         el += '<text y="10.6" text-anchor="middle" font-size="5.6">' + esc(nd.label) + '</text>';
       } else {
         /* 项目：外晕 + 实心 */
-        el += '<circle r="8.5" fill="' + nd.color + '" opacity=".16"></circle>';
-        el += '<circle r="5.2" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></circle>';
+        el += '<circle r="9.7" fill="' + nd.color + '" opacity=".16"></circle>';
+        el += '<circle r="5.9" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></circle>';
         el += '<text y="13.8" text-anchor="middle" font-size="6.4">' + esc(nd.label) + '</text>';
       }
       el += '</g>';
@@ -999,7 +999,7 @@
       var kin = e.w >= 2 ? ' g-link-kin' : '';
       return '<line class="g-link' + kin + '" data-a="' + e.a + '" data-b="' + e.b + '" x1="' + a.x.toFixed(2) + '" y1="' + a.y.toFixed(2) + '" x2="' + b.x.toFixed(2) + '" y2="' + b.y.toFixed(2) + '"></line>';
     }).join("");
-    var W = 1000, H = 680;
+    var W = 1000, H = 540;
     var _old = stage.querySelector('svg');
     if (_old) _old.parentNode.removeChild(_old);
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

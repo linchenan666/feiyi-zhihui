@@ -558,12 +558,14 @@ body.vt-on .view.active{animation:none}
   border:1px solid var(--line-soft);border-radius:2px;
   transition:border-color .35s,transform .35s var(--ease);
 }
-.region-card{padding:0 0 24px}
+.region-card{padding:0 0 24px;background:linear-gradient(180deg,rgba(26,20,14,.82),rgba(18,14,10,.86));
+  border-color:rgba(166,124,46,.28);box-shadow:0 10px 30px rgba(8,6,4,.25)}
+.region-card:hover{border-color:var(--gold)}
 .region-pic{display:block;height:168px;background-size:cover;background-position:center;margin-bottom:22px;position:relative}
 .region-pic::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(33,29,24,.5))}
 .region-card .no,.region-card h3,.region-card .tag,.region-card p{margin-left:24px;margin-right:24px}
 .region-card .no{margin-top:0}
-.region-card .badge{top:16px;right:16px;background:rgba(15,10,6,.55);border-color:rgba(166,124,46,.6)}
+.region-card .badge{top:16px;right:16px;background:rgba(15,10,6,.55);border-color:rgba(166,124,46,.6);color:#FBF7EE}
 .card:hover{border-color:var(--gold);transform:translateY(-4px)}
 .card .frame{position:relative;aspect-ratio:3/4;overflow:hidden}
 .card .frame img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease),filter .8s}
@@ -804,10 +806,10 @@ body.vt-on .view.active{animation:none}
   transition:border-color .35s,transform .35s var(--ease);
 }
 .region-card:hover{border-color:var(--gold);transform:translateY(-4px)}
-.region-card .no{font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:.24em;color:var(--gold)}
-.region-card h3{font-family:var(--serif);font-weight:800;font-size:24px;letter-spacing:.1em;margin:10px 0 4px}
-.region-card .tag{font-size:12px;letter-spacing:.18em;color:var(--cinnabar);margin-bottom:14px}
-.region-card p{font-size:13px;font-weight:300;color:var(--ink-2);line-height:1.75;
+.region-card .no{font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:.24em;color:#EACB7E}
+.region-card h3{font-family:var(--serif);font-weight:800;font-size:24px;letter-spacing:.1em;margin:10px 0 4px;color:#F3D9A4}
+.region-card .tag{font-size:12px;letter-spacing:.18em;color:#FBF7EE;margin-bottom:14px}
+.region-card p{font-size:13px;font-weight:300;color:rgba(251,247,238,.9);line-height:1.75;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .region-card .badge{position:absolute;top:22px;right:22px;font-size:11px;letter-spacing:.14em;
   color:var(--gold-2);border:1px solid rgba(166,124,46,.45);padding:3px 10px;border-radius:999px}

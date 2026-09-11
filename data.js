@@ -541,3 +541,22 @@ var KB_ITEMS = [];
 })();
 
 var KB_ALL = KB_GLOBAL.concat(KB_ITEMS);
+
+/* 展品主题氛围（M8.36 新增）：每件展品一页一世界 —— bg=主题渐变 / mark=水印字 / tint=强调色 */
+var ITEM_THEME = {
+  yuju:     { bg: "linear-gradient(160deg,#3A1210 0%,#7A241C 45%,#2B0E0C 100%)", mark: "戏", tint: "#E8B04B" },
+  quju:     { bg: "linear-gradient(160deg,#12202E 0%,#2A4156 45%,#0E1720 100%)", mark: "曲", tint: "#9FC0D8" },
+  zhuizi:   { bg: "linear-gradient(160deg,#241B12 0%,#4A3825 45%,#1A130C 100%)", mark: "坠", tint: "#D8BC8A" },
+  majie:    { bg: "linear-gradient(160deg,#3A2C14 0%,#6B5428 45%,#2A2010 100%)", mark: "书", tint: "#E8D19A" },
+  junci:    { bg: "linear-gradient(160deg,#24101C 0%,#5E2840 38%,#B05538 72%,#1C0C18 100%)", mark: "窑", tint: "#E8A06B" },
+  ruci:     { bg: "linear-gradient(160deg,#0E2028 0%,#28505E 45%,#0A1820 100%)", mark: "青", tint: "#9CC8D0" },
+  sancai:   { bg: "linear-gradient(160deg,#1A2818 0%,#3E5E32 35%,#A86A38 68%,#331C18 100%)", mark: "彩", tint: "#D8C08A" },
+  shuixi:   { bg: "linear-gradient(160deg,#241A10 0%,#5E4A30 45%,#1E150C 100%)", mark: "席", tint: "#E8CE9A" },
+  bianxiu:  { bg: "linear-gradient(160deg,#2A1226 0%,#5E2A4E 45%,#1C0E1A 100%)", mark: "绣", tint: "#D8A0C0" },
+  zhuxian:  { bg: "linear-gradient(160deg,#3A1410 0%,#96301E 45%,#14305A 100%)", mark: "画", tint: "#F0C060" },
+  nigugu:   { bg: "linear-gradient(160deg,#33200F 0%,#6B4523 45%,#241608 100%)", mark: "泥", tint: "#E0B878" },
+  ninigou:  { bg: "linear-gradient(160deg,#0E0C10 0%,#2E2430 45%,#120E14 100%)", mark: "灵", tint: "#E8C8A0" },
+  shaolin:  { bg: "linear-gradient(160deg,#2E2410 0%,#6B5428 45%,#201A0C 100%)", mark: "禅", tint: "#E8C878" },
+  taiji:    { bg: "linear-gradient(160deg,#141414 0%,#3A3A3A 45%,#0E0E0E 100%)", mark: "道", tint: "#C8C8C8" },
+  dahuatie: { bg: "linear-gradient(160deg,#0A1226 0%,#1A2E52 45%,#0A0E1A 100%)", mark: "火", tint: "#F0A050" }
+};

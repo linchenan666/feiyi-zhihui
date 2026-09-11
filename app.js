@@ -416,7 +416,10 @@
       });
     }
 
+    var thm = (typeof ITEM_THEME === "object" && ITEM_THEME[it.id]) || ITEM_THEME.yuju;
     el.innerHTML =
+      '<div class="item-bg" aria-hidden="true" style="background:' + thm.bg + '"><i class="im-mark" style="color:' + thm.tint + '">' + thm.mark + '</i></div>' +
+      '<div class="item-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap item">' +
         '<a class="item-back rv" href="#/hall">返回展品总览</a>' +
         '<div class="item-layout">' +
@@ -555,7 +558,8 @@
             '<span class="cat">' + it.category + '</span>' +
             '</a>';
         }).join("")
-      : '<div class="region-empty">该市暂无招牌非遗点位，可从地图或展品总览探索其他城市的非遗。</div>';
+      : '<div class="region-empty">该市暂无招牌非遗点位，可从地图或展品总览探索其他城市的非遗。</div>' +
+        '<div class="region-empty-acts"><a href="#/map">去非遗地图看看</a><a href="#/hall">去展品总览</a></div>';
     el.innerHTML =
       '<div class="region-bg" aria-hidden="true"><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i><i class="rb-l"></i></div>' +
       '<div class="region-veil" aria-hidden="true"></div>' +
@@ -1137,7 +1141,12 @@
   function renderAsk() {
     var el = $("#view-ask");
     var hot = ["什么是非物质文化遗产", "河南有多少项国家级非遗", "第一次来，推荐先看什么", "钧瓷为什么每件都不一样", "打铁花是怎么打的", "太极拳是陈家沟发明的吗"];
+    var askModeLabel = (typeof REMOTE_API === "object" && REMOTE_API.key)
+      ? '<button class="mode-switch" id="ask-mode" type="button" aria-pressed="false" title="有 key 时点亮真·大模型回答">离线 ⇄ 在线</button>'
+      : '';
     el.innerHTML =
+      '<div class="ask-bg" aria-hidden="true"></div>' +
+      '<div class="ask-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap ask-view">' +
         '<div class="section-head rv">' +
           '<div class="kicker">04 · AI 智能讲解</div>' +
@@ -1148,7 +1157,7 @@
           '<div class="ask-panel rv" style="--d:.1s">' +
             '<div class="ask-head">' +
               '<span class="seal-sm">讲</span><b>非遗讲解员</b>' +
-              '<span class="status"><i></i>内置知识库 · 离线模式</span>' +
+              '<span class="status" id="ask-status"><i></i>内置知识库 · 离线模式</span>' + askModeLabel +
             '</div>' +
             '<div class="ask-body" id="ask-body"></div>' +
             '<div class="ask-suggests" id="ask-suggests">' +
@@ -1188,15 +1197,54 @@
       if (!text) return;
       pushMsg("user", text);
       input.value = "";
-      /* 思考状态可视化：先显示呼吸点，再流式作答 */
-      var think = pushMsg("ai", null, null, false, true);
-      setTimeout(function () {
-        var ans = matchAnswer(text);
-        askHistory.push({ q: text, a: ans.a });
-        typeInto(think, ans.a, ans.src);
-      }, REDUCED ? 0 : 480);
+      var online = (typeof askOnline !== "undefined") && askOnline && REMOTE_API && REMOTE_API.url && REMOTE_API.key;
+      if (!online) {
+        var think = pushMsg("ai", null, null, false, true);
+        setTimeout(function () {
+          var ans = matchAnswer(text);
+          askHistory.push({ q: text, a: ans.a });
+          typeInto(think, ans.a, ans.src);
+        }, REDUCED ? 0 : 480);
+      } else {
+        var think2 = pushMsg("ai", null, null, false, true);
+        fetch(REMOTE_API.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + REMOTE_API.key },
+          body: JSON.stringify({
+            model: REMOTE_API.model || "doubao-seed-1-6-250615",
+            messages: [{ role: "user", content: text }],
+            stream: false
+          })
+        }).then(function (r) { return r.json(); }).then(function (j) {
+          if (think2 && think2.parentNode) think2.parentNode.removeChild(think2);
+          var txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+          askHistory.push({ q: text, a: txt || "" });
+          typeInto(think2, txt || JSON.stringify(j) || "（无返回内容）", "在线大模型 · " + (REMOTE_API.model || ""));
+        }).catch(function (e) {
+          if (think2 && think2.parentNode) think2.parentNode.removeChild(think2);
+          pushMsg("ai", "在线请求失败：" + e.message + "。file:// 直开会被浏览器拦截跨域，请本地起服务或部署到线上后使用（离线模式不受影响）。");
+        });
+      }
     }
 
+    var askOnline = false;
+    var modeBtn = $("#ask-mode");
+    if (modeBtn) modeBtn.addEventListener("click", function () {
+      askOnline = !askOnline;
+      modeBtn.setAttribute("aria-pressed", String(askOnline));
+      var st = $("#ask-status");
+      if (st) {
+        st.innerHTML = askOnline
+          ? "<i></i>在线模式 · 大模型回答"
+          : "<i></i>内置知识库 · 离线模式";
+      }
+      if (askOnline && (!REMOTE_API || !REMOTE_API.key)) {
+        pushMsg("ai", "在线模式需要先在 app.js 顶部 REMOTE_API 填入 url 与 key（请勿提交到公开仓库）；当前仍由内置知识库回答。");
+        askOnline = false;
+        modeBtn.setAttribute("aria-pressed", "false");
+        if (st) st.innerHTML = "<i></i>内置知识库 · 离线模式";
+      }
+    });
     send.addEventListener("click", function () { ask(input.value); });
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter") ask(input.value);
@@ -1290,6 +1338,8 @@
   function renderImmerse() {
     var el = $("#view-immerse");
     el.innerHTML =
+      '<div class="immerse-bg" aria-hidden="true"></div>' +
+      '<div class="immerse-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap immerse">' +
         '<div class="section-head rv">' +
           '<div class="kicker">05 · 沉浸演绎</div>' +
@@ -1406,6 +1456,8 @@
   function renderCreate() {
     var el = $("#view-create");
     el.innerHTML =
+      '<div class="create-bg" aria-hidden="true"></div>' +
+      '<div class="create-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap create-view">' +
         '<div class="section-head rv">' +
           '<div class="kicker">06 · AI 文创工坊</div>' +
@@ -1433,6 +1485,7 @@
               '<button class="btn-gen" id="btn-gen" type="button">生成</button>' +
               '<button class="btn-shuffle" id="btn-shuffle" type="button">换组灵感</button>' +
               '<button class="btn-save" id="btn-save" type="button">下载 PNG</button>' +
+              '<button class="btn-share" id="btn-share" type="button">复制分享文案</button>' +
             '</div>' +
           '</div>' +
           '<div class="create-stage rv" style="--d:.16s">' +
@@ -1446,7 +1499,35 @@
     observeReveals(el);
   }
 
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { toast("分享文案已复制"); }, function () { fallbackCopy(t); });
+    } else { fallbackCopy(t); }
+  }
+  function fallbackCopy(t) {
+    var ta = document.createElement("textarea");
+    ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("分享文案已复制"); } catch (e) { toast("复制失败，请手动复制"); }
+    document.body.removeChild(ta);
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("#toast");
+    if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
+  }
   function bindCreate() {
+    var shareBtn = $("#btn-share");
+    if (shareBtn) shareBtn.addEventListener("click", function () {
+      var it = byId[createIdx] || byId[0];
+      var st = CREATE_STYLES.filter(function (s) { return s.id === createStyle; })[0] || CREATE_STYLES[0];
+      copyText("我在「非遗智汇 · 河南非遗 AI 数字展厅」用 AI 生成了一张「" + it.name + "」" + st.label +
+        "文创海报——15 项河南招牌非遗、6 大门类、10 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
+        "（传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
+    });
     var items = $("#create-items"), styles = $("#create-styles");
     if (items) $$("button", items).forEach(function (b) {
       b.addEventListener("click", function () {

@@ -1367,6 +1367,169 @@ body:has(.map-bg) footer .foot-meta b{color:#F3D9A4}
   }
   .nf-ver{font-size:10px;letter-spacing:.12em;color:var(--ink-3)}
 }
+
+/* ============ M8.36 信笺墨池 · 印坊印阵 · 夜戏台 · 展品主题氛围 ============ */
+.ask-view,.create-view,.immerse,.item{position:relative;z-index:2}
+.ask-bg,.create-bg,.immerse-bg,.item-bg{
+  position:fixed;left:-5%;right:-5%;bottom:-5%;top:var(--nav-h);z-index:0;overflow:hidden;pointer-events:none;
+}
+.ask-veil,.create-veil,.immerse-veil,.item-veil{
+  position:fixed;left:0;right:0;bottom:0;top:var(--nav-h);z-index:1;pointer-events:none;
+}
+
+/* ---- 问·AI · 信笺墨池 ---- */
+.ask-bg::before{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(120% 90% at 18% 12%, rgba(166,124,46,.18), transparent 55%),
+    radial-gradient(100% 80% at 85% 85%, rgba(176,58,46,.15), transparent 60%),
+    linear-gradient(165deg,#17120C 0%,#221A11 45%,#0E0B07 100%);
+}
+.ask-bg::after{content:"";position:absolute;inset:0;opacity:.6;
+  background:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221600%22%20height%3D%22900%22%20viewBox%3D%220%200%201600%20900%22%3E%3Cpath%20d%3D%22M-50%20700%20C%20300%20640%20500%20760%20780%20660%20S%201250%20540%201650%20640%22%20fill%3D%22none%22%20stroke%3D%22%23F3D9A4%22%20stroke-width%3D%223%22%20opacity%3D%220.22%22%2F%3E%3Cpath%20d%3D%22M-50%20520%20C%20350%20480%20650%20590%20980%20500%20S%201400%20380%201650%20470%22%20fill%3D%22none%22%20stroke%3D%22%23FBF7EE%22%20stroke-width%3D%222%22%20opacity%3D%220.14%22%2F%3E%3Cpath%20d%3D%22M200%20-50%20C%20240%20220%20120%20480%20300%20760%20S%20420%20880%20500%20950%22%20fill%3D%22none%22%20stroke%3D%22%23F3D9A4%22%20stroke-width%3D%222%22%20opacity%3D%220.10%22%2F%3E%3Cpath%20d%3D%22M900%20-40%20C%20940%20160%20860%20320%201000%20480%20S%201180%20700%201100%20940%22%20fill%3D%22none%22%20stroke%3D%22%23D8BC8A%22%20stroke-width%3D%222%22%20opacity%3D%220.09%22%2F%3E%3C%2Fsvg%3E') center/cover no-repeat}
+.ask-veil{background:linear-gradient(180deg,rgba(15,10,6,.72),rgba(15,10,6,.5) 40%,rgba(15,10,6,.8))}
+body:has(.ask-bg) .section-title{color:#FBF7EE}
+body:has(.ask-bg) .ask-view .kicker{color:#F3D9A4}
+body:has(.ask-bg) .section-sub{color:rgba(251,247,238,.72)}
+body:has(.ask-bg) .ask-panel{background:linear-gradient(180deg,rgba(24,18,13,.86),rgba(16,12,8,.9));border-color:rgba(166,124,46,.3)}
+body:has(.ask-bg) .ask-panel .seal-sm{background:var(--cinnabar)}
+body:has(.ask-bg) .ask-panel b{color:#FBF7EE}
+body:has(.ask-bg) .status{color:rgba(251,247,238,.8)}
+body:has(.ask-bg) .ask-body .msg .bubble{background:rgba(251,247,238,.08);border-color:rgba(166,124,46,.25);color:#F3EFE2}
+body:has(.ask-bg) .ask-body .msg.user .bubble{background:rgba(176,58,46,.55);border-color:rgba(176,58,46,.2)}
+body:has(.ask-bg) .ask-suggests button{color:rgba(251,247,238,.85);border-color:rgba(166,124,46,.35);background:rgba(15,10,6,.35)}
+body:has(.ask-bg) .ask-suggests button:hover{color:#F3D9A4;border-color:#F3D9A4}
+body:has(.ask-bg) .ask-input{border-color:rgba(166,124,46,.35);background:rgba(15,10,6,.35)}
+body:has(.ask-bg) .ask-input input{color:#FBF7EE}
+body:has(.ask-bg) .ask-input input::placeholder{color:rgba(251,247,238,.45)}
+body:has(.ask-bg) .ask-input button{background:var(--cinnabar);color:#FBF7EE}
+body:has(.ask-bg) .ask-side .note{background:linear-gradient(180deg,rgba(24,18,13,.86),rgba(16,12,8,.9));border-color:rgba(166,124,46,.3)}
+body:has(.ask-bg) .ask-side h4{color:#F3D9A4}
+body:has(.ask-bg) .ask-side p{color:rgba(251,247,238,.8)}
+body:has(.ask-bg) .ask-side code{background:rgba(251,247,238,.12);color:#F3D9A4}
+body:has(.ask-bg) .ask-hot li{color:rgba(251,247,238,.82);border-bottom-color:rgba(166,124,46,.22)}
+body:has(.ask-bg) .ask-hot li:hover{color:#F3D9A4}
+.mode-switch{
+  margin-left:auto;font-family:inherit;font-size:11px;letter-spacing:.12em;
+  color:#F3D9A4;border:1px solid rgba(243,217,164,.45);background:rgba(15,10,6,.4);
+  padding:5px 12px;border-radius:999px;cursor:pointer;transition:all .3s;
+}
+.mode-switch:hover{border-color:#F3D9A4;box-shadow:0 0 14px rgba(243,217,164,.25)}
+.mode-switch[aria-pressed="true"]{background:#F3D9A4;color:#211D18;border-color:#F3D9A4}
+
+/* ---- 文创生成 · 印坊印阵 ---- */
+.create-bg::before{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(110% 85% at 80% 8%, rgba(243,217,164,.13), transparent 55%),
+    radial-gradient(90% 70% at 10% 90%, rgba(176,58,46,.22), transparent 60%),
+    linear-gradient(160deg,#3A1410 0%,#6E2418 42%,#2A0E0A 100%);
+}
+.create-bg::after{content:"";position:absolute;inset:0;opacity:.5;
+  background:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22640%22%20viewBox%3D%220%200%20640%20640%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23B03A2E%22%20opacity%3D%220.42%22%3E%3Crect%20x%3D%2230%22%20y%3D%2230%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2230%22%20y%3D%22180%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2230%22%20y%3D%22330%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2230%22%20y%3D%22480%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%22180%22%20y%3D%2230%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%22180%22%20y%3D%22180%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%22180%22%20y%3D%22330%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%22180%22%20y%3D%22480%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%22330%22%20y%3D%2230%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%22330%22%20y%3D%22180%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%22330%22%20y%3D%22330%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%22330%22%20y%3D%22480%22%20width%3D%22120%22%20height%3D%22120%22%20stroke-width%3D%222%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23E8C878%22%20opacity%3D%220.32%22%3E%3Crect%20x%3D%22500%22%20y%3D%22120%22%20width%3D%22110%22%20height%3D%22110%22%20stroke-width%3D%222%22%20transform%3D%22rotate%288%20555%20175%29%22%2F%3E%3Crect%20x%3D%22500%22%20y%3D%22400%22%20width%3D%22110%22%20height%3D%22110%22%20stroke-width%3D%222%22%20transform%3D%22rotate%28-6%20555%20455%29%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E') repeat, linear-gradient(160deg,transparent 40%,rgba(15,10,6,.4) 100%)}
+.create-veil{background:linear-gradient(180deg,rgba(26,12,8,.66),rgba(26,12,8,.48) 42%,rgba(26,12,8,.78))}
+body:has(.create-bg) .section-title{color:#FBF7EE}
+body:has(.create-bg) .create-view .kicker{color:#F3D9A4}
+body:has(.create-bg) .section-sub{color:rgba(251,247,238,.72)}
+body:has(.create-bg) .create-panel{background:linear-gradient(180deg,rgba(38,16,10,.88),rgba(24,10,6,.92));border-color:rgba(166,124,46,.3)}
+body:has(.create-bg) .create-panel h3{color:#F3D9A4}
+body:has(.create-bg) .create-field label{color:rgba(251,247,238,.78)}
+body:has(.create-bg) .item-pick button,body:has(.create-bg) .style-pick button{color:rgba(251,247,238,.85);border-color:rgba(166,124,46,.35);background:rgba(15,10,6,.35)}
+body:has(.create-bg) .item-pick button:hover,body:has(.create-bg) .style-pick button:hover{color:#F3D9A4;border-color:#F3D9A4}
+body:has(.create-bg) .item-pick button.on,body:has(.create-bg) .style-pick button.on{background:rgba(176,58,46,.7);border-color:rgba(176,58,46,.4);color:#FBF7EE}
+body:has(.create-bg) .poster-caption{color:rgba(251,247,238,.72)}
+body:has(.create-bg) .poster-caption em{color:#F3D9A4}
+.btn-share{
+  flex:1 1 140px;justify-content:center;align-items:center;gap:8px;
+  background:rgba(15,10,6,.4);color:#F3D9A4;border:1px solid rgba(243,217,164,.45);
+}
+.btn-share:hover{background:rgba(243,217,164,.14);border-color:#F3D9A4}
+
+/* ---- 沉浸演绎 · 夜戏台 ---- */
+.immerse-bg::before{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(70% 55% at 50% 28%, rgba(243,217,164,.16), transparent 60%),
+    radial-gradient(45% 60% at 28% 80%, rgba(176,58,46,.2), transparent 62%),
+    radial-gradient(40% 55% at 74% 82%, rgba(166,124,46,.14), transparent 60%),
+    linear-gradient(180deg,#0C0A08 0%,#16120E 55%,#0A0807 100%);
+}
+.immerse-bg::after{content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg, rgba(243,217,164,.10), transparent 70%),
+    linear-gradient(180deg, rgba(243,217,164,.06), transparent 60%),
+    linear-gradient(180deg, rgba(176,58,46,.08), transparent 65%);
+  background-size:26% 100%,20% 100%,30% 100%;
+  background-position:30% 0,68% 0,8% 0;
+  background-repeat:no-repeat;
+}
+.immerse-veil{background:linear-gradient(180deg,rgba(10,8,6,.6),rgba(10,8,6,.45) 45%,rgba(10,8,6,.75))}
+body:has(.immerse-bg) .section-title{color:#FBF7EE}
+body:has(.immerse-bg) .immerse .kicker{color:#F3D9A4}
+body:has(.immerse-bg) .section-sub{color:rgba(251,247,238,.72)}
+body:has(.immerse-bg) .immerse-pick button{color:rgba(251,247,238,.85);border-color:rgba(166,124,46,.35);background:rgba(15,10,6,.4)}
+body:has(.immerse-bg) .immerse-pick button:hover{color:#F3D9A4;border-color:#F3D9A4}
+body:has(.immerse-bg) .immerse-pick button.on{background:rgba(176,58,46,.75);border-color:rgba(176,58,46,.4);color:#FBF7EE}
+
+/* ---- 展品详情 · 每页一世界 ---- */
+.item-bg::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(90% 70% at 50% 26%, rgba(251,247,238,.08), transparent 58%)}
+.item-veil{background:linear-gradient(180deg,rgba(15,10,6,.62),rgba(15,10,6,.46) 45%,rgba(15,10,6,.76))}
+.item-bg .im-mark{
+  position:absolute;right:2%;top:50%;transform:translateY(-50%);
+  font-family:var(--serif);font-weight:900;font-size:clamp(200px,38vh,420px);
+  writing-mode:vertical-rl;opacity:.13;pointer-events:none;letter-spacing:.05em;
+}
+body:has(.item-bg) .item-back{color:#FBF7EE}
+body:has(.item-bg) .item-back:hover{color:#F3D9A4}
+body:has(.item-bg) .item-figure .frame{border-color:rgba(243,217,164,.35);box-shadow:0 24px 70px rgba(8,6,4,.45)}
+body:has(.item-bg) .item-body .kicker{color:#F3D9A4}
+body:has(.item-bg) .item-body h1{color:#FBF7EE}
+body:has(.item-bg) .item-body .en-title{color:rgba(251,247,238,.6)}
+body:has(.item-bg) .chip{color:#FBF7EE;border-color:rgba(243,217,164,.4);background:rgba(15,10,6,.4)}
+body:has(.item-bg) .chip.hot{border-color:rgba(176,58,46,.6);background:rgba(176,58,46,.55)}
+body:has(.item-bg) .item-tagline{color:rgba(251,247,238,.88)}
+body:has(.item-bg) .item-section{background:linear-gradient(180deg,rgba(24,18,13,.78),rgba(16,12,8,.84));border-color:rgba(166,124,46,.28);border-radius:2px;padding:20px 22px}
+body:has(.item-bg) .item-section h4{color:#F3D9A4}
+body:has(.item-bg) .points li,body:has(.item-bg) .deep-list li{color:rgba(251,247,238,.88)}
+body:has(.item-bg) .verify-box{background:rgba(176,58,46,.16);border-color:rgba(176,58,46,.45)}
+body:has(.item-bg) .verify-box h5{color:#F3D9A4}
+body:has(.item-bg) .verify-box p{color:rgba(251,247,238,.8)}
+body:has(.item-bg) .item-actions .act{border-color:rgba(243,217,164,.4);color:#FBF7EE;background:rgba(15,10,6,.4)}
+body:has(.item-bg) .item-actions .act-primary{background:var(--cinnabar);border-color:var(--cinnabar)}
+body:has(.item-bg) .item-actions .act:hover{border-color:#F3D9A4;color:#F3D9A4}
+
+/* ---- 城市详情空态引导 ---- */
+.region-empty-acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.region-empty-acts a{
+  font-size:12px;letter-spacing:.18em;color:#FBF7EE;text-decoration:none;
+  border:1px solid rgba(243,217,164,.45);background:rgba(15,10,6,.4);padding:8px 18px;border-radius:999px;transition:all .3s;
+}
+.region-empty-acts a:hover{color:#F3D9A4;border-color:#F3D9A4}
+
+/* ---- toast ---- */
+#toast{
+  position:fixed;left:50%;bottom:40px;transform:translate(-50%,20px);z-index:3000;
+  background:rgba(33,29,24,.94);color:#FBF7EE;font-size:13px;letter-spacing:.1em;
+  padding:10px 22px;border-radius:999px;border:1px solid rgba(243,217,164,.4);
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s var(--ease);
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* 页脚白字（深底页面统一） */
+body:has(.ask-bg) footer,body:has(.create-bg) footer,body:has(.immerse-bg) footer,body:has(.item-bg) footer{
+  border-top-color:rgba(244,237,223,.16);background:rgba(15,10,6,.55);
+}
+body:has(.ask-bg) footer .foot-brand b,body:has(.create-bg) footer .foot-brand b,
+body:has(.immerse-bg) footer .foot-brand b,body:has(.item-bg) footer .foot-brand b{color:#FBF7EE}
+body:has(.ask-bg) footer .foot-brand p,body:has(.create-bg) footer .foot-brand p,
+body:has(.immerse-bg) footer .foot-brand p,body:has(.item-bg) footer .foot-brand p{color:rgba(251,247,238,.72)}
+body:has(.ask-bg) footer .foot-meta,body:has(.create-bg) footer .foot-meta,
+body:has(.immerse-bg) footer .foot-meta,body:has(.item-bg) footer .foot-meta{color:rgba(251,247,238,.72)}
+body:has(.ask-bg) footer .foot-meta b,body:has(.create-bg) footer .foot-meta b,
+body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b{color:#F3D9A4}
+
+@media (max-width:980px){
+  .item-bg .im-mark{font-size:clamp(120px,30vh,220px)}
+}
+
 </style>
 </head>
 <body>

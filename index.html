@@ -417,10 +417,11 @@ body.vt-on .view.active{animation:none}
   padding:clamp(38px,7vh,70px) clamp(24px,4.5vw,60px);
   min-height:clamp(200px,30vh,300px);
   display:flex;align-items:center;
-  box-shadow:0 16px 44px rgba(33,29,18,.20);
+  background:rgba(15,10,6,.45);
+  box-shadow:0 16px 44px rgba(0,0,0,.35);
   isolation:isolate;
 }
-.hh-bg{position:absolute;inset:-5%;z-index:-3}
+.hh-bg{position:fixed;left:-5%;right:-5%;bottom:-5%;top:var(--nav-h);z-index:0}
 .hh-l{
   position:absolute;inset:0;background-size:cover;background-position:center;
   opacity:0;will-change:transform,opacity;
@@ -436,8 +437,8 @@ body.vt-on .view.active{animation:none}
   28%,100%{opacity:0;transform:scale(1.10)}
 }
 .hh-veil{
-  position:absolute;inset:0;z-index:-2;
-  background:linear-gradient(100deg, rgba(15,10,6,.82) 0%, rgba(15,10,6,.58) 46%, rgba(15,10,6,.26) 100%);
+  position:fixed;left:0;right:0;bottom:0;top:var(--nav-h);z-index:1;
+  background:linear-gradient(180deg, rgba(15,10,6,.88) 0%, rgba(15,10,6,.66) 34%, rgba(15,10,6,.78) 100%);
 }
 .hh-seal{
   position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:1;
@@ -456,7 +457,7 @@ body.vt-on .view.active{animation:none}
 .hall-hero .section-sub{color:rgba(251,247,238,.82);max-width:560px;text-shadow:0 1px 10px rgba(0,0,0,.45)}
 
 /* ---------- 整页氛围色联动（M8.14） ---------- */
-.hall{position:relative}
+.hall{position:relative;z-index:2}
 .hall-amb{position:absolute;inset:-10%;z-index:0;pointer-events:none}
 .hall-amb .ha{
   position:absolute;inset:0;opacity:0;
@@ -1159,6 +1160,12 @@ body.vt-on .view.active{animation:none}
 footer{padding:70px 0 40px;border-top:1px solid var(--line-soft)}
 /* 地图页深色背景：页脚换白色字 */
 body:has(.map-bg) footer{display:none}
+/* hall 页全视口深背景：页脚白色文字 */
+body:has(.hall-bg) footer{border-top-color:rgba(244,237,223,.16);background:rgba(15,10,6,.55)}
+body:has(.hall-bg) footer .foot-brand b{color:#FBF7EE}
+body:has(.hall-bg) footer .foot-brand p{color:rgba(251,247,238,.72)}
+body:has(.hall-bg) footer .foot-meta{color:rgba(251,247,238,.72)}
+body:has(.hall-bg) footer .foot-meta b{color:#F3D9A4}
 body:has(.map-bg) footer .foot-brand b{color:#FBF7EE}
 body:has(.map-bg) footer .foot-brand p{color:rgba(251,247,238,.72)}
 body:has(.map-bg) footer .foot-meta{color:rgba(251,247,238,.72)}

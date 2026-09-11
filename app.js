@@ -874,12 +874,34 @@
   function layoutGraph(nodes, edges) {
     var n = nodes.length;
     var W = 1000, H = 680, CX = W / 2, CY = H / 2;
+    /* 门类扇区：6 类各占 60°，项目在所属扇区内均匀分布 */
+    var catIdx = {};
+    nodes.forEach(function (nd) { if (nd.type === "item" && !(nd.cat in catIdx)) catIdx[nd.cat] = 0; });
+    var catKeys = Object.keys(catIdx), sec = 2 * Math.PI / Math.max(catKeys.length, 1);
+    var cnt = {}, idx = {};
+    nodes.forEach(function (nd) {
+      if (nd.type === "item") { cnt[nd.cat] = (cnt[nd.cat] || 0) + 1; }
+    });
+    nodes.forEach(function (nd) {
+      if (nd.type === "item") {
+        var ci = catKeys.indexOf(nd.cat);
+        var j = idx[nd.cat] = (idx[nd.cat] || 0);
+        var half = Math.max(cnt[nd.cat] - 1, 1) / 2;
+        var off = (j - half) * (sec * 0.62) / Math.max(cnt[nd.cat], 1);
+        catIdx[nd.cat + "_" + nd.id] = ci * sec + off;
+      }
+    });
     var pos = nodes.map(function (nd, i) {
-      var rr = nd.type === "city" ? 42 : nd.type === "cat" ? 34 : 24;
-      var a = i / n * Math.PI * 2 + (i % 5) * 0.31;
+      var rr = nd.type === "city" ? 82 : nd.type === "cat" ? 62 : 44;
+      var a;
+      if (nd.type === "item") {
+        a = catIdx[nd.cat + "_" + nd.id] !== undefined ? catIdx[nd.cat + "_" + nd.id] : (i / n * Math.PI * 2);
+      } else {
+        a = (i / n * Math.PI * 2) + 0.26;
+      }
       return { x: CX + Math.cos(a) * rr, y: CY + Math.sin(a) * rr, vx: 0, vy: 0 };
     });
-    function lab(nd) { return Math.max(nd.label.length * 1.5, nd.r * 2.2); }
+    function lab(nd) { return Math.max(nd.label.length * 1.8, 10); }
     function iter() {
       var i, j, dx, dy, d2, d, fx, fy;
       /* 斥力：按节点占用面积（圆 + 文字宽）计算，标签不重叠 */
@@ -888,7 +910,7 @@
           dx = pos[j].x - pos[i].x; dy = pos[j].y - pos[i].y;
           d2 = Math.max(dx * dx + dy * dy, 1);
           var R = lab(nodes[i]) + lab(nodes[j]);
-          var rep = R * R * 1.5 / d2;
+          var rep = R * R * 1.8 / d2;
           d = Math.sqrt(d2);
           fx = dx / d * rep; fy = dy / d * rep;
           pos[i].vx -= fx; pos[i].vy -= fy; pos[j].vx += fx; pos[j].vy += fy;
@@ -907,7 +929,7 @@
       /* 中心引力 + 类型分环：项目内环 / 门类中环 / 地市外环 */
       for (i = 0; i < n; i++) {
         var nd = nodes[i], p = pos[i];
-        var targetR = nd.type === "item" ? 23 : nd.type === "cat" ? 33 : 41;
+        var targetR = nd.type === "item" ? 44 : nd.type === "cat" ? 62 : 82;
         var ang = Math.atan2(p.y - CY, p.x - CX);
         var tx = CX + Math.cos(ang) * targetR, ty = CY + Math.sin(ang) * targetR;
         p.vx += (tx - p.x) * 0.016;
@@ -932,8 +954,9 @@
         '<div class="graph-stage rv" style="--d:.1s" id="graph-stage">' +
           '<div class="graph-legend">' +
             cats.map(function (c) { return '<span class="lg"><i style="background:' + CAT_COLOR[c.id] + '"></i>' + c.label + '</span>'; }).join("") +
-            '<span class="lg"><span class="ln-k"></span>亲缘</span>' +
-            '<span class="lg"><span class="ln-c"></span>地域·门类</span>' +
+            '<span class="lg sep"><span class="ln-k"></span>亲缘</span>' +
+            '<span class="lg sep"><span class="ln-c"></span>地域·门类</span>' +
+            '<span class="graph-meta">' + byId.length + ' 项招牌 · ' + cats.length + ' 大门类 · ' + Object.keys(cities).length + ' 地市 · ' + Object.keys(kin).length + ' 组亲缘</span>' +
           '</div>' +
           '<span class="hint">悬停节点 · 点亮关联 · 点击进入详情</span>' +
         '</div>' +
@@ -953,13 +976,20 @@
         (nd.type === "item" ? ' tabindex="0" role="button" aria-label="' + esc(nd.label) + '，点击查看详情"' : '') +
         ' transform="translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')">';
       if (nd.type === "cat") {
-        el += '<circle r="' + nd.r + '" fill="none" stroke="' + nd.color + '" stroke-width="1"></circle>';
-        el += '<text y="3.6" text-anchor="middle" font-size="3.1">' + esc(nd.label) + '</text>';
+        /* 门类：双环徽章 + 内芯 */
+        el += '<circle r="11" fill="none" stroke="' + nd.color + '" stroke-width="1.3"></circle>';
+        el += '<circle r="7.5" fill="' + nd.color + '" opacity=".14"></circle>';
+        el += '<circle r="3.6" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width=".9"></circle>';
+        el += '<text y="6.8" text-anchor="middle" font-size="7.2">' + esc(nd.label) + '</text>';
+      } else if (nd.type === "city") {
+        /* 地市：菱形方标 */
+        el += '<rect x="-4.8" y="-4.8" width="9.6" height="9.6" transform="rotate(45)" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></rect>';
+        el += '<text y="10.6" text-anchor="middle" font-size="5.6">' + esc(nd.label) + '</text>';
       } else {
-        el += '<circle r="' + nd.r + '" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1"></circle>';
-        var ty = nd.type === "item" ? nd.r + 3 : nd.r + 2.8;
-        var fs = nd.type === "item" ? 2.8 : 2.4;
-        el += '<text y="' + ty + '" text-anchor="middle" font-size="' + fs + '">' + esc(nd.label) + '</text>';
+        /* 项目：外晕 + 实心 */
+        el += '<circle r="8.5" fill="' + nd.color + '" opacity=".16"></circle>';
+        el += '<circle r="5.2" fill="' + nd.color + '" stroke="#F4EDDF" stroke-width="1.2"></circle>';
+        el += '<text y="13.8" text-anchor="middle" font-size="6.4">' + esc(nd.label) + '</text>';
       }
       el += '</g>';
       return el;
@@ -970,7 +1000,14 @@
       return '<line class="g-link' + kin + '" data-a="' + e.a + '" data-b="' + e.b + '" x1="' + a.x.toFixed(2) + '" y1="' + a.y.toFixed(2) + '" x2="' + b.x.toFixed(2) + '" y2="' + b.y.toFixed(2) + '"></line>';
     }).join("");
     var W = 1000, H = 680;
-    stage.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="非遗知识图谱">' + edgeList + nodeList + '</svg>';
+    var _old = stage.querySelector('svg');
+    if (_old) _old.parentNode.removeChild(_old);
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', '非遗知识图谱');
+    svg.innerHTML = edgeList + nodeList;
+    stage.appendChild(svg);
 
     var nodes = $$(".g-node", stage), links = $$(".g-link", stage);
     nodes.forEach(function (g) {

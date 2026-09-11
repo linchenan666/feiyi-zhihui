@@ -575,6 +575,11 @@
     var el = $("#view-map");
     var groups = cityItems();
     var cityKeys = Object.keys(groups);
+    var catMap = {};
+    byId.forEach(function (it) { catMap[it.category] = (catMap[it.category] || 0) + 1; });
+    var catCounts = Object.keys(catMap).map(function (k) { return { name: k, n: catMap[k] }; })
+      .sort(function (a, b) { return b.n - a.n; })
+      .map(function (x) { x.pct = Math.round(x.n / byId.length * 100); return x; });
     el.innerHTML =
       '<div class="section-wrap map-view">' +
         '<div class="map-bg" aria-hidden="true"><i class="mb-l"></i><i class="mb-l"></i><i class="mb-l"></i><i class="mb-l"></i></div>' +
@@ -599,6 +604,7 @@
               '<span>真实行政区划 · 坐标基于公开地理数据</span>' +
             '</div>' +
           '</div>' +
+          '<div class="city-col">' +
           '<div class="city-list rv" style="--d:.18s" id="city-list">' +
             cityKeys.map(function (ck) {
               return '<div class="city-row" data-city="' + ck + '">' +
@@ -606,6 +612,20 @@
                 '<span class="count">' + groups[ck].length + ' 项</span>' +
               '</div>';
             }).join("") +
+          '</div>' +
+          '<div class="map-stats rv" style="--d:.26s">' +
+            '<div class="ms-head"><b>非遗速览</b><span>招牌数据</span></div>' +
+            '<div class="ms-big">' +
+              '<div><b>' + byId.length + '</b><span>项招牌</span></div>' +
+              '<div><b>' + cityKeys.length + '</b><span>个地市</span></div>' +
+              '<div><b>' + catCounts.length + '</b><span>大门类</span></div>' +
+            '</div>' +
+            '<div class="ms-bars">' +
+              catCounts.map(function (cc) {
+                return '<div class="ms-bar"><i style="width:' + cc.pct + '%"></i><b>' + cc.name + '</b><span>' + cc.n + '</span></div>';
+              }).join("") +
+            '</div>' +
+          '</div>' +
           '</div>' +
         '</div>' +
       '</div>';

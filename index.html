@@ -641,7 +641,7 @@ body.vt-on .view.active{animation:none}
 
 /* ---------- 非遗地图：整页动态文化图背景（M8.17） ---------- */
 .map-view{position:relative;overflow:hidden}
-.map-bg{position:fixed;inset:-5%;z-index:0}
+.map-bg{position:fixed;left:-5%;right:-5%;bottom:-5%;top:calc(var(--nav-h) - 5%);z-index:0}
 .map-bg .mb-l{
   position:absolute;inset:0;background-size:cover;background-position:center;
   opacity:0;will-change:transform,opacity;
@@ -652,11 +652,11 @@ body.vt-on .view.active{animation:none}
 .map-bg .mb-l:nth-child(3){background-image:url(assets/mapbg/map-longmen.jpg);animation-delay:12s}
 .map-bg .mb-l:nth-child(4){background-image:url(assets/mapbg/map-majie.jpg);animation-delay:18s}
 .map-veil{
-  position:fixed;inset:0;z-index:1;
+  position:fixed;left:0;right:0;bottom:0;top:var(--nav-h);z-index:1;
   background:
     linear-gradient(180deg, rgba(15,10,6,.86) 0%, rgba(15,10,6,.66) 30%, rgba(15,10,6,.72) 100%);
 }
-.map-amb{position:fixed;inset:-10%;z-index:2;pointer-events:none}
+.map-amb{position:fixed;left:-10%;right:-10%;bottom:-10%;top:calc(var(--nav-h) - 10%);z-index:2;pointer-events:none}
 .map-amb i{position:absolute;inset:0;opacity:0;animation:hbCycle 24s var(--ease) infinite;will-change:transform,opacity}
 .map-amb i:nth-child(2){animation-delay:6s}
 .map-amb i:nth-child(3){animation-delay:12s}

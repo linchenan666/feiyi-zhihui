@@ -577,10 +577,16 @@
     var cityKeys = Object.keys(groups);
     el.innerHTML =
       '<div class="section-wrap map-view">' +
-        '<div class="section-head rv">' +
-          '<div class="kicker">02 · 非遗地图</div>' +
-          '<h2 class="section-title">河南版图上的文化坐标</h2>' +
-          '<p class="section-sub">十五项招牌非遗分布在中原大地的十个地市。悬停标点查看项目，点击进入详情。</p>' +
+        '<div class="hall-hero map-hero rv">' +
+          '<div class="hh-bg" aria-hidden="true"><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i></div>' +
+          '<div class="hh-veil" aria-hidden="true"></div>' +
+          '<div class="hh-amb" aria-hidden="true"><i></i><i></i><i></i><i></i></div>' +
+          '<span class="hh-seal" aria-hidden="true"><b>舆</b><b>图</b></span>' +
+          '<div class="section-head">' +
+            '<div class="kicker">02 · 非遗地图</div>' +
+            '<h2 class="section-title">河南版图上的文化坐标</h2>' +
+            '<p class="section-sub">十五项招牌非遗分布在中原大地的十个地市。悬停标点查看项目，点击进入详情。</p>' +
+          '</div>' +
         '</div>' +
         '<div class="map-layout">' +
           '<div class="rv" style="--d:.1s">' +

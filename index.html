@@ -639,6 +639,70 @@ body.vt-on .view.active{animation:none}
 /* ---------- 地图 ---------- */
 .map-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 
+/* ---------- 非遗地图：整页动态文化图背景（M8.17） ---------- */
+.map-view{position:relative;overflow:hidden}
+.map-bg{position:absolute;inset:-5%;z-index:0}
+.map-bg .mb-l{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;will-change:transform,opacity;
+  animation:hbCycle 24s var(--ease) infinite;
+}
+.map-bg .mb-l:nth-child(1){background-image:url(assets/cats/cat-minsu.jpg)}
+.map-bg .mb-l:nth-child(2){background-image:url(assets/cats/cat-jiyi.jpg);animation-delay:6s}
+.map-bg .mb-l:nth-child(3){background-image:url(assets/cats/cat-xiqu.jpg);animation-delay:12s}
+.map-bg .mb-l:nth-child(4){background-image:url(assets/cats/cat-meishu.jpg);animation-delay:18s}
+.map-veil{
+  position:absolute;inset:0;z-index:1;
+  background:
+    linear-gradient(180deg, rgba(15,10,6,.86) 0%, rgba(15,10,6,.66) 30%, rgba(15,10,6,.72) 100%);
+}
+.map-amb{position:absolute;inset:-10%;z-index:2;pointer-events:none}
+.map-amb i{position:absolute;inset:0;opacity:0;animation:hbCycle 24s var(--ease) infinite;will-change:transform,opacity}
+.map-amb i:nth-child(2){animation-delay:6s}
+.map-amb i:nth-child(3){animation-delay:12s}
+.map-amb i:nth-child(4){animation-delay:18s}
+.map-amb i:nth-child(1){background:radial-gradient(70% 60% at 78% 20%, rgba(104,62,104,.55) 0%, rgba(104,62,104,0) 72%)}
+.map-amb i:nth-child(2){background:radial-gradient(70% 60% at 78% 20%, rgba(56,68,148,.55) 0%, rgba(56,68,148,0) 72%)}
+.map-amb i:nth-child(3){background:radial-gradient(70% 60% at 78% 20%, rgba(156,58,46,.55) 0%, rgba(156,58,46,0) 72%)}
+.map-amb i:nth-child(4){background:radial-gradient(70% 60% at 78% 20%, rgba(140,96,40,.55) 0%, rgba(140,96,40,0) 72%)}
+/* 标题白字 */
+.map-view .section-head{position:relative;z-index:3;max-width:680px}
+.map-view .kicker{color:#F3D9A4;letter-spacing:.3em}
+.map-view .section-title{color:#FBF7EE;font-size:clamp(28px,4.4vw,44px);text-shadow:0 3px 18px rgba(0,0,0,.5)}
+.map-view .section-sub{color:rgba(251,247,238,.82);text-shadow:0 1px 10px rgba(0,0,0,.45)}
+/* 地图主体深墨卡片 */
+.map-view .map-layout{position:relative;z-index:3}
+.map-view .map-canvas{
+  border-color:rgba(214,178,102,.32);
+  background:linear-gradient(160deg, rgba(26,21,16,.72) 0%, rgba(20,16,12,.62) 100%);
+  box-shadow:0 14px 40px rgba(0,0,0,.28);
+}
+.map-view .map-cities path{fill:rgba(166,124,46,.13);stroke:rgba(214,178,102,.85);stroke-width:.18}
+.map-view .map-city text{fill:rgba(244,237,223,.85);stroke:rgba(20,16,12,.9);stroke-width:.9px}
+.map-view .map-city.sel path{fill:rgba(176,58,46,.32);stroke:var(--cinnabar);stroke-width:.7}
+.map-view .map-city.sel text{fill:#F4EDDF}
+.map-view .map-city:hover path,.map-view .map-city.hot path{fill:rgba(196,83,66,.30);stroke:rgba(196,83,66,.9);stroke-width:.7}
+.map-view .map-city:hover text,.map-view .map-city.hot text{fill:#F4EDDF}
+.map-view .map-dot circle{fill:#D97B6B;stroke:rgba(20,16,12,.85);stroke-width:1.4}
+.map-view .map-dot text{fill:rgba(244,237,223,.92);stroke:rgba(20,16,12,.85);stroke-width:.6px}
+.map-view .map-dot:hover circle,.map-view .map-dot.hot circle{fill:#E0B04F;r:2.6}
+.map-view .map-legend{color:rgba(244,237,223,.78)}
+.map-view .city-list{border-top-color:rgba(214,178,102,.25)}
+.map-view .city-row{color:rgba(244,237,223,.88)}
+.map-view .city-row span{color:rgba(244,237,223,.62)}
+.map-view .city-row .count{color:#E0B04F}
+.map-view .city-row:hover{padding-left:12px;color:#F3D9A4}
+.map-view .city-row.on{color:#F3D9A4}
+@media (prefers-reduced-motion: reduce){
+  .map-bg .mb-l{animation:none}
+  .map-bg .mb-l:nth-child(1){opacity:1}
+  .map-bg .mb-l:nth-child(2),.map-bg .mb-l:nth-child(3),.map-bg .mb-l:nth-child(4){opacity:0}
+  .map-amb i{animation:none}
+  .map-amb i:nth-child(1){opacity:.5}
+  .map-amb i:nth-child(2),.map-amb i:nth-child(3),.map-amb i:nth-child(4){opacity:0}
+}
+
+
 /* ============================================================
    城市介绍 · M8.5 新大类：一城一脉，中原十八城
    水印"城"压底 + 场景渐变 + 金线角饰，与全站氛围层同语言

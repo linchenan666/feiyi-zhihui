@@ -577,6 +577,9 @@
     var cityKeys = Object.keys(groups);
     el.innerHTML =
       '<div class="section-wrap map-view">' +
+        '<div class="map-bg" aria-hidden="true"><i class="mb-l"></i><i class="mb-l"></i><i class="mb-l"></i><i class="mb-l"></i></div>' +
+        '<div class="map-veil" aria-hidden="true"></div>' +
+        '<div class="map-amb" aria-hidden="true"><i></i><i></i><i></i><i></i></div>' +
         '<div class="section-head rv">' +
           '<div class="kicker">02 · 非遗地图</div>' +
           '<h2 class="section-title">河南版图上的文化坐标</h2>' +

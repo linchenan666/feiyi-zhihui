@@ -328,10 +328,15 @@
     var el = $("#view-hall");
     el.innerHTML =
       '<div class="section-wrap hall">' +
-        '<div class="section-head rv">' +
-          '<div class="kicker">01 · 展品总览</div>' +
-          '<h2 class="section-title">十五件河南珍宝</h2>' +
-          '<p class="section-sub">从一声梆子腔到一窑窑变的火，六大门类、十五项国家级非遗，每一件都值得停下来看三分钟。</p>' +
+        '<div class="hall-hero rv">' +
+          '<div class="hh-bg" aria-hidden="true"><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i><i class="hh-l"></i></div>' +
+          '<div class="hh-veil" aria-hidden="true"></div>' +
+          '<span class="hh-seal" aria-hidden="true">珍宝</span>' +
+          '<div class="section-head">' +
+            '<div class="kicker">01 · 展品总览</div>' +
+            '<h2 class="section-title">十五件河南珍宝</h2>' +
+            '<p class="section-sub">从一声梆子腔到一窑窑变的火，六大门类、十五项国家级非遗，每一件都值得停下来看三分钟。</p>' +
+          '</div>' +
         '</div>' +
         '<div class="filter-bar rv" style="--d:.1s" id="filter-bar">' +
           '<button class="' + (hallFilter === "全部" ? "on" : "") + '" data-f="全部">全部 · 15</button>' +

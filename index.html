@@ -408,6 +408,55 @@ body.vt-on .view.active{animation:none}
 
 /* ---------- 展品总览 ---------- */
 .hall{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
+
+/* ---------- 展品总览标题区：动态文化图轮播（M8.13） ---------- */
+.hall-hero{
+  position:relative;overflow:hidden;border-radius:16px;
+  margin-bottom:clamp(28px,4vh,46px);
+  padding:clamp(38px,7vh,70px) clamp(24px,4.5vw,60px);
+  min-height:clamp(200px,30vh,300px);
+  display:flex;align-items:center;
+  box-shadow:0 16px 44px rgba(33,29,18,.20);
+  isolation:isolate;
+}
+.hh-bg{position:absolute;inset:-5%;z-index:-3}
+.hh-l{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;will-change:transform,opacity;
+  animation:hbCycle 24s var(--ease) infinite;
+}
+.hh-l:nth-child(1){background-image:url(assets/cats/cat-minsu.jpg)}
+.hh-l:nth-child(2){background-image:url(assets/cats/cat-jiyi.jpg);animation-delay:6s}
+.hh-l:nth-child(3){background-image:url(assets/cats/cat-xiqu.jpg);animation-delay:12s}
+.hh-l:nth-child(4){background-image:url(assets/cats/cat-meishu.jpg);animation-delay:18s}
+@keyframes hbCycle{
+  0%{opacity:0;transform:scale(1.06)}
+  9%,22%{opacity:1}
+  28%,100%{opacity:0;transform:scale(1.16)}
+}
+.hh-veil{
+  position:absolute;inset:0;z-index:-2;
+  background:linear-gradient(100deg, rgba(15,10,6,.82) 0%, rgba(15,10,6,.58) 46%, rgba(15,10,6,.26) 100%);
+}
+.hh-seal{
+  position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:1;
+  font-family:"Noto Serif SC","Songti SC",serif;font-weight:900;
+  font-size:clamp(76px,14vw,158px);line-height:1;
+  writing-mode:vertical-rl;letter-spacing:.14em;
+  color:rgba(247,231,200,.15);
+  text-shadow:0 0 46px rgba(166,124,46,.22);
+  pointer-events:none;user-select:none;
+}
+.hall-hero .section-head{position:relative;z-index:2;max-width:640px;margin:0}
+.hall-hero .kicker{color:#F3D9A4;letter-spacing:.3em}
+.hall-hero .section-title{color:#FBF7EE;font-size:clamp(30px,4.6vw,46px);text-shadow:0 3px 18px rgba(0,0,0,.5)}
+.hall-hero .section-sub{color:rgba(251,247,238,.82);max-width:560px;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+@media (prefers-reduced-motion: reduce){
+  .hh-l{animation:none}
+  .hh-l:nth-child(1){opacity:1}
+  .hh-l:nth-child(2),.hh-l:nth-child(3),.hh-l:nth-child(4){opacity:0}
+}
+
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:clamp(32px,5vh,52px)}
 .filter-bar button{
   font-size:13px;letter-spacing:.14em;color:var(--ink-2);

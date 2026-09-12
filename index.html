@@ -1576,6 +1576,18 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
   .filter-bar button{flex:0 0 auto}
   .filter-bar .f-cat{flex:0 0 auto}
 }
+
+/* M8.37k 城市介绍页标题区高亮（深色背景上原墨字不可见 → 金黄标题+白副题+阴影） */
+.region-view .kicker{color:#FFD97A}
+.region-view .kicker::before{background:#FFD97A}
+.region-view .section-title{
+  color:#FFE9B8;
+  text-shadow:0 2px 16px rgba(0,0,0,.62),0 0 2px rgba(0,0,0,.45);
+}
+.region-view .section-sub{
+  color:rgba(255,252,244,.95);
+  text-shadow:0 1px 10px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.4);
+}
 </style>
 </head>
 <body>

@@ -1073,9 +1073,22 @@
     var svgEl = stage.querySelector('svg');
     if (zb && svgEl) {
       if (!zb._z) zb._z = 1;
-      svgEl.style.width = '100%';
-      svgEl.style.height = '100%';
       svgEl.style.transformOrigin = 'center center';
+      var stageW = stage.clientWidth || 0;
+      if (stageW < 760) {
+        /* 窄屏：保持图谱 1000px 物理宽可读，图谱框横向滑动（M8.9 方案回归） */
+        svgEl.style.width = '1000px';
+        svgEl.style.height = 'auto';
+        stage.style.overflowX = 'auto';
+        stage.style.overflowY = 'hidden';
+        /* 初始滚动到图谱中心，打开即见主体（M8.9 方案回归） */
+        stage.scrollLeft = Math.max(0, (1000 - stageW) / 2);
+      } else {
+        svgEl.style.width = '100%';
+        svgEl.style.height = '100%';
+        stage.style.overflowX = 'hidden';
+        stage.style.overflowY = 'hidden';
+      }
       function gzSet(v) {
         zb._z = Math.max(1, Math.min(3.2, Math.round(v * 10) / 10));
         svgEl.style.transform = 'scale(' + zb._z + ')';

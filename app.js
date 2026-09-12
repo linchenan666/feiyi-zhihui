@@ -1092,6 +1092,7 @@
       function gzSet(v) {
         zb._z = Math.max(1, Math.min(3.2, Math.round(v * 10) / 10));
         svgEl.style.transform = 'scale(' + zb._z + ')';
+        stage.classList.toggle('gz-zoomed', zb._z > 1.15);
       }
       zb.querySelector('.gz-in').onclick = function () { gzSet(zb._z * 1.25); };
       zb.querySelector('.gz-out').onclick = function () { gzSet(zb._z / 1.25); };
@@ -1387,6 +1388,8 @@
     stage.innerHTML =
       '<div class="stage-img" style="background-image:url(' + it.img + ')"></div>' +
       '<div class="stage-veil"></div>' +
+      '<button class="stage-arrow sta-prev" id="st-arrow-prev" type="button" aria-label="上一项">‹</button>' +
+      '<button class="stage-arrow sta-next" id="st-arrow-next" type="button" aria-label="下一项">›</button>' +
       '<div class="stage-num">' + pad(immerseIdx + 1) + ' / ' + pad(byId.length) + '</div>' +
       '<div class="stage-title">' + it.name + '<small>' + esc(it.en) + ' · ' + it.category + '</small></div>' +
       '<div class="stage-line" id="stage-line">' + esc(lines[0]) + '</div>' +
@@ -1429,18 +1432,33 @@
 
   function bindStageCtrl() {
     var prev = $("#st-prev"), next = $("#st-next"), play = $("#st-play");
-    if (prev) prev.addEventListener("click", function () {
-      immerseIdx = (immerseIdx - 1 + byId.length) % byId.length;
-      updatePick(); drawImmerse();
-    });
-    if (next) next.addEventListener("click", function () {
-      immerseIdx = (immerseIdx + 1) % byId.length;
-      updatePick(); drawImmerse();
-    });
+    var ap = $("#st-arrow-prev"), an = $("#st-arrow-next");
+    if (prev) prev.addEventListener("click", function () { stepImmerse(-1); });
+    if (next) next.addEventListener("click", function () { stepImmerse(1); });
+    if (ap) ap.addEventListener("click", function () { stepImmerse(-1); });
+    if (an) an.addEventListener("click", function () { stepImmerse(1); });
     if (play) play.addEventListener("click", function () {
       immersePaused = !immersePaused;
       play.textContent = immersePaused ? "▶" : "‖";
       startImmerseTimer();
+    });
+  }
+
+  function stepImmerse(d) {
+    immerseIdx = (immerseIdx + d + byId.length) % byId.length;
+    updatePick(); drawImmerse();
+  }
+
+  /* 键盘 ← → 切换展品（仅沉浸视图激活时；避开输入框；一次性注册） */
+  if (!window._imKeysBound) {
+    window._imKeysBound = true;
+    document.addEventListener("keydown", function (e) {
+      var v = $("#view-immerse");
+      if (!v || !v.classList.contains("active")) return;
+      var t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); stepImmerse(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); stepImmerse(1); }
     });
   }
 

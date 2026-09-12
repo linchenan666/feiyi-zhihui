@@ -219,7 +219,9 @@ main{position:relative}
 /* 知识图谱 —— 星图：巨字「网」居中 + 点阵 + 中心墨晕 + 放射金芒 */
 .view[data-view="graph"]::before{
   content:"谱";
-  top:44%;left:50%;transform:translate(-50%,-50%);
+  position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;
+  background-position:center;
   color:rgba(255,248,230,.10);
   text-shadow:0 0 46px rgba(0,0,0,.65);
   background-image:url(assets/region/r-kaifeng.jpg);
@@ -233,6 +235,7 @@ main{position:relative}
   75%,100%{background-image:url(assets/region/r-luoyang.jpg)}
 }
 .view[data-view="graph"]::after{
+  position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
   background:
     radial-gradient(62% 48% at 50% 42%, rgba(232,200,126,.12), transparent 68%),
     radial-gradient(38% 30% at 16% 12%, rgba(176,58,46,.10), transparent 70%),

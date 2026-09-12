@@ -1568,6 +1568,14 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
   .item-bg .im-mark{font-size:clamp(120px,30vh,220px)}
 }
 
+
+/* M8.37j 窄屏筛选条横向滑动（390px 实测 6 按钮换 3 行，改为单行横滑） */
+@media (max-width:640px){
+  .filter-bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:8px;padding-bottom:6px;margin-bottom:clamp(24px,4vh,40px)}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-bar button{flex:0 0 auto}
+  .filter-bar .f-cat{flex:0 0 auto}
+}
 </style>
 </head>
 <body>

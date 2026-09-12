@@ -248,7 +248,7 @@
 
   /* ================= 工具 ================= */
   function esc(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function defer(fn) { requestAnimationFrame(function () { requestAnimationFrame(fn); }); }

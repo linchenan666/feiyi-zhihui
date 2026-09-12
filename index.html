@@ -1064,7 +1064,7 @@ body:has(.region-bg) footer .foot-meta b{color:#F3D9A4}
 .graph-legend .lg .ln-k{width:20px;height:0;border-top:1.5px solid rgba(166,124,46,.65);display:inline-block}
 .graph-legend .lg .ln-c{width:16px;height:0;border-top:1px solid rgba(33,29,24,.25);display:inline-block}
 .graph-stage{
-  position:relative;border:1px solid var(--line-soft);border-radius:2px;
+  position:relative;overflow:hidden;border:1px solid var(--line-soft);border-radius:2px;
   background:
     radial-gradient(55% 38% at 50% 40%,rgba(166,124,46,.055),transparent 70%),
     radial-gradient(34% 26% at 18% 14%,rgba(176,58,46,.045),transparent 72%),
@@ -1104,6 +1104,7 @@ body:has(.region-bg) footer .foot-meta b{color:#F3D9A4}
 .g-link{stroke:rgba(33,29,24,.18);stroke-width:1}
 .g-link-kin{stroke:rgba(166,124,46,.62);stroke-width:1.3;stroke-dasharray:3 2}
 .g-link.hot{stroke:var(--cinnabar);stroke-width:1.6}
+.graph-stage svg{transition:transform .25s var(--ease)}
 .g-node{transition:opacity .35s var(--ease),filter .3s var(--ease)}
 .g-link{transition:opacity .35s var(--ease),stroke .3s var(--ease)}
 .g-link.dim,.g-node.dim{opacity:.05!important}

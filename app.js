@@ -1073,14 +1073,22 @@
     var svgEl = stage.querySelector('svg');
     if (zb && svgEl) {
       if (!zb._z) zb._z = 1;
+      svgEl.style.width = '100%';
+      svgEl.style.height = '100%';
+      svgEl.style.transformOrigin = 'center center';
       function gzSet(v) {
         zb._z = Math.max(1, Math.min(3.2, Math.round(v * 10) / 10));
-        svgEl.style.width = (1000 * zb._z) + 'px';
-        svgEl.style.height = 'auto';
+        svgEl.style.transform = 'scale(' + zb._z + ')';
       }
       zb.querySelector('.gz-in').onclick = function () { gzSet(zb._z * 1.25); };
       zb.querySelector('.gz-out').onclick = function () { gzSet(zb._z / 1.25); };
       zb.querySelector('.gz-r').onclick = function () { gzSet(1); };
+      /* 滚轮缩放：以图谱框中心为轴（M8.37i） */
+      stage.addEventListener('wheel', function (ev) {
+        if (ev.target.closest && ev.target.closest('.graph-zoom')) return;
+        ev.preventDefault();
+        gzSet(zb._z * (ev.deltaY < 0 ? 1.12 : 0.89));
+      }, { passive: false });
     }
 
     /* 入场动画：节点分批渐显 + 连线渐显（M8.10） */

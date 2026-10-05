@@ -705,16 +705,22 @@
       });
     }
     function syncFavClear() {
-      var has = bar.querySelector("button.fav-clear");
+      var fcs = bar.querySelectorAll("button.fav-clear");
       if (hallFilter === "fav" && favs.length > 0) {
-        if (!has) {
+        if (!bar.querySelector('button[data-f="favclear"]')) {
           var nb = document.createElement("button");
           nb.className = "fav-clear"; nb.setAttribute("data-f", "favclear"); nb.textContent = "清空收藏";
           var favBtn = bar.querySelector('button[data-f="fav"]');
           if (favBtn) { favBtn.insertAdjacentElement("afterend", nb); bindOne(nb); }
         }
-      } else if (has) {
-        has.parentNode.removeChild(has);
+        if (!bar.querySelector('button[data-f="favout"]')) {
+          var nb2 = document.createElement("button");
+          nb2.className = "fav-clear"; nb2.setAttribute("data-f", "favout"); nb2.textContent = "导出清单";
+          var anchor = bar.querySelector('button[data-f="favclear"]') || bar.querySelector('button[data-f="fav"]');
+          if (anchor) { anchor.insertAdjacentElement("afterend", nb2); bindOne(nb2); }
+        }
+      } else if (fcs.length) {
+        fcs.forEach(function (x) { x.parentNode.removeChild(x); });
       }
     }
     $$("button", bar).forEach(bindOne);

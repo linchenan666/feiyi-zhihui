@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>非遗文物 3D 数字化展示系统 · 工程落地方案</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23211D18'/%3E%3Ctext x='32' y='46' font-size='34' text-anchor='middle' font-family='serif' font-weight='900' fill='%23E8C96A'%3E3D%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#1B1713; --ink2:#4A423A; --line:#D8D0C4; --bg:#FBF8F2; --card:#FFFFFF;
+  --accent:#8A2E24; --accent2:#A67C2E; --ok:#2E5E3C; --warn:#9A6A00; --code:#2B2520;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth; scroll-padding-top:72px;}
+body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.75; font-size:15px;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px 120px;}
+header.dochead{background:var(--ink); color:#F3EDE0; padding:56px 28px 44px; margin-bottom:8px;}
+header.dochead .wrap{max-width:1180px; padding:0;}
+header.dochead h1{font-family:"Noto Serif SC","Songti SC","SimSun",serif; font-size:30px; line-height:1.4; font-weight:700; margin-bottom:12px;}
+header.dochead .sub{color:#C9BFAB; font-size:14px; max-width:860px;}
+.meta-row{margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; font-size:12px;}
+.meta-row span{border:1px solid #5A5245; padding:4px 12px; border-radius:999px; color:#E0D7C4;}
+nav.toc{position:sticky; top:0; z-index:20; background:rgba(251,248,242,.97); border-bottom:1px solid var(--line); padding:10px 0;}
+nav.toc .wrap{padding:0 28px; display:flex; gap:4px; overflow-x:auto; flex-wrap:nowrap;}
+nav.toc a{white-space:nowrap; color:var(--ink2); text-decoration:none; font-size:12.5px; padding:6px 10px; border-radius:6px;}
+nav.toc a:hover{background:#EDE6D8; color:var(--ink);}
+h2.sec{font-family:"Noto Serif SC","Songti SC",serif; font-size:23px; font-weight:700; color:var(--ink); margin:72px 0 6px; padding-top:14px; border-top:2px solid var(--line);}
+h2.sec .no{color:var(--accent); margin-right:10px; font-family:"Noto Sans SC",sans-serif;}
+h3{font-size:17px; font-weight:700; margin:34px 0 12px; color:var(--ink);}
+h4{font-size:15px; font-weight:700; margin:24px 0 8px; color:var(--ink2);}
+p{margin:10px 0; color:var(--ink);}
+ul,ol{margin:10px 0 10px 24px;}
+li{margin:6px 0;}
+table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px; background:var(--card);}
+th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+th{background:#F0E9DB; font-weight:700; color:var(--ink);}
+td code,th code{font-size:12px;}
+tr:nth-child(even) td{background:#FBF8F1;}
+code{font-family:Consolas,"Cascadia Code","Courier New",monospace; font-size:12.5px; background:#F0EBE1; color:var(--code); padding:1px 6px; border-radius:4px;}
+pre{background:var(--code); color:#E8E0D0; padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:12.5px; line-height:1.65; margin:14px 0; font-family:Consolas,"Cascadia Code",monospace;}
+pre code{background:none; color:inherit; padding:0;}
+.callout{border-left:4px solid var(--accent); background:#F7EFE4; padding:14px 18px; margin:16px 0; font-size:14px;}
+.callout.ok{border-color:var(--ok); background:#EEF4EE;}
+.callout.warn{border-color:var(--warn); background:#FBF3E0;}
+.checklist li{list-style:none; position:relative; padding-left:26px;}
+.checklist li::before{content:"▢"; position:absolute; left:0; color:var(--accent2); font-weight:700;}
+.qtarget{background:var(--ink); color:#F3EDE0; border-radius:8px; padding:14px 18px; margin:14px 0;}
+.qtarget span{color:#E8C96A; font-weight:700;}
+.fig{border:1px solid var(--line); border-radius:8px; background:var(--card); padding:16px; margin:14px 0;}
+.fig .cap{font-size:12.5px; color:var(--ink2); margin-top:8px;}
+.tag{display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; margin-right:6px;}
+.tag.p0{background:#8A2E24; color:#fff;} .tag.p1{background:#A67C2E; color:#fff;} .tag.p2{background:#6E7B8B; color:#fff;}
+@media print{
+  nav.toc{display:none;} body{background:#fff;} .wrap{max-width:100%; padding:0;}
+  h2.sec{page-break-before:always;}
+}
+@media (max-width:640px){
+  body{font-size:14px;} header.dochead h1{font-size:22px;}
+  .wrap{padding:0 16px 80px;} table{font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<header class="dochead">
+  <div class="wrap">
+    <h1>非遗文物 3D 数字化展示系统<br>工程落地方案</h1>
+    <p class="sub">对象：非遗相关文物（首批四类：榫卯木作 / 景泰蓝 / 漆器 / 青铜器）。约束：全程离线、顶尖建模、深度交互、深度拆解、深度展示、三层内容结构（器物 / 工艺 / 口述）。本方案为可直接执行的技术总纲，每一条含工具、版本、参数、验证方法。</p>
+    <div class="meta-row">
+      <span>文档版本 v1.0</span><span>撰写日期 2026-10-04</span><span>标准：国家级大赛一等奖交付线</span><span>形态：离线自包含 HTML</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#s0">0 总纲</a><a href="#s1">1 需求与量化目标</a><a href="#s2">2 数据采集与建模</a><a href="#s3">3 引擎与渲染</a><a href="#s4">4 交互与拆解</a><a href="#s5">5 工艺流程层</a><a href="#s6">6 口述与知识层</a><a href="#s7">7 离线打包部署</a><a href="#s8">8 测试与验收</a><a href="#s9">9 团队成本工期</a><a href="#s10">10 风险清单</a><a href="#s11">11 三重思维检查</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ============ 0 总纲 ============ -->
+<h2 class="sec" id="s0"><span class="no">0</span>总纲：非遗是"无形技艺"，不是"有形器物"</h2>
+<p>非遗名录登记的是<strong>技艺</strong>，器物只是技艺的瞬时载体。只做"看得见的文物 3D"是对赛题的错误理解，也丢掉了展示系统的差异化价值。本系统强制三层结构，缺一层判不合格：</p>
+<table>
+<tr><th>层</th><th>回答的问题</th><th>承载内容</th><th>关键交互</th></tr>
+<tr><td><strong>L1 静态文物 3D</strong></td><td>器物长什么样（看得见）</td><td>存档级高模 + 展示级优化模型、PBR 材质、色彩科学标定</td><td>360° 观察、缩放、拆解、剖切、测量、热点标注</td></tr>
+<tr><td><strong>L2 工艺流程 3D 演示</strong></td><td>器物怎么做出来的（看得懂"怎么做"）</td><td>工序序列化数据、零件/工具绑定、相机运镜、步骤动画</td><td>逐步拆解、可暂停、可回到任意步骤、单步往复</td></tr>
+<tr><td><strong>L3 传承人口述与工艺知识</strong></td><td>为什么这样做（听得见"为什么"）</td><td>口述录音、转写字幕、术语/材料/禁忌卡片、多语言语音</td><td>随工序联动播放、语音导览、知识卡检索</td></tr>
+</table>
+<p>三层的数据关系是绑定的，不是三个孤立模块：L1 装配树里的零件 id 被 L2 工序的 action 引用；L2 的每道工序被 L3 的口述片段引用。用户可以在任意一层发起跳转：点零件 → 看它在哪道工序生成；听口述提到"开料" → 跳到该工序的 3D 演示。</p>
+<div class="callout"><strong>架构红线</strong>：三层全部离线可运行。L2 的工序动画和 L3 的口述音频必须与 L1 模型同包交付，不允许"模型本地、视频/音频在线"的偷工方案。</div>
+
+<!-- ============ 1 需求与量化目标 ============ -->
+<h2 class="sec" id="s1"><span class="no">1</span>需求与量化目标</h2>
+
+<h3>1.1 功能需求（验收级）</h3>
+<table>
+<tr><th>#</th><th>需求</th><th>硬性要求</th><th>验收方式</th></tr>
+<tr><td>F1</td><td>全程离线</td><td>模型/贴图/字体/代码/数据全部本地化；页面与引擎零外部请求（HTTP/HTTPS）；禁 CDN、在线字体、在线纹理、远程 API</td><td>DevTools Network 断网刷新走查 + 源码审计（见 §7.2）</td></tr>
+<tr><td>F2</td><td>顶尖质量建模</td><td>PBR 全流程；色彩由分光光度计标定（ΔE ≤ 3），非肉眼调色；几何误差毫米级（小件 ≤0.5mm）</td><td>比色报告 + Hausdorff 距离报告（见 §2.3 / §8.3）</td></tr>
+<tr><td>F3</td><td>深度交互</td><td>360° 全视角、任意缩放/旋转/平移；阻尼、惯性、俯仰钳制</td><td>操作走查 + 帧率监控</td></tr>
+<tr><td>F4</td><td>深度拆解</td><td>爆炸视图 / 装配分解；逐零件拆开与复位；装配动画；榫卯类按真实结构拆（楔/榫/卯/穿带）</td><td>拆解状态机走查（见 §4.2）</td></tr>
+<tr><td>F5</td><td>深度展示</td><td>剖切、透视(X-Ray)、线框、标注热点、尺寸测量、材质与光照切换、结构注释与工艺知识层</td><td>逐项功能清单验收（见 §4）</td></tr>
+<tr><td>F6</td><td>工艺流程演示</td><td>每道工序可逐步拆解、可暂停、可回到任意步骤；工序与零件/工具/口述绑定</td><td>§5 播放器走查</td></tr>
+<tr><td>F7</td><td>无障碍与多语言</td><td>键盘可达、ARIA、对比度；中/英 + 少数民族语言（按地区选配）+ 语音导览</td><td>§6.4 清单</td></tr>
+<tr><td>F8</td><td>音频层</td><td>工艺讲解、工具声、传承人口述录音，均离线内嵌</td><td>断网播放走查</td></tr>
+<tr><td>F9</td><td>离线更新</td><td>增量更新包 + U盘/局域网推送</td><td>§7.3 演练</td></tr>
+<tr><td>F10</td><td>资产防篡改</td><td>哈希校验、可选签名、文物图水印</td><td>§7.4 演练</td></tr>
+<tr><td>F11</td><td>安全边界</td><td>无 XSS、本地文件权限最小化、WebGL 资源注入防护</td><td>§7.5 审计</td></tr>
+<tr><td>F12</td><td>失败容错</td><td>加载失败重试→降级 2D；内存不足自动降档；低配检测</td><td>故障注入测试（§8.4）</td></tr>
+<tr><td>F13</td><td>离线埋点</td><td>本地 JSONL 日志；联网时可选回传（默认关、脱敏）</td><td>§7.7 走查</td></tr>
+</table>
+
+<h3>1.2 性能量化目标（验收红线）</h3>
+<div class="qtarget"><span>首屏 ≤ 3 秒</span>（冷启动：本地资源，含引擎初始化与 LOD0 加载）；<span>集显一体机 ≥ 30 FPS</span>（1080p 展示场景）；<span>单件资源包 ≤ 50 MB</span>（含 LOD 三级 + 工艺层 + 口述音频）；<span>总内存 ≤ 1.5 GB</span>。</div>
+<table>
+<tr><th>载体</th><th>渲染分辨率</th><th>目标帧率</th><th>单件资源包</th><th>内存预算</th><th>LOD 策略</th></tr>
+<tr><td>展厅触摸一体机（集显）</td><td>1920×1080</td><td>≥30 FPS</td><td>≤50 MB</td><td>≤1.2 GB</td><td>LOD0/LOD1 切换 + 关后处理</td></tr>
+<tr><td>桌面（独显 RTX 3060 级）</td><td>2560×1440~4K</td><td>≥60 FPS</td><td>≤50 MB</td><td>≤1.5 GB</td><td>LOD0 + 可选后处理</td></tr>
+<tr><td>平板（iPad/Android 中端）</td><td>1080p</td><td>≥30 FPS</td><td>≤50 MB</td><td>≤1.2 GB</td><td>LOD1 主用</td></tr>
+<tr><td>手机（中端）</td><td>720p~1080p</td><td>≥30 FPS</td><td>≤50 MB（按需子包 ≤20 MB）</td><td>≤1.0 GB</td><td>LOD1/LOD2 + 纹理再压</td></tr>
+<tr><td>头显（可选，PC 串流）</td><td>双目 ~4K</td><td>≥90 Hz</td><td>同桌面</td><td>≤2.0 GB</td><td>LOD1 主用，禁后处理</td></tr>
+</table>
+<h3>1.3 性能达成手段（对应上述目标）</h3>
+<ul>
+<li><strong>加载</strong>：渐进加载管线——先外壳（UI/清单）→ LOD0 网格 → 贴图（mipmap 渐进）→ 工艺/音频按需；gzip/brotli 压缩静态包。</li>
+<li><strong>几何</strong>：LOD 三级（见 §2.2 面数表）；Draco 压缩（顶点 12bit 量化）；静态合批（同材质合并）；frustum + 八叉树遮挡剔除（展厅场景物件多时启用）。</li>
+<li><strong>贴图</strong>：KTX2/BasisU（桌面 BC7、移动 ASTC）；纹理图集合并小贴图；LRU 释放离屏纹理。</li>
+<li><strong>渲染</strong>：单次 draw call 预算——一体机场景 ≤600 draw call、≤120k 三角形（LOD 生效后）；后处理按载体开关（§3.3）。</li>
+<li><strong>内存</strong>：显存纹理预算 ≤512 MB（一体机）；几何 ≤256 MB；不重复持有 glTF 原始 buffer（加载后即释放）。</li>
+</ul>
+
+<!-- ============ 2 数据采集与建模 ============ -->
+<h2 class="sec" id="s2"><span class="no">2</span>数据采集与建模工艺</h2>
+
+<h3>2.1 原始数据获取：两条路线</h3>
+<h4>路线 A：摄影测量（可接触、可拍摄的器物，主路线）</h4>
+<p>工具：<strong>RealityCapture 1.4.x</strong>（Epic 现行授权：非商业免费档 / 商业按收入分成；首选，对齐质量/速度最优）、<strong>Metashape 2.1.x</strong>（备选，Pro 单机授权）、<strong>Meshroom 2025</strong>（开源兜底，全流程免费，速度慢一档）。三套流程任选其一，输出同一规格：带控制点的对齐 + 密集点云 + 高分辨率网格 + 4K 纹理。</p>
+<p><strong>拍摄规范（现场执行单，逐条落实）</strong>：</p>
+<table>
+<tr><th>项</th><th>参数</th><th>原因</th></tr>
+<tr><td>机身/镜头</td><td>全画幅或 APS-C；定焦 50–85mm 等效；手动对焦、焦点锁定</td><td>变焦/自动对焦焦点漂移会直接废掉对齐</td></tr>
+<tr><td>曝光</td><td>光圈 f/8–f/11；快门 ≥1/125s；ISO ≤100；RAW 拍摄</td><td>保证全物件景深清晰；ISO 压低噪点保证对齐与纹理</td></tr>
+<tr><td>布光</td><td>双柔光箱，光源面加线偏振片，镜头前加分析器旋转至正交（交叉偏振，消高光）；色温 5000K±200K，双灯强度一致</td><td>消釉面/金属/漆面反光，拍出真实漫反射色；见 §2.3</td></tr>
+<tr><td>转盘</td><td>15°/帧（24 帧/圈）；俯角 0°/30°/60° 三圈 + 顶视圈 + 底部圈</td><td>覆盖全部法线方向；小件共 120–200 张</td></tr>
+<tr><td>重叠率</td><td>相邻帧 ≥80%</td><td>低于 70% 会在纹理融合处出断层</td></tr>
+<tr><td>标定物</td><td>每圈首帧放置 X-Rite ColorChecker + 灰球（色卡占画面 ≥10%）</td><td>色彩标定与白平衡的锚点（§2.3）</td></tr>
+</table>
+<p><strong>RealityCapture 处理参数</strong>：对齐精度 High；关键点匹配 ≥5000 对/帧对；对齐 RMS ≤0.3px、投影误差均值 ≤0.5px；控制点 ≥6 个、重投影误差 ≤1px；密集点云去噪（统计离群点，K=20, σ=2.5）；网格 Poisson 深度 12–14；简化用 Quadric Edge Collapse，误差上限 0.5mm（小件）/2mm（大件）。纹理：每 UV 岛 texel 密度 ≥20 px/cm（小件直接出 4K）。</p>
+
+<h4>路线 B：手工高模（不可接触 / 缺失部位补全，主路线之二）</h4>
+<p>工具：<strong>ZBrush 2025.x</strong>（细节雕刻）+ <strong>Blender 5.2 LTS</strong>（重拓扑、UV、装配、导出）。流程：文献线图/博物馆正摄影像/同型器物/传承人口述为复原依据 → 基模 → 雕刻细节（铸造范线、铭文、磨损用 alpha 笔刷与 brush 图层）→ 显式标注。</p>
+<div class="callout warn"><strong>复原必须显式标注，不允许冒充实测</strong>：每个复原件在 glTF 扩展（自定义 <code>KHR_x_hean_reconstructed</code> 或 manifest JSON）记录：<code>reconstructed: true</code>、依据来源（文献/线图/口述/同型）、置信度（高/中/低）、参与确认的传承人/研究员。UI 渲染时给"复原部位"角标与半透明着色，点开即见证据链。这条同时是合规要求（§10 风险）与诚信要求。</div>
+
+<h3>2.2 工艺链：原始数据 → 高精度几何 → 重拓扑 → PBR 烘焙 → 实时渲染</h3>
+<table>
+<tr><th>阶段</th><th>工具（版本）</th><th>关键参数</th><th>输出/精度指标</th></tr>
+<tr><td>原始网格</td><td>RealityCapture 1.4 / Metashape 2.1 / ZBrush 2025</td><td>—</td><td>高模 500万–2000万面；小件单件 ≤2GB</td></tr>
+<tr><td>重拓扑</td><td>ZRemesher（ZBrush）/ InstaLOD 2024.x（半自动）</td><td>目标面数按载体分档；四边形为主，器物外表面无三角扇</td><td>LOD0 30万–150万面（见分档表）</td></tr>
+<tr><td>UV</td><td>Blender 5.2 LTS</td><td>texel 密度 ≥40 texel/cm（4K）；接缝放内壁/底面/隐蔽处；单 UDIM</td><td>UV 岛 ≤32，重叠 0</td></tr>
+<tr><td>烘焙</td><td>Marmoset Toolbag 4.1 / Substance 3D Painter 10.x</td><td>cage 0.05mm、膨胀 2%、采样 16×；输出 ID/AO/Normal(中世界)/Curvature/Thickness/Height，8K 烘焙→4K 交付</td><td>AO 无漏光；Normal 切线空间</td></tr>
+<tr><td>PBR 材质</td><td>Substance 3D Painter 10.x</td><td>metallic-roughness 工作流；金属件单独测金属度；漆/釉面用 clearcoat</td><td>色值全部来自 §2.3 标定表</td></tr>
+<tr><td>简化/LOD</td><td>glTF-Transform 4.x + Meshopt</td><td>LOD1 为 LOD0 的 20–25% 面数；LOD2 为 5–8%；距离阈值按屏幕占比 0.25 / 0.1</td><td>LOD 切换像素误差 ≤1%（无感切换）</td></tr>
+<tr><td>压缩导出</td><td>glTF-Transform 4.x + Draco 1.5.x + KTX-Software 4.x</td><td>Draco 12bit 顶点量化；纹理 KTX2：桌面 BC7、移动 ASTC 4×4；mipmap 全开</td><td>几何压缩 8–12×；纹理压缩 4–6×；单件 runtime 包 ≤50MB</td></tr>
+</table>
+<p><strong>载体分档面数</strong>（LOD0 上限）：展厅一体机 120万面；桌面 150万面；平板 60万面；手机 30万面。LOD1 依次为 30万/40万/15万/8万；LOD2 为 8万/10万/4万/2万。</p>
+<p><strong>几何精度验收</strong>：LOD0 与高模做 Hausdorff 距离比对（MeshLab 2024.05 或 CloudCompare 2.13），小件 ≤0.5mm、大件 ≤2mm；LOD1 相对 LOD0 ≤0.5%（屏幕像素误差口径）。比对报告存入每件文物的 manifest。</p>
+
+<h3>2.3 色彩还原的科学管理（禁止肉眼调色）</h3>
+<div class="qtarget">目标：数字模型与实物并排比色 <span>ΔE ≤ 3</span>（CIEDE2000，D65/10°），覆盖釉色、漆色、金属锈色、木色四类材质。</div>
+<h4>2.3.1 硬件与链路</h4>
+<ul>
+<li><strong>取色</strong>：分光光度计 X-Rite Ci62（或 Konica Minolta CM-700d），每材质区 ≥5 点取均值，记录 L*a*b*；观察条件统一 D65/10°；输出到项目色值库（SQLite/CSV）。</li>
+<li><strong>监视器标定</strong>：i1 Display Pro / Spyder X2 校色，D65、Gamma 2.2、亮度 120cd/m²；ICC profile 写入系统并锁死（禁用户侧改）。</li>
+<li><strong>相机色彩链路</strong>：RAW 拍摄 → 灰卡白平衡 → ColorChecker 建相机 ICC（Lumariver Profile Designer 或 Adobe DNG Profile Editor）→ 去马赛克不做锐化 → 在 ICC 管理下转 sRGB。</li>
+<li><strong>交叉偏振拍贴图</strong>：漫反射贴图用正交偏振（消高光）；另拍一张同机位同构图带高光参考帧（specular 参考），两图编号成对入档。</li>
+</ul>
+<h4>2.3.2 输出与记录</h4>
+<ul>
+<li>工作空间：sRGB / Rec.709；金属件 baseColor 存线性 float（glTF metallic-roughness 金属通道不贴 sRGB 曲线），金属度/粗糙度用实测或目测分级（金属度 0.85–1.0，粗糙度 0.05–0.6 按打磨状态）。</li>
+<li>每件文物产出一份<strong>色值文档</strong>（入 manifest 元数据）：材质区名称、L*a*b*、对应 sRGB hex、metallic、roughness、clearcoat、实测点位数、取色日期、操作员。评审和复现都以此文档为准，而不是截图。</li>
+<li>抽样复验：每批次 ≥10% 材质区由第二人用 Ci62 复核，ΔE 漂移 >1 的区重做。</li>
+</ul>
+
+<h3>2.4 四类文物差异化建模路线（先定差异，再谈通用）</h3>
+<table>
+<tr><th>类</th><th>结构特点</th><th>建模重点</th><th>材质/贴图难点</th><th>拆解结构</th><th>关键参数</th></tr>
+<tr><td><strong>榫卯木作</strong></td><td>装配体：多零件由楔/榫/卯/穿带互锁，无钉胶</td><td>每零件独立建模（木料纹理顺纹方向与年轮径向一致）；装配基准面与公差在建模阶段定义</td><td>木纹 PBR：年轮/弦切/径切三类纹理；粗糙度 0.35–0.5；清漆层 clearcoat（若有髹饰）</td><td>按真实拆卸顺序拆：先楔、再穿带、后榫卯逐件退位；爆炸向量沿榫头轴向</td><td>零件数 20–80；LOD0 ≤100万面；榫头配合间隙 0.1–0.3mm（模型按实测余量）</td></tr>
+<tr><td><strong>景泰蓝</strong></td><td>铜胎 + 掐丝 + 釉料填烧 + 镀金；金属与釉的复合体</td><td>金属胎（拉丝镀金）高反射；掐丝凹槽用高度/法线贴图+真实几何（关键区）；丝与釉交界清晰</td><td>釉面半透明多层（次表面/clearcoat 双层）；各釉色分区 L*a*b* 标定（景泰蓝釉色多达十余区）；高光分两档（釉面镜面 + 金属拉丝各向异性）</td><td>拆解为示意级：胎体/丝层/釉层/镀金层四层剥离（非破坏性，标注"示意分层"）</td><td>釉区 ≤24 区；清漆 roughness 0.15–0.25；丝线宽按实物毫米实测</td></tr>
+<tr><td><strong>漆器</strong></td><td>多层髹漆（胎体+灰层+色漆层+罩漆）+ 描金/螺钿</td><td>胎体（木/夹纻）为几何主体；漆层厚度 0.2–2mm 用多层嵌套网格表达（剖切可见层序）</td><td>漆面镜面反射（roughness 0.05–0.15）+ 环境反射 IBL；描金用高度+法线贴图；罩漆层 clearcoat；漆皮开裂/起皱用曲率驱动的破损贴图</td><td>按漆层序逐层剥离（胎→灰→色漆→罩漆→纹饰），每层配工艺说明</td><td>层数 3–7 层；clearcoat 强度 0.6–1.0；破损贴图遮罩 2–4 级</td></tr>
+<tr><td><strong>青铜器</strong></td><td>铸造件 + 范线/铸缝 + 铭文 + 锈蚀层；出土/传世状态差异大</td><td>范线与分范痕迹用低幅高度贴图；铭文用法线+高度双贴图（需实物拓片/文字对位）</td><td>金属反射（IBL 强环境）；锈蚀多层：Cuprite（红）/绿锈（孔雀石）/蓝锈，用分层贴图混合，锈区 L*a*b* 标定；出土件 vs 传世件出两套贴图预设</td><td>器身/耳/足/盖按铸造分范拆（若为复合铸造件），铭文区作为热点而非拆件</td><td>锈层 3 层混合；金属度 0.9–1.0；粗糙度 0.2–0.5（按锈蚀程度）；IBL 强度 0.8–1.2</td></tr>
+</table>
+<div class="callout"><strong>通用底座</strong>：四类共用一套引擎、装配树格式、拆解状态机、工艺流程播放器（§4–§5）。差异只发生在数据层（零件定义、爆炸向量、工序表、材质预设），不写第二套代码。</div>
+
+<h3>2.5 双轨：存档级 / 展示级</h3>
+<table>
+<tr><th>轨</th><th>用途</th><th>内容</th><th>存储/保留</th></tr>
+<tr><td><strong>Master（存档级）</strong></td><td>长期保存、再加工、学术复现</td><td>原始扫描网格/高模（500万–2000万面）、无损源贴图（TIFF/EXR）、摄影原片 RAW、色值库、复原证据链、口述母带 WAV/FLAC</td><td>独立目录 <code>assets/&lt;id&gt;/master/</code>，只读归档；对象存储 + 异地备份；保留期永久</td></tr>
+<tr><td><strong>Runtime（展示级）</strong></td><td>运行时加载</td><td>LOD0/1/2（Draco glTF）、KTX2 贴图、AAC/Opus 音频、工序 JSON、manifest</td><td><code>assets/&lt;id&gt;/runtime/</code>，随发布包分发；版本化</td></tr>
+</table>
+<p>任何展示优化（减面、压缩、再烘焙）只发生在 Runtime 轨；Master 轨永不覆盖、只追加版本。这条同时满足"长期保存"与"展示性能"两个互斥目标，缺一不可。</p>
+
+<!-- ============ 3 引擎与渲染 ============ -->
+<h2 class="sec" id="s3"><span class="no">3</span>引擎与渲染</h2>
+
+<h3>3.1 引擎对比与选型</h3>
+<table>
+<tr><th>引擎（版本）</th><th>glTF 2.0 支持</th><th>离线包体（引擎净重）</th><th>Web/Tauri/PWA 三形态</th><th>授权</th><th>结论</th></tr>
+<tr><td><strong>three.js r186</strong>（选定）</td><td>一等公民：GLTFLoader/DracoLoader/KTX2Loader 官方维护</td><td>模块化 ~600KB gz，可按需裁剪</td><td>同一代码库跑通三形态；file:// 可内联</td><td>MIT，无费用</td><td><strong>采用</strong></td></tr>
+<tr><td>Babylon.js 8.x</td><td>好，但材质模型与 glTF 转换适配成本高</td><td>~1.2MB+，裁剪复杂</td><td>三形态可，WebGPU 激进（兼容面窄）</td><td>Apache 2.0</td><td>否决：包体大、中文资料少、改造工期长</td></tr>
+<tr><td>Godot 4.5</td><td>导入器成熟，导出 Web 弱</td><td>Web 导出 wasm ~30MB+</td><td>桌面强、Web 弱；iOS Safari 兼容差；纹理流送受限</td><td>MIT</td><td>否决：离线 Web 形态不成立</td></tr>
+<tr><td>Unity 6</td><td>插件生态，非原生</td><td>WebGL wasm 15MB+，启动慢</td><td>WebGL 已降为维护态；体积/内存超预算</td><td>商业授权</td><td>否决</td></tr>
+<tr><td>Unreal 5.6</td><td>好</td><td>引擎 + 着色器编译巨大（GB 级）</td><td>Web 无支持；桌面影视级（Nanite/Lumen）但内存 2GB+</td><td>商业分成</td><td>否决：与离线轻量目标冲突</td></tr>
+</table>
+<p><strong>选定理由（一句话）</strong>：离线三形态（Tauri/PWA/自包含 HTML）要求单一代码库 + glTF 2.0/Draco/KTX2 全链路原生支持 + 包体可控 + 零授权成本，只有 three.js 同时满足；Babylon 的 WebGPU 领先与 Godot/Unity/Unreal 的桌面优势在本项目的"离线 Web 优先"约束下不构成收益。</p>
+
+<h3>3.2 渲染管线（参数固化）</h3>
+<ul>
+<li><strong>API</strong>：WebGL2 基线（WebGPU 预留实验通道，不上线依赖）；渲染器 <code>antialias:true</code>、<code>powerPreference:"high-performance"</code>。</li>
+<li><strong>光照</strong>：IBL 预烘焙环境（HDR 环境贴图 → irradiance + prefiltered specular，分光光度计标定色温匹配）+ 主光（方向光，强度 1.0–1.5）+ 填充 + 轮廓光；色温预设见 §4.6。</li>
+<li><strong>材质</strong>：MeshPhysicalMaterial（metallic-roughness）；漆器/景泰蓝釉面启用 <code>clearcoat</code>（强度 0.6–1.0）；青铜锈区用多层贴图混合；各向异性仅景泰蓝金属丝区启用（cost 高，移动端关）。</li>
+<li><strong>后期</strong>：ACES Filmic tonemapping（固定）；SMAA（桌面/一体机）；FXAA（低配）；bloom 仅桌面独显档可开（器物重点位，强度 ≤0.4）；SSR 不做。</li>
+<li><strong>纹理</strong>：KTX2（桌面 BC7、移动 ASTC 4×4），mipmap 全开、各向异性过滤 8×（桌面 16×）。</li>
+<li><strong>几何</strong>：Draco 解码放 Worker 线程；加载完成后释放原始 buffer。</li>
+</ul>
+
+<h3>3.3 性能手段（对应 §1.3 目标，逐条落到代码）</h3>
+<table>
+<tr><th>手段</th><th>实施</th><th>触发条件</th></tr>
+<tr><td>LOD 三级</td><td>距离/屏幕占比切换；LOD0→1 阈值 0.25，1→2 阈值 0.1（屏幕占比）</td><td>常开</td></tr>
+<tr><td>合批</td><td>同材质静态件 InstancedMesh / 合并几何；拆解动画件不合并</td><td>同材质 ≥4 件</td></tr>
+<tr><td>遮挡剔除</td><td>frustum cull 常开；八叉树遮挡剔除</td><td>场景物件 ≥200 时启用</td></tr>
+<tr><td>纹理图集</td><td>小贴图（&lt;256px）合并图集，减 draw call 与切换</td><td>同材质系</td></tr>
+<tr><td>按需加载</td><td>视口外展品不预载；进入再流送（纹理 mipmap 渐进）</td><td>展厅多展品场景</td></tr>
+<tr><td>内存控制</td><td>LRU 释放离屏纹理（GL dispose）；几何不重复持有</td><td>显存 >512MB 预警</td></tr>
+<tr><td>自动降档</td><td>FPS &lt;20 持续 5s → 强制 LOD1 + 关后处理 + 砍各向异性</td><td>运行时监控</td></tr>
+</table>
+
+<h3>3.4 工程目录结构（资源规范，双轨）</h3>
+<pre>
+project/
+├─ src/                      # 源码（TS 编译 → dist）
+│  ├─ engine/                # 渲染、管线、LOD、资源管理
+│  ├─ interaction/           # 控制器、拆解状态机、测量
+│  ├─ process/               # 工艺演示播放器
+│  ├─ knowledge/             # 口述、知识卡、多语言
+│  └─ ui/                    # 界面层
+├─ assets/
+│  ├─ artifacts/&lt;id&gt;/
+│  │  ├─ master/             # 存档级：RAW、高模、源贴图、色值库、口述母带（只读）
+│  │  └─ runtime/            # 展示级：LOD0-2 glb、ktx2、音频、process.json、manifest.json
+│  ├─ fonts/                 # 本地字体（woff2，禁 CDN）
+│  └─ audio/                 # 导览音频（按语言分目录）
+├─ dist/                     # 发布产物（Tauri/PWA/自包含三选一形态）
+├─ tools/                    # 打包、校验、签名脚本
+└─ manifest.json             # 版本 + 全资源 sha256
+</pre>
+
+<!-- ============ 4 交互与拆解 ============ -->
+<h2 class="sec" id="s4"><span class="no">4</span>交互与拆解系统</h2>
+
+<h3>4.1 360° 观察与操控（L1 基座）</h3>
+<ul>
+<li>轨道控制器：旋转（阻尼 0.08）、俯仰钳制 ±85°、缩放 0.05×–5×（相对物体包围盒半径）、平移、惯性；触屏单指旋转/双指缩放平移（pointer events 统一封装）。</li>
+<li>双击复位：回到标定初始机位；"初始视角"按钮常驻。</li>
+<li>交互层与渲染层分离：控制器只改相机状态对象，渲染循环消费；任何时刻可被拆解动画/工艺运镜接管并安全归还。</li>
+</ul>
+
+<h3>4.2 深度拆解：装配树 + 爆炸状态机</h3>
+<p><strong>装配树 JSON 规格</strong>（每件文物一个，存 runtime 包）：</p>
+<pre>{
+  "id": "mu-07", "name": "束腰攒框桌",
+  "scaleUnit": "mm",
+  "parts": [
+    { "id": "top", "parent": null, "name": "面板",
+      "explode": { "dir": [0,1,0], "dist": 320, "order": 5 }, "mesh": "top.glb" },
+    { "id": "wedge", "parent": "leg", "name": "楔",
+      "explode": { "dir": [0.7,0,-0.7], "dist": 90, "order": 1 }, "mesh": "wedge.glb" }
+  ]
+}</pre>
+<p><strong>状态机</strong>：<code>完整 → 拆解中 → 拆解态 → 回装中 → 完整</code>，任一状态可暂停；<code>explode(t)</code> 按 <code>order</code> 顺序逐件位移（缓动 cubic-out，单件 0.4–0.6s，支持整体动画与单件步进）。操作：<strong>拆下一个 / 装回上一个 / 一键爆炸 / 一键复位</strong>；点任意零件可单独拖动（拖离/放回，带吸附回位）。榫卯类按真实拆卸顺序（先楔、穿带、再榫卯退位），顺序写进 <code>explode.order</code>，不是随意散开。</p>
+
+<h3>4.3 深度展示六件套</h3>
+<table>
+<tr><th>功能</th><th>实现</th><th>参数</th></tr>
+<tr><td>剖切</td><td>ClipPlane 六方向 + 自由平面（拖拽）；剖面双面渲染（背面法线翻转 + 剖面填充色材质）</td><td>剖面填充色半透明 0.35；可多面叠加</td></tr>
+<tr><td>透视 X-Ray</td><td>MeshBasic 全透 + 边缘光（fresnel 输出或后处理描边）</td><td>透明度 0.08–0.15；边缘亮度可调</td></tr>
+<tr><td>线框</td><td>EdgesGeometry + LineSegments（顶点色），可与实体叠加显示</td><td>线宽 1px，色随主题</td></tr>
+<tr><td>标注热点</td><td>3D 锚点（球标+文字 sprite）→ 屏幕投影 → 卡片（标题/工艺说明/口述引用入口）</td><td>卡片 ≤220px 宽；锚点 hover 高亮</td></tr>
+<tr><td>尺寸测量</td><td>两点/三点点选；结果 mm 显示；比例尺在 manifest 标定（scaleUnit:mm）</td><td>精度显示 0.1mm；测量线常显可清</td></tr>
+<tr><td>材质/光照切换</td><td>预设：博物馆（3000K 低照）/ 日光（D65 高照）/ 暗场（单束追光）/ 线稿（造型展示）</td><td>预设切换 ≤0.3s 过渡</td></tr>
+</table>
+<p><strong>结构注释树</strong>：左侧树 = 装配结构；点节点 → 部件高亮 + 右侧面板（名称、材料、工艺说明、关联工序、口述入口）。树与爆炸动画双向同步（点树节点可单独拆该零件）。</p>
+
+<!-- ============ 5 工艺流程演示层 ============ -->
+<h2 class="sec" id="s5"><span class="no">5</span>工艺流程演示层（L2：看得懂"怎么做"）</h2>
+<p>这是非遗系统与"文物扫描展示"的本质区别，权重最高。要求：每道工序<strong>逐步拆解、可暂停、可回到任意步骤</strong>；工序与零件/工具/口述三层绑定。</p>
+
+<h3>5.1 工序数据格式（每件文物一个 process.json，入 runtime 包）</h3>
+<pre>{
+  "id": "mu-07", "steps": [
+    { "id": "s1", "title": "选料 · 开料", "duration": 8,
+      "camera": { "from": [2,1.2,4], "to": [0.8,0.6,2], "ease": "cubic-in-out" },
+      "actions": [
+        { "t": 0.0, "type": "highlight", "ref": "top" },
+        { "t": 0.5, "type": "label", "ref": "top", "text": "面板取材，顺纹避疖" },
+        { "t": 2.0, "type": "audio", "ref": "tool-saw", "vol": 0.4 },
+        { "t": 3.0, "type": "speech", "ref": "narr-s1", "lang": "zh" }
+      ],
+      "narration": { "text": "选料先看年轮走向……", "audio": "narr-s1.aac", "ts": [0,8] } }
+  ] }
+</pre>
+<ul>
+<li><strong>action 类型</strong>：<code>highlight / label / explode / assemble / cut / audio / speech / part-visible</code>；全部按相对步内时间 <code>t</code> 触发，播放器统一时钟驱动。</li>
+<li><strong>相机运镜</strong>：关键帧（from/to）+ 贝塞尔缓动；每步默认 6–10s；运镜期间用户仍可拖拽查看（暂停运镜），松开后回到运镜路径。</li>
+<li><strong>与 L1 绑定</strong>：<code>ref</code> 全部指向 §4.2 装配树零件 id；点"零件 → 它出现在哪道工序"由 process.json 反查索引生成。</li>
+<li><strong>与 L3 绑定</strong>：<code>speech</code> 引用口述片段 id（§6），点口述卡可跳回对应工序。</li>
+</ul>
+
+<h3>5.2 播放器行为（验收即此清单）</h3>
+<ul class="checklist">
+<li>播放 / 暂停 / 上一步 / 下一步 / <strong>回到任意步骤</strong>（步骤条点选）/ 循环单步往复。</li>
+<li>每步结束自动暂停（"可暂停"硬要求）；步骤条显示 已完成/进行中/未开始 三态。</li>
+<li>单步往复模式：当前步骤动画循环播（便于讲评），不自动进下一步。</li>
+<li>声音分层：口述（主）+ 工具声（环境）+ 工坊底噪（可选静音键全局）。</li>
+<li>全程离线：工序动画为本地 glTF/JSON 驱动，禁止用在线视频替代；确需视频素材（如传承人实拍）则转码内嵌（H.264 720p ≤10MB/段）并标注来源。</li>
+</ul>
+
+<!-- ============ 6 口述与知识层 ============ -->
+<h2 class="sec" id="s6"><span class="no">6</span>传承人口述与工艺知识层（L3：听得见"为什么"）</h2>
+
+<h3>6.1 采集与制作</h3>
+<table>
+<tr><th>环节</th><th>工具（版本）</th><th>规格</th></tr>
+<tr><td>口述录音</td><td>Reaper 6.x / Audacity 3.x；电容麦 + 声学处理（工坊现场或静室）</td><td>存档 44.1kHz/24bit WAV；展示转 AAC 128kbps 或 Opus 96kbps（体积优先）</td></tr>
+<tr><td>转写校对</td><td>通义听悟 / 剪映 初转 → 人工逐句校对</td><td>SRT + JSON 双格式，逐句时间戳；错字率 0（人工关）</td></tr>
+<tr><td>术语整理</td><td>工艺研究员 + 传承人双签</td><td>术语卡含注音、释义、口诀、禁忌；条目进知识库</td></tr>
+</table>
+
+<h3>6.2 知识卡体系（挂载点 = 零件 / 工序 / 热点）</h3>
+<p>字段：<code>title / category(术语|材料|历史|工具|口诀|禁忌) / body / audioRef / lang</code>。检索：按名称/类别/工序过滤，全部离线（本地倒排索引 JSON，体量 ≤2MB）。</p>
+
+<h3>6.3 多语言与语音导览</h3>
+<ul>
+<li>语言包：中文（默认）、英文；少数民族语言按项目地区选配（苗语/藏语/壮语等），口述层优先真人配音，次选离线 TTS。</li>
+<li>离线 TTS：<strong>Piper</strong>（ONNX 本地推理，多语言模型，~20–60MB/语言）或 <strong>eSpeak-NG</strong>（极小，~5MB，音质一般）；禁用云 TTS。配音合成文件与字幕同包分发。</li>
+<li>语音导览：进展品默认不自动播（浏览器自动播放策略），提供"开始导览"按钮；导览沿 L1→L2→L3 顺序串联（先看器物、再讲工艺、后听口述）。</li>
+<li>无障碍：全键盘可达、ARIA 标注、正文对比度 ≥4.5:1、字幕 CC 模式、<code>prefers-reduced-motion</code> 关运镜动画。</li>
+</ul>
+
+<!-- ============ 7 离线打包与部署 ============ -->
+<h2 class="sec" id="s7"><span class="no">7</span>离线打包与部署</h2>
+
+<h3>7.1 交付形态三选一（对比 + 选型）</h3>
+<table>
+<tr><th>形态</th><th>安装/体积</th><th>跨平台</th><th>维护与更新</th><th>适用场景</th></tr>
+<tr><td><strong>Tauri 2.x</strong>（主推）</td><td>壳程序 ~25–40MB（不含资源包）；资源外置随包</td><td>Windows/macOS/Linux（WebView2/WKWebView/WebKitGTK）</td><td>内置 updater（增量差分）；文件系统访问强，资源外置好做增量与校验</td><td>展厅一体机、桌面工作站</td></tr>
+<tr><td><strong>PWA</strong>（次选）</td><td>无安装包；体积 = 资源包</td><td>所有浏览器；iOS 有存储配额与后台限制</td><td>Service Worker precache + 版本检查更新</td><td>要求浏览器打开、管理方不接受装软件的场景</td></tr>
+<tr><td><strong>自包含 HTML + 资源包</strong>（应急）</td><td>单 HTML（小件内联）或 HTML + assets 目录；双击即开</td><td>一切有浏览器的设备；Safari file:// 有部分限制（fetch 禁）→ 用相对路径 img/script/iframe 加载规避</td><td>替换目录即更新；零部署成本</td><td>便携展示、U盘分发、评委预览</td></tr>
+</table>
+<p><strong>选型结论</strong>：展厅/桌面主形态 <strong>Tauri 2.x</strong>（性能、更新、文件访问三项最优）；便携/评审场景保留 <strong>自包含 HTML + 资源包</strong>；PWA 仅当主办方要求"网页形态"时启用。三者共用同一份 <code>dist/</code> 产物与同一 manifest，切换形态不重做内容。</p>
+
+<h3>7.2 断网可验证的打包方法与验证步骤</h3>
+<p><strong>打包</strong>：</p>
+<pre># 1) 构建 dist
+npm run build                     # TS 编译 + 资源拷贝（assets/ 按 manifest 白名单）
+node tools/make-manifest.mjs      # 生成 manifest.json（版本 + 每文件 sha256 + 语言包清单）
+node tools/compress.mjs           # 纹理转 KTX2、音频转码、gzip/brotli 静态包
+# 2) 校验
+node tools/verify.mjs dist        # 校验所有 sha256，报告缺失/篡改
+# 3) 三形态产物
+npm run build:tauri               # → src-tauri/target/release/*.msi|dmg|AppImage
+npm run build:pwa                 # → dist-pwa/（含 sw.js + precache manifest）
+npm run build:html                # → dist-html/（index.html + assets/）
+</pre>
+<p><strong>断网验证（四档，由快到慢）</strong>：</p>
+<ol>
+<li><strong>DevTools 模拟</strong>：打开应用 → DevTools → Network → 勾选 Offline → 刷新 → 全功能走查（3D/拆解/工艺/口述/多语言）→ 零请求失败。</li>
+<li><strong>外部 URL 审计</strong>：对发布产物跑 <code>rg -n "https?://" dist/</code>，允许命中仅 <code>data:</code> 与相对路径；任何 <code>http(s)://</code> 资源引用即不合格（manifest 里允许放回传地址但必须可选关闭）。</li>
+<li><strong>真机断网</strong>：Windows 禁用网卡 / 手机飞行模式 → 完整走查一遍（含首启冷启动）。</li>
+<li><strong>本地服务 + 流量抓包</strong>：<code>python -m http.server 8080</code> 起服 → 打开 → Fiddler/DevTools 确认 0 个外部域名请求（字体、贴图、JS 全本地）。</li>
+</ol>
+
+<h3>7.3 离线更新机制</h3>
+<ul>
+<li><strong>增量更新包</strong>：客户端持 <code>manifest.json</code>（version + 每资源 sha256）；服务器/局域网推送新 manifest → 客户端 diff → 只下载变更资源（字节级差分，图片/音频用 bsdiff 或 xdelta3，模型走整文件）。</li>
+<li><strong>推送通道</strong>：U 盘（导入工具校验 hash 后并入）、局域网 HTTP（内网静态服务）、Tauri updater（外网可选）。</li>
+<li><strong>回滚</strong>：保留上一版 manifest + 资源目录，更新失败自动回滚。</li>
+</ul>
+
+<h3>7.4 资产防篡改</h3>
+<ul>
+<li>资源加载前强制比对 manifest sha256，不一致拒绝加载并告警（防替换/注入）。</li>
+<li>manifest 可选 Ed25519 签名（离线验签，公钥内嵌），面向正式发布。</li>
+<li>文物图暗水印（DCT 域，不可见），用于外泄溯源。</li>
+</ul>
+
+<h3>7.5 安全边界（评审关注项，直接写死）</h3>
+<table>
+<tr><th>面</th><th>措施</th></tr>
+<tr><td>XSS</td><td>不 eval 外部输入；innerHTML 只用白名单模板；用户输入（搜索/批注）全部转义后入 DOM</td></tr>
+<tr><td>本地文件</td><td>Tauri 白名单 capability；只读写应用数据目录，不触碰系统路径；PWA 用 Cache API 不暴露文件系统</td></tr>
+<tr><td>WebGL 资源注入</td><td>运行时只加载 manifest 白名单内路径；禁止运行时 fetch 任意 URL；纹理/几何加载前过 hash 校验</td></tr>
+<tr><td>回传通道</td><td>埋点回传默认关闭、必须显式开启、只传脱敏聚合数据、POST 走白名单域名</td></tr>
+</table>
+
+<h3>7.6 失败容错（低配/异常路径）</h3>
+<ul>
+<li>WebGL2 缺失/初始化失败 → 自动切 2D 展品模式（每件备 ≤1MB JPG 展品图 + 图文说明）。</li>
+<li>资源加载失败 → 重试 2 次 → 跳过该项并提示 → 其余功能照常。</li>
+<li>内存不足（Performance.memory 阈值 80%）→ 强制 LOD1 → 释放离屏纹理（LRU）→ 提示降档。</li>
+<li>FPS 持续 &lt;20 五秒 → 自动降档（§3.3），不打断演示。</li>
+</ul>
+
+<h3>7.7 离线埋点与本地日志</h3>
+<ul>
+<li>本地 JSONL 日志：<code>view / action / duration / error / fpsSample / loadTiming</code>，写入应用数据目录，滚动保留 90 天。</li>
+<li>联网时可选回传（默认关，设置页显式开启）：POST 脱敏聚合（无文物文件名、无设备标识），失败静默不阻塞。</li>
+<li>日志导出：提供"导出日志"按钮（JSON 打包），供维护与答辩举证。</li>
+</ul>
+
+<!-- ============ 8 测试与验收 ============ -->
+<h2 class="sec" id="s8"><span class="no">8</span>测试与验收标准</h2>
+
+<h3>8.1 功能验收（逐条可点）</h3>
+<table>
+<tr><th>模块</th><th>验收项（抽查代表）</th><th>通过标准</th></tr>
+<tr><td>L1 观察</td><td>360° 旋转 / 缩放 / 平移 / 双击复位</td><td>全程无卡顿、无穿模、阻尼手感正常</td></tr>
+<tr><td>L1 拆解</td><td>一键爆炸 / 逐件拆 / 回装 / 单件拖离吸附回位；榫卯件顺序正确</td><td>顺序与 process.json 一致，动画 0.4–0.6s</td></tr>
+<tr><td>L1 展示</td><td>剖切（六向+自由）/ X-Ray / 线框 / 热点卡片 / 两点测量 / 光照预设切换</td><td>逐项开关无残留、测量数值与实物卡尺一致 ±0.5mm</td></tr>
+<tr><td>L2 工艺</td><td>播放/暂停/上下步/回到任意步骤/单步往复</td><td>步骤条三态正确；口述随步触发</td></tr>
+<tr><td>L3 口述</td><td>语音导览 / 字幕 / 术语检索 / 口述↔工序跳转</td><td>断网全通；字幕与音频偏差 ≤100ms</td></tr>
+<tr><td>多语言</td><td>中英切换 + 少数民族语言（如有）</td><td>无硬编码残留、字体回退正确</td></tr>
+</table>
+
+<h3>8.2 性能验收（工具：Stats.js / Chrome Tracing / Performance.memory）</h3>
+<table>
+<tr><th>指标</th><th>阈值</th><th>测量方法</th></tr>
+<tr><td>首屏（冷启动）</td><td>≤3s</td><td>Navigation Timing + 引擎 ready 回调，10 次取 P95</td></tr>
+<tr><td>帧率（一体机 1080p）</td><td>≥30 FPS</td><td>Stats.js 60s 采样，P95</td></tr>
+<tr><td>帧率（桌面 4K）</td><td>≥60 FPS</td><td>同上</td></tr>
+<tr><td>总内存</td><td>≤1.5GB</td><td>Performance.memory（浏览器）/ 任务管理器（Tauri）</td></tr>
+<tr><td>单件包体积</td><td>≤50MB</td><td>manifest 统计 runtime 目录</td></tr>
+<tr><td>LOD 切换</td><td>像素误差 ≤1%</td><td>固定机位双 LOD 截图比对</td></tr>
+<tr><td>长跑稳定性</td><td>12h 无泄漏</td><td>循环 500 次进展品/退出，内存不单调增长</td></tr>
+</table>
+
+<h3>8.3 视觉与几何验收</h3>
+<ul>
+<li><strong>比色</strong>：模型渲染帧（固定光照 D65）与实物照片/实物并排，ΔE ≤3（CIEDE2000）；逐材质区出报告。</li>
+<li><strong>几何</strong>：LOD0 vs 高模 Hausdorff 距离小件 ≤0.5mm / 大件 ≤2mm；CloudCompare 报告归档。</li>
+</ul>
+
+<h3>8.4 故障注入</h3>
+<ul>
+<li>删改名任一资源文件 → 应用应报错降级而非白屏；恢复文件后自愈。</li>
+<li>篡改资源字节 → sha256 校验拦截并告警。</li>
+<li>WebGL 禁用（浏览器 flag）→ 自动切 2D 模式。</li>
+<li>内存压力（同时开 8 件展品）→ 触发 LRU 释放与降档，无崩溃。</li>
+</ul>
+
+<h3>8.5 兼容矩阵</h3>
+<table>
+<tr><th>平台</th><th>浏览器/运行时</th><th>通过条件</th></tr>
+<tr><td>Windows 10/11</td><td>Chrome 128+ / Edge 128+ / Tauri (WebView2)</td><td>功能+性能全过</td></tr>
+<tr><td>macOS</td><td>Safari 17+ / Tauri (WKWebView)</td><td>功能全过；帧率目标放宽 15%（WebKit 基线）</td></tr>
+<tr><td>Android</td><td>Chrome 128+</td><td>触屏手势全过</td></tr>
+<tr><td>iOS</td><td>Safari 17+</td><td>功能全过；注意自动播放与存储配额</td></tr>
+<tr><td>展厅一体机</td><td>Windows + Edge kiosk / Tauri</td><td>性能红线必过；触摸校准</td></tr>
+</table>
+
+<!-- ============ 9 团队成本工期 ============ -->
+<h2 class="sec" id="s9"><span class="no">9</span>团队 / 成本 / 工期 / 里程碑</h2>
+
+<h3>9.1 团队（7–8 人）</h3>
+<table>
+<tr><th>角色</th><th>人数</th><th>职责</th></tr>
+<tr><td>技术总监/主程</td><td>1</td><td>架构、引擎集成、交互/拆解/工艺层主开发</td></tr>
+<tr><td>三维采集与建模</td><td>2</td><td>摄影测量、高模雕刻、重拓扑、LOD</td></tr>
+<tr><td>材质与贴图</td><td>1</td><td>PBR 烘焙、色彩标定、贴图压缩</td></tr>
+<tr><td>交互/前端开发</td><td>1–2</td><td>UI、控制器、测量、无障碍、多语言</td></tr>
+<tr><td>非遗工艺研究员</td><td>1</td><td>工序拆解、术语、复原依据、口述对接（需对接传承人）</td></tr>
+<tr><td>录音/口述整理</td><td>1</td><td>录音、转写校对、字幕、TTS 集成</td></tr>
+<tr><td>测试</td><td>1</td><td>功能/性能/兼容/故障注入/离线验证</td></tr>
+</table>
+<p><strong>1–2 人小团队变体</strong>（如参赛队）：砍范围不砍质量——首批只做 3 件文物（榫卯 1 件 + 景泰蓝或青铜 1 件 + 漆器 1 件）；工艺层每件只做 5 道关键工序；多语言只做中英；TTS 用 eSpeak-NG；摄影测量用 RealityCapture 免费档或 Meshroom；建模用 Blender 全流程（不买 ZBrush/Substance，用 Blender 烘焙 + 免费纹理）。工期压缩见 9.4 表注。</p>
+
+<h3>9.2 成本（量级，实际以官网报价为准）</h3>
+<table>
+<tr><th>项</th><th>量级</th><th>说明</th></tr>
+<tr><td>软件授权</td><td>¥0–4万</td><td>RealityCapture 非商业免费；Metashape Pro 单机约 $1.5k；ZBrush 订阅约 $40/月；Substance 3D 约 $20/月；Marmoset Toolbag 买断约 $299；全部开源替代可行（Meshroom + Blender）</td></tr>
+<tr><td>硬件</td><td>¥3–10万</td><td>全画幅相机+微距+转盘；分光光度计 Ci62 约 ¥3–5万（可用租借/送检替代）；图形工作站 RTX 4070 级 2 台；校准仪 i1 约 ¥2k</td></tr>
+<tr><td>人力</td><td>按 7 人 × 8 个月</td><td>见 9.3；小团队变体 2–3 人 × 4–5 个月</td></tr>
+</table>
+
+<h3>9.3 里程碑（32 周，每阶段可演示）</h3>
+<table>
+<tr><th>M</th><th>内容</th><th>工期</th><th>交付物（可验收）</th></tr>
+<tr><td>M1</td><td>需求基线 + 采集规范 + 首批 3 件数据采集与建模</td><td>8 周</td><td>高模 + 色值库 + 复原证据链；Master 归档</td></tr>
+<tr><td>M2</td><td>引擎集成 + 单件贯通（L1 观察/拆解/展示）</td><td>4 周</td><td>单件在 three.js 全交互可演示</td></tr>
+<tr><td>M3</td><td>交互系统完成（拆解状态机/测量/热点/光照预设）</td><td>4 周</td><td>L1 验收清单全过</td></tr>
+<tr><td>M4</td><td>工艺流程演示层 + 口述知识层</td><td>6 周</td><td>L2/L3 验收清单全过；3 件文物完整三层</td></tr>
+<tr><td>M5</td><td>离线打包（Tauri/HTML 双形态）+ 增量更新 + 防篡改</td><td>4 周</td><td>断网四档验证通过；增量演练</td></tr>
+<tr><td>M6</td><td>全量测试 + 兼容矩阵 + 文档</td><td>4 周</td><td>验收报告、操作手册、技术文档</td></tr>
+</table>
+<p>小团队变体：M1 缩至 5 周（3 件）、M2–M4 各减 1–2 周（只做 5 道工序/件）、M5–M6 各 3 周，总 20–22 周，首件贯通在第 5 周。</p>
+
+<!-- ============ 10 合规·文物安全·元数据·风险 ============ -->
+<h2 class="sec" id="s10"><span class="no">10</span>合规授权 · 文物安全 · 元数据与长期保存 · 风险清单</h2>
+
+<h3>10.1 合规与版权授权清单（逐项书面化，缺一项不立项）</h3>
+<table>
+<tr><th>权利对象</th><th>风险点</th><th>授权/处置要求</th></tr>
+<tr><td>文物本体数字化复制权</td><td>博物馆/收藏方对高精度三维数据有控制权，扫描行为本身可能受馆方协议约束</td><td>取得馆方书面许可（扫描范围、数据用途、发布范围、分辨率上限约定）；馆方有数字化授权范本的按范本执行</td></tr>
+<tr><td>非遗项目本身（技艺）</td><td>非遗名录中的技艺属公共文化资源，但具体表达有版权边界</td><td>技艺介绍引用官方名录口径；不宣称对技艺本身主张权利</td></tr>
+<tr><td>传承人肖像与口述</td><td>录音、影像、姓名、肖像的使用权</td><td>肖像权/录音授权书：用途、期限、地域、可修改性、商业/非商业界定；口述稿交传承人审阅确认</td></tr>
+<tr><td>工艺照片/线图/文献</td><td>第三方图片版权</td><td>仅用自有拍摄与公有领域文献；第三方素材逐条记录来源与授权状态</td></tr>
+<tr><td>模型数据本身</td><td>高模是重要数字资产</td><td>项目内约定数据权属（项目方/馆方/个人比例），写入合作协议；开源或发布前过授权清单</td></tr>
+</table>
+<p>产出物：每件文物一份 <strong>授权清单（licenses.json）</strong>，逐项含权利人、凭证编号、范围、有效期；随 Master 轨归档，发布前由负责人签核。</p>
+
+<h3>10.2 文物安全与无损采集预案</h3>
+<table>
+<tr><th>风险源</th><th>预案</th></tr>
+<tr><td>接触式扫描（3D 扫描仪贴触）</td><td>脆弱/彩绘/漆皮文物禁止接触式扫描；只做摄影测量或非接触激光（按馆方评估）；操作戴手套、固定防滑垫、限时</td></tr>
+<tr><td>强光（摄影灯/扫描光源）</td><td>照度上限 300 lux（按文物材质分级：纺织品/彩绘 ≤50 lux、陶瓷/金属可放宽）；单次连续照明 ≤15 分钟、间隔散热；UV 光源禁用（除非馆方专项批准）</td></tr>
+<tr><td>热源</td><td>光源距文物 ≥1.5m；环境温湿度按馆方要求（典型 20±2℃ / RH 45–55%）；转盘接触面加软垫</td></tr>
+<tr><td>搬运与摆位</td><td>双人操作、软质夹具、缓起缓放；扫描全程馆方人员在场监督</td></tr>
+</table>
+<p>每场采集出具一份<strong>采集安全记录</strong>（照度、时长、温湿度、操作员、馆方确认人）。</p>
+
+<h3>10.3 数字资产长期保存与元数据标准</h3>
+<ul>
+<li><strong>元数据对齐 CIDOC-CRM（ISO 21127）</strong>：映射表——E22 Human-Made Object（文物）、E12 Production（制作事件，对接工艺层工序）、E67 Birth/E69 Death 不适用、E16 Measurement（尺寸/色值测量事件）、E89 Propositional Object（复原依据/文献）、E31 Document（授权与口述转写）。每件文物产出一份 <code>cidoc.json</code>（或 RDF 序列化），与 Master 轨共存。</li>
+<li><strong>格式长期性</strong>：几何存档 glTF 2.0（开放标准）+ 原始格式双份；贴图 TIFF/EXR 无损；音频 WAV/FLAC；口述转写 TXT+JSON；禁止私有格式独存。</li>
+<li><strong>备份策略</strong>：Master 轨双副本异地（如：馆方服务器 + 项目对象存储），季度校验 hash；版本只增不覆盖。</li>
+<li><strong>可读性</strong>：目录规范 + 每目录 README（见 §3.4），换人不依赖个人记忆。</li>
+</ul>
+
+<h3>10.4 风险清单</h3>
+<table>
+<tr><th>#</th><th>风险</th><th>概率</th><th>影响</th><th>预案</th></tr>
+<tr><td>R1</td><td>扫描反光/暗部导致几何塌陷（釉面、漆面、铜绿）</td><td>中</td><td>高</td><td>交叉偏振 + 多角度补拍 + 手工高模修补；漏区显式标注</td></tr>
+<tr><td>R2</td><td>色彩漂移（ΔE 超限）</td><td>中</td><td>中</td><td>分光光度计全链标定 + 双人抽检 + 色值文档存档（§2.3）</td></tr>
+<tr><td>R3</td><td>离线包超 50MB（音频/贴图膨胀）</td><td>中</td><td>中</td><td>音频 AAC/Opus、KTX2 压缩、LOD2 子包按需；发布前体积门禁</td></tr>
+<tr><td>R4</td><td>低配一体机性能不达标</td><td>中</td><td>高</td><td>自动降档（§3.3/§7.6）+ 载体分档面数 + 验收前置</td></tr>
+<tr><td>R5</td><td>授权不齐（肖像/馆方/第三方素材）</td><td>低</td><td>极高</td><td>10.1 清单门禁：缺项不发布；发布前法务/馆方复核</td></tr>
+<tr><td>R6</td><td>three.js 版本升级破坏兼容</td><td>中</td><td>中</td><td>锁定 r186 基线；glTF 资产与引擎解耦；升级走回归测试</td></tr>
+<tr><td>R7</td><td>数据长期保存格式漂移</td><td>低</td><td>高</td><td>10.3 双格式 + 季度校验 + 归档 README</td></tr>
+<tr><td>R8</td><td>工期延迟（口述/工艺研究员排期）</td><td>中</td><td>中</td><td>工艺研究员提前锁定；工序表先于建模产出；里程碑每阶段可交付</td></tr>
+<tr><td>R9</td><td>文物安全事件（照明/搬运）</td><td>低</td><td>极高</td><td>10.2 预案 + 馆方在场监督 + 安全记录</td></tr>
+</table>
+
+<!-- ============ 11 三重思维检查 ============ -->
+<h2 class="sec" id="s11"><span class="no">11</span>三重思维检查（输出前自检结论）</h2>
+
+<h3>第一重 · 技术可行性：离线渲染性能是否达标</h3>
+<div class="callout ok"><strong>结论：通过</strong>。首屏 ≤3s：本地资源零网络往返 + 渐进加载 + Draco Worker 解码（首屏只载 LOD0 与关键贴图，mipmap 渐进）；一体机 ≥30FPS：单场景 ≤600 draw call / ≤120k 三角形（LOD 生效），关后处理，KTX2 BC7 贴图显存 ≤512MB；单件 ≤50MB：LOD 三级 + Draco 8–12× + KTX2 4–6× 压缩在预算内（音频用 AAC 128k 控制）；总内存 ≤1.5GB：纹理 LRU + 几何不重复持有 + glTF buffer 用后释放。四项量化目标均有对应手段，无"拍脑袋"承诺。</div>
+
+<h3>第二重 · 交互与内容深度：是否覆盖五层"看全、看细、拆得开、讲得清、讲得出怎么做"</h3>
+<div class="callout ok"><strong>结论：通过</strong>。看全：360° + 缩放平移；看细：剖切/X-Ray/线框/热点/测量/光照预设（§4.3）；拆得开：装配树 + 爆炸状态机 + 逐件拆装 + 真实结构顺序（榫卯先楔再穿带）（§4.2）；讲得清：结构注释树 + 知识卡 + 口述（§4.4/§6）；讲得出怎么做：L2 工序演示层——逐步拆解、暂停、回到任意步骤、零件/工具/口述三层绑定（§5），这是本项目区别于"文物扫描展示"的核心，未省略、未降级。</div>
+
+<h3>第三重 · 工程质量与交付合规：是否真离线、可部署、可更新、可长期保存、合规闭环</h3>
+<div class="callout ok"><strong>结论：通过</strong>。真离线：打包产物外部 URL 审计为零 + 断网四档验证（§7.2）；可部署：Tauri 2 主形态 + 自包含 HTML 应急形态，共用 dist/manifest（§7.1）；增量更新：manifest diff + U盘/局域网推送 + 回滚（§7.3）；防篡改：sha256 强制校验 + 可选 Ed25519 + 暗水印（§7.4）；安全：XSS/本地文件/WebGL 注入三道边界写死（§7.5）；长期保存：Master 双轨 + CIDOC-CRM 元数据 + 开放格式 + 双副本备份（§10.3）；合规：授权清单门禁（§10.1）。</div>
+<div class="callout warn"><strong>回炉项（开工前必须补齐，不补齐不进入 M1）</strong>：① 首批文物与馆方/收藏方的数字化授权尚未取得——这是所有工作的前置条件；② 四类文物各确认 1 件具体实物并出采集风险评估；③ 传承人口述授权书模板定稿。三项均为流程性前置，不阻塞方案本身，但阻塞开工。</div>
+
+<footer style="margin-top:72px; padding-top:18px; border-top:1px solid var(--line); color:var(--ink2); font-size:12.5px;">
+文档结束 · 非遗文物 3D 数字化展示系统工程落地方案 v1.0 · 所有量化指标均可由对应章节验收方法复核。
+</footer>
+
+</div>
+</body>
+</html>

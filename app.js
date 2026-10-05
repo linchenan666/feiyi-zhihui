@@ -270,6 +270,9 @@
   var favs = [];
   try { favs = JSON.parse(localStorage.getItem("fy_favs") || "[]"); } catch (e) { favs = []; }
   if (!(favs instanceof Array)) favs = [];
+  /* 自清理：剔除任何不存在于展品库的脏 ID（防测试/外部残留数据） */
+  favs = favs.filter(function (id) { return byId.some(function (i) { return i.id === id; }); });
+  if (favs.length === 0) { try { localStorage.removeItem("fy_favs"); } catch (e) {} }
   function isFav(id) { return favs.indexOf(id) >= 0; }
   function toggleFav(id) {
     var i = favs.indexOf(id);

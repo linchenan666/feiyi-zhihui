@@ -8,6 +8,7 @@
 var FEIYI_DATA = [
   {
     id: "yuju",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1yV411a7Va&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "豫剧",
     en: "Henan Opera",
     category: "戏曲",
@@ -38,6 +39,7 @@ var FEIYI_DATA = [
   },
   {
     id: "quju",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1LG411h7HP&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "曲剧",
     en: "Qu Opera",
     category: "戏曲",
@@ -67,6 +69,7 @@ var FEIYI_DATA = [
   },
   {
     id: "zhuizi",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1eWpVe5EeM&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "河南坠子",
     en: "Henan Zhuizi",
     category: "曲艺",
@@ -96,6 +99,7 @@ var FEIYI_DATA = [
   },
   {
     id: "majie",
+    embed: "https://player.bilibili.com/player.html?bvid=BV19KaY6FENH&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "马街书会",
     en: "Majie Storytelling Fair",
     category: "民俗",
@@ -125,6 +129,7 @@ var FEIYI_DATA = [
   },
   {
     id: "junci",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1Ta4y1L7Sc&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "钧瓷",
     en: "Jun Ware",
     category: "技艺",
@@ -154,6 +159,7 @@ var FEIYI_DATA = [
   },
   {
     id: "ruci",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1HdenzNEUH&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "汝瓷",
     en: "Ru Ware",
     category: "技艺",
@@ -183,6 +189,7 @@ var FEIYI_DATA = [
   },
   {
     id: "sancai",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1wi4y1L7Lh&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "唐三彩",
     en: "Tang Sancai",
     category: "技艺",
@@ -212,6 +219,7 @@ var FEIYI_DATA = [
   },
   {
     id: "shuixi",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1VU411S7LN&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "洛阳水席",
     en: "Luoyang Water Banquet",
     category: "技艺",
@@ -241,6 +249,7 @@ var FEIYI_DATA = [
   },
   {
     id: "bianxiu",
+    embed: "https://player.bilibili.com/player.html?bvid=BV11r4y1c7uz&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "汴绣",
     en: "Bian Embroidery",
     category: "美术",
@@ -270,6 +279,7 @@ var FEIYI_DATA = [
   },
   {
     id: "zhuxian",
+    embed: "https://player.bilibili.com/player.html?aid=584884780&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "朱仙镇年画",
     en: "Zhuxian New Year Pictures",
     category: "美术",
@@ -299,6 +309,7 @@ var FEIYI_DATA = [
   },
   {
     id: "nigugu",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1AA411j7pw&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "浚县泥咕咕",
     en: "Xunxian Clay Whistles",
     category: "美术",
@@ -328,6 +339,7 @@ var FEIYI_DATA = [
   },
   {
     id: "ninigou",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1ox411M7Wc&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "淮阳泥泥狗",
     en: "Huaiyang Clay Dogs",
     category: "美术",
@@ -357,6 +369,7 @@ var FEIYI_DATA = [
   },
   {
     id: "shaolin",
+    embed: "https://player.bilibili.com/player.html?bvid=BV19d4y1d7fJ&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "少林功夫",
     en: "Shaolin Kung Fu",
     category: "体育",
@@ -386,6 +399,7 @@ var FEIYI_DATA = [
   },
   {
     id: "taiji",
+    embed: "https://player.bilibili.com/player.html?bvid=BV14FCgBLEzB&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "陈氏太极拳",
     en: "Chen-style Taijiquan",
     category: "体育",
@@ -415,6 +429,7 @@ var FEIYI_DATA = [
   },
   {
     id: "dahuatie",
+    embed: "https://player.bilibili.com/player.html?bvid=BV1JPrLYDEXP&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "打铁花",
     en: "Iron Flower Show",
     category: "民俗",
@@ -559,4 +574,9 @@ var ITEM_THEME = {
   shaolin:  { bg: "linear-gradient(160deg,#2E2410 0%,#6B5428 45%,#201A0C 100%)", mark: "禅", tint: "#E8C878" },
   taiji:    { bg: "linear-gradient(160deg,#141414 0%,#3A3A3A 45%,#0E0E0E 100%)", mark: "道", tint: "#C8C8C8" },
   dahuatie: { bg: "linear-gradient(160deg,#0A1226 0%,#1A2E52 45%,#0A0E1A 100%)", mark: "火", tint: "#F0A050" }
+};
+
+/* 沉浸演绎 · 本地权威视频清单（由 scan_videos.py 扫描 assets/video 自动生成；也可手工登记 "id":"路径"） */
+var HALL_VIDEOS = {
+
 };

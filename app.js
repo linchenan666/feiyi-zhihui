@@ -43,7 +43,7 @@
   byId.forEach(function (it) { itemById[it.id] = it; });
 
   /* ================= 路由 ================= */
-  var routes = ["home", "hall", "item", "map", "region", "graph", "ask", "create", "immerse"];
+  var routes = ["home", "hall", "item", "map", "region", "graph", "treasury", "ask", "create", "evolution", "immerse"];
 
   function parseHash() {
     var h = location.hash.replace(/^#\/?/, "") || "home";
@@ -82,8 +82,8 @@
     /* 渲染当前视图 */
     var R = {
       home: renderHome, hall: renderHall, item: function () { renderItem(r.id); },
-      map: renderMap, region: function () { renderRegion(r.id); }, graph: renderGraph, ask: renderAsk,
-      create: renderCreate, immerse: renderImmerse
+      map: renderMap, region: function () { renderRegion(r.id); }, graph: renderGraph, treasury: renderTreasury, ask: renderAsk,
+      create: renderCreate, evolution: renderEvolution, immerse: renderImmerse
     };
     if (R[r.view]) R[r.view]();
     else renderHome();
@@ -238,13 +238,25 @@
     });
   }
 
-  /* 页面过渡：View Transitions 编排，不支持时直接切换 */
+  /* 页面过渡：View Transitions 编排，不支持或被打断时直接切换 */
   function transition(fn) {
     if (document.startViewTransition) {
-      var vt = document.startViewTransition(fn);
-      if (vt && vt.finished) vt.finished.then(scrollTopNow);
+      var vt;
+      try {
+        vt = document.startViewTransition(fn);
+      } catch (e) { fn(); scrollTopNow(); return; }
+      if (vt && vt.finished) {
+        vt.finished.then(scrollTopNow, function () { scrollTopNow(); });
+        if (vt.ready) vt.ready.catch(function () {});
+      } else { fn(); scrollTopNow(); }
     } else { fn(); scrollTopNow(); }
   }
+
+  /* 浏览器 View Transition 竞态（跳过/中断）属正常现象，过滤其控制台噪音 */
+  window.addEventListener("unhandledrejection", function (ev) {
+    var n = ev && ev.reason && ev.reason.name;
+    if (n === "AbortError" || n === "InvalidStateError") ev.preventDefault();
+  });
 
   /* ================= 工具 ================= */
   function esc(s) {
@@ -308,18 +320,285 @@
           '<div class="hero-cta">' +
             '<a class="btn-enter" href="#/hall">步入展厅</a>' +
             '<a class="btn-ghost" href="#/ask">先问一个问题</a>' +
+            '<a class="btn-ghost" href="#/evolution">看演进馆</a>' +
+            '<button class="btn-ghost" id="btn-help" type="button">使用说明</button>' +
           '</div>' +
         '</div>' +
         '<div class="hero-metrics">' +
           '<div class="m"><b>15<i>项</i></b><span>招牌深挖</span></div>' +
           '<div class="m"><b>6<i>门类</i></b><span>全类覆盖</span></div>' +
-          '<div class="m"><b>10<i>地市</i></b><span>河南版图</span></div>' +
+          '<div class="m"><b>9<i>地市</i></b><span>河南版图</span></div>' +
           '<div class="m"><b>0<i>上传</i></b><span>纯本地运行</span></div>' +
         '</div>' +
         '<div class="hero-side">把非遗讲给你听 · HENAN ICH</div>' +
         '<div class="hero-scroll">向下</div>' +
-      '</div>';
+      '</div>' + homeCarouselHtml() + authorNoteHtml();
     initHeroParallax();
+    initHomeCarousel();
+    var hb = document.getElementById("btn-help");
+    if (hb) hb.addEventListener("click", showHelp);
+  }
+
+  /* ================= 使用说明浮层（M8.43 可点击跳详情） ================= */
+  var HELP_ITEMS = [
+    ["01 · 首页", "下滑读「作者的话」，看十二件非遗轮播。", "home"],
+    ["02 · 展品总览", "十五件河南珍宝按门类筛选；点卡片右上「藏」章一键收藏。", "hall"],
+    ["03 · 舆图", "地市红点即非遗分布；悬停只亮单项，点击看城市介绍。", "map"],
+    ["04 · 城市", "中原十八城、一城一脉；带「非遗」角标的城市藏有招牌项目。", "region"],
+    ["05 · 知识图谱", "节点即非遗，连线即关联；拖拽平移、滚轮缩放，悬停高亮。", "graph"],
+    ["06 · 珍品馆", "3D 文物拖拽旋转、拆解、工艺演示、口述音频讲「为什么」。", "treasury"],
+    ["07 · 问·AI", "问任意非遗问题即答即读；配置 Key 可切换真·大模型。", "ask"],
+    ["08 · 创意工坊", "选非遗主题生成 AI 海报与文创文案，可收藏、可复制。", "create"],
+    ["09 · 演进馆", "十二轮开发时间轴：真实 Prompt 与落地文件，评委可一键复现。", "evolution"],
+    ["10 · 沉浸演绎", "权威纪录片轮播，左右箭头或键盘切换，进入即播、悬停暂停。", "immerse"],
+    ["通用 · 隐私", "纯本地运行、零上传、断网可用；收藏数据只存于你的浏览器。", ""]
+  ];
+  function helpModalHtml() {
+    return '<div class="help-modal" id="help-modal" role="dialog" aria-modal="true" aria-label="使用说明">' +
+      '<div class="help-panel">' +
+        '<button class="help-close" id="help-close" type="button" aria-label="关闭">×</button>' +
+        '<div id="help-body"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  function renderHelpList() {
+    var body = document.getElementById("help-body");
+    if (!body) return;
+    body.innerHTML =
+      '<h3>使用说明</h3>' +
+      '<p class="help-sub">十个版块 · 一分钟上手 · 纯本地运行 · 点击条目看图文详解</p>' +
+      '<ul class="help-list">' +
+        HELP_ITEMS.map(function (h) {
+          var n = h[0].split("·");
+          var key = h[2];
+          return '<li class="' + (key ? "link" : "") + '"' + (key ? ' data-key="' + key + '"' : "") + '><b>' + n[0] + '</b><span>' + h[1] + '</span><i>' + n[1] + (key ? " ›" : "") + '</i></li>';
+        }).join("") +
+      '</ul>';
+    $$(".help-list li[data-key]", body).forEach(function (li) {
+      li.addEventListener("click", function () { renderHelpDetail(li.getAttribute("data-key")); });
+    });
+  }
+  function renderHelpDetail(key) {
+    var d = window.HELP_DETAILS && HELP_DETAILS[key];
+    if (!d) return;
+    var body = document.getElementById("help-body");
+    if (!body) return;
+    var name = "";
+    for (var i = 0; i < HELP_ITEMS.length; i++) {
+      if (HELP_ITEMS[i][2] === key) { name = HELP_ITEMS[i][0]; break; }
+    }
+    body.innerHTML =
+      '<button class="help-back" id="help-back" type="button">‹ 返回使用说明</button>' +
+      '<h3>' + name + '</h3>' +
+      '<div class="help-detail">' +
+        '<div class="help-fig"><img src="' + d.img + '" alt="' + name + ' 界面截图" loading="lazy"></div>' +
+        '<ol class="help-steps">' + d.steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + '</ol>' +
+      '</div>' +
+      '<a class="help-go" href="#/' + key + '">进入该模块体验 ›</a>';
+    document.getElementById("help-back").addEventListener("click", renderHelpList);
+    var go = document.querySelector("#help-body .help-go");
+    if (go) go.addEventListener("click", closeHelp);
+  }
+  function showHelp() {
+    var m = document.getElementById("help-modal");
+    if (!m) {
+      var d = document.createElement("div");
+      d.innerHTML = helpModalHtml();
+      document.body.appendChild(d.firstElementChild);
+      m = document.getElementById("help-modal");
+      document.getElementById("help-close").addEventListener("click", closeHelp);
+      m.addEventListener("click", function (e) { if (e.target === m) closeHelp(); });
+    }
+    renderHelpList();
+    m.classList.add("show");
+  }
+  function closeHelp() {
+    var m = document.getElementById("help-modal");
+    if (m) m.classList.remove("show");
+  }
+  if (!window.__helpKeyBound) {
+    window.__helpKeyBound = true;
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHelp(); });
+  }
+
+  /* ================= 作者的话（第一人称 · 真人声音 · 降AI） ================= */
+  var AUTHOR_PARAS = [
+    "我在洛阳读书。这座城随手一抓就是历史——龙门的佛、唐三彩的釉、老城的水席；可我慢慢发现，身边的同学、远道来的朋友，大多只是路过拍张照，说不出这些东西究竟好在哪。非遗在资料里、在玻璃柜里、在长辈的记忆里，离我们这代人的手机屏幕，隔着一段不近的距离。",
+    "我没有本事把它们一一「复活」，但我至少想做一个入口：让你被一张好看的画面留住，愿意点进去读三分钟，随口问一句、立刻有人答，还能看见它们在中原大地上怎样彼此牵连。这就是「非遗智汇」。",
+    "为什么是这十五项？我没贪多。豫剧、钧瓷、唐三彩、打铁花……这十五项覆盖戏曲、曲艺、技艺、美术、体育、民俗六个门类，是我想先讲深、讲透的河南底气；其余的我会一项项补，而不是堆一个看着热闹、点进去空泛的清单。",
+    "也请允许我留一份诚实：凡我还没核实到确凿出处的内容，都标了「待核」，没有为了好看去硬编。这个应用纯本地运行、不上传任何数据——我希望它干净，就像我希望这些故事被讲得干净。",
+    "如果它让你对某一项非遗，多了三分钟的兴趣，那我做这件事的意义，就已经满了。"
+  ];
+  function authorNoteHtml() {
+    return '<section class="author-note" aria-label="作者的话">' +
+      '<div class="section-wrap an-wrap">' +
+        '<div class="an-side">' +
+          '<span class="an-zh">作者的话</span>' +
+          '<span class="an-en">A NOTE FROM THE AUTHOR</span>' +
+          '<span class="an-line"></span>' +
+        '</div>' +
+        '<div class="an-body">' +
+          AUTHOR_PARAS.map(function (p) { return '<p>' + p + '</p>'; }).join("") +
+          '<div class="an-sign">' +
+            '<span class="an-seal" aria-hidden="true">航</span>' +
+            '<div class="an-sign-tx"><b>李宇航 · HesperAn</b><i>于洛阳 · 二〇二六 秋</i></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ============== 首页 · 招牌非遗小型轮播 ============== */
+  function homeCarouselHtml() {
+    return '<section class="home-carousel" aria-label="招牌非遗速览">' +
+      '<div class="hc-wrap">' +
+        '<div class="hc-head rv">' +
+          '<div class="kicker">招 牌 速 览</div>' +
+          '<h2 class="hc-title">十五项河南非遗</h2>' +
+          '<p class="hc-sub">轻点一张，走进它的故事</p>' +
+        '</div>' +
+        '<div class="hc-viewport" id="hc-viewport">' +
+          '<div class="hc-track" id="hc-track">' +
+            byId.map(function (it) {
+              return '<a class="hc-slide" href="#/item/' + it.id + '">' +
+                '<span class="hc-img"><img src="' + it.img + '" alt="' + it.name + '" loading="lazy" decoding="async">' +
+                '<span class="hc-cat">' + it.category + '</span>' +
+                '<span class="hc-name">' + it.name + '</span></span>' +
+                '<span class="hc-meta"><p>' + esc(it.tagline.slice(0, 40)) + '…</p></span>' +
+              '</a>';
+            }).join("") +
+          '</div>' +
+          '<button class="hc-arrow hc-prev" id="hc-prev" type="button" aria-label="上一项">&#8249;</button>' +
+          '<button class="hc-arrow hc-next" id="hc-next" type="button" aria-label="下一项">&#8250;</button>' +
+        '</div>' +
+        '<div class="hc-dots" id="hc-dots">' +
+          byId.map(function (it, k) {
+            return '<button type="button" data-k="' + k + '" aria-label="第' + (k + 1) + '项"></button>';
+          }).join("") +
+        '</div>' +
+      '</div>' +
+    '</section>';
+  }
+
+  var hcIdx = 0, hcTimer = null, hcDir = 1, hcHover = false;
+  function initHomeCarousel() {
+    if (hcTimer) { clearInterval(hcTimer); hcTimer = null; }
+    var track = $("#hc-track"), vp = $("#hc-viewport");
+    if (!track || !vp) return;
+    var slides = Array.prototype.slice.call(track.querySelectorAll(".hc-slide"));
+    var dots = Array.prototype.slice.call(document.querySelectorAll("#hc-dots button"));
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function layout() {
+      if (!document.body.contains(track)) {
+        if (hcTimer) { clearInterval(hcTimer); hcTimer = null; }
+        return;
+      }
+      var vw = vp.clientWidth;
+      var r0 = slides[0].getBoundingClientRect();
+      var w = r0.width;
+      var g = slides.length > 1 ? slides[1].getBoundingClientRect().left - r0.right : 0;
+      var x = vw / 2 - (hcIdx * (w + g) + w / 2);
+      track.style.transform = "translateX(" + x + "px)";
+      slides.forEach(function (sl, k) {
+        var d = Math.abs(k - hcIdx);
+        sl.classList.toggle("active", d === 0);
+        sl.classList.toggle("near", d === 1);
+      });
+      dots.forEach(function (d, k) { d.classList.toggle("on", k === hcIdx); });
+    }
+    function go(n) {
+      hcIdx = Math.max(0, Math.min(slides.length - 1, n));
+      hcDir = hcIdx === 0 ? 1 : (hcIdx === slides.length - 1 ? -1 : hcDir);
+      layout();
+    }
+    $("#hc-prev").addEventListener("click", function (e) { e.preventDefault(); go(hcIdx - 1); });
+    $("#hc-next").addEventListener("click", function (e) { e.preventDefault(); go(hcIdx + 1); });
+    dots.forEach(function (d) {
+      d.addEventListener("click", function () { go(parseInt(d.getAttribute("data-k"), 10)); });
+    });
+    vp.addEventListener("mouseenter", function () { hcHover = true; });
+    vp.addEventListener("mouseleave", function () { hcHover = false; });
+    var sx = 0;
+    vp.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    vp.addEventListener("touchend", function (e) {
+      var dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) go(hcIdx + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+    window.__hcLayout = layout;
+    if (!window.__hcResizeBound) {
+      window.__hcResizeBound = true;
+      window.addEventListener("resize", function () {
+        if (!window.__hcLayout) return;
+        if (window.__hcRT) cancelAnimationFrame(window.__hcRT);
+        window.__hcRT = requestAnimationFrame(function () { window.__hcLayout(); });
+      });
+    }
+    layout();
+    if (!reduce) {
+      hcTimer = setInterval(function () { if (!hcHover) go(hcIdx + hcDir); }, 2000);
+    }
+  }
+
+  /* ============== 详情页 · 你可能还喜欢（自动轮播） ============== */
+  var relIdx = 0, relTimer = null, relDir = 1, relHover = false;
+  function initRelatedCarousel() {
+    if (relTimer) { clearInterval(relTimer); relTimer = null; }
+    var track = $("#rel-track"), vp = $("#rel-viewport");
+    if (!track || !vp) return;
+    var slides = Array.prototype.slice.call(track.querySelectorAll(".hc-slide"));
+    var dots = Array.prototype.slice.call(document.querySelectorAll("#rel-dots button"));
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function layout() {
+      if (!document.body.contains(track)) {
+        if (relTimer) { clearInterval(relTimer); relTimer = null; }
+        return;
+      }
+      var vw = vp.clientWidth;
+      var r0 = slides[0].getBoundingClientRect();
+      var w = r0.width;
+      var g = slides.length > 1 ? slides[1].getBoundingClientRect().left - r0.right : 0;
+      var x = vw / 2 - (relIdx * (w + g) + w / 2);
+      track.style.transform = "translateX(" + x + "px)";
+      slides.forEach(function (sl, k) {
+        var d = Math.abs(k - relIdx);
+        sl.classList.toggle("active", d === 0);
+        sl.classList.toggle("near", d === 1);
+      });
+      dots.forEach(function (d, k) { d.classList.toggle("on", k === relIdx); });
+    }
+    function go(n) {
+      relIdx = Math.max(0, Math.min(slides.length - 1, n));
+      relDir = relIdx === 0 ? 1 : (relIdx === slides.length - 1 ? -1 : relDir);
+      layout();
+    }
+    $("#rel-prev").addEventListener("click", function (e) { e.preventDefault(); go(relIdx - 1); });
+    $("#rel-next").addEventListener("click", function (e) { e.preventDefault(); go(relIdx + 1); });
+    dots.forEach(function (d) {
+      d.addEventListener("click", function () { go(parseInt(d.getAttribute("data-k"), 10)); });
+    });
+    vp.addEventListener("mouseenter", function () { relHover = true; });
+    vp.addEventListener("mouseleave", function () { relHover = false; });
+    var sx = 0;
+    vp.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    vp.addEventListener("touchend", function (e) {
+      var dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) go(relIdx + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+    window.__relLayout = layout;
+    if (!window.__relResizeBound) {
+      window.__relResizeBound = true;
+      window.addEventListener("resize", function () {
+        if (!window.__relLayout) return;
+        if (window.__relRT) cancelAnimationFrame(window.__relRT);
+        window.__relRT = requestAnimationFrame(function () { window.__relLayout(); });
+      });
+    }
+    layout();
+    if (!reduce) {
+      relTimer = setInterval(function () { if (!relHover) go(relIdx + relDir); }, 2000);
+    }
   }
 
   /* ================= HALL ================= */
@@ -342,6 +621,7 @@
         '<div class="filter-bar rv" style="--d:.1s" id="filter-bar">' +
           '<button class="' + (hallFilter === "全部" ? "on" : "") + '" data-f="全部">全部 · 15</button>' +
           '<button class="' + (hallFilter === "fav" ? "on" : "") + '" data-f="fav">已收藏 · ' + favs.length + '</button>' +
+          (hallFilter === "fav" && favs.length > 0 ? '<button data-f="favclear" class="fav-clear">清空收藏</button><button data-f="favout" class="fav-clear">导出清单</button>' : '') +
           cats.map(function (c) {
             var n = byId.filter(function (i) { return i.category === c.id; }).length;
             return '<button class="f-cat ' + (hallFilter === c.id ? "on" : "") + '" style="--img:url(' + (CAT_IMG[c.id] || "") + ')" data-f="' + c.id + '" aria-label="筛选：' + c.label + '">' +
@@ -364,10 +644,11 @@
     if (hallFilter === "全部") list = byId;
     else if (hallFilter === "fav") list = byId.filter(function (i) { return isFav(i.id); });
     else list = byId.filter(function (i) { return i.category === hallFilter; });
-    grid.innerHTML = list.map(function (it, k) {
+    grid.innerHTML = list.length ? list.map(function (it, k) {
       var g = byId.indexOf(it);
       return '<a class="card tilt rv" style="--d:' + (k * 0.06).toFixed(2) + 's" href="#/item/' + it.id + '" data-cat="' + it.category + '">' +
         '<div class="frame"><span class="num">' + pad(g + 1) + '</span>' +
+        '<button class="fav-ghost' + (isFav(it.id) ? " on" : "") + '" data-fav="' + it.id + '" aria-label="收藏/取消收藏" title="收藏"><span>藏</span></button>' +
         '<img src="' + it.img + '" alt="' + it.name + '" loading="lazy" decoding="async">' +
         '<span class="cat">' + it.category + '</span>' +
         '<span class="more">查看详情</span></div>' +
@@ -375,20 +656,69 @@
         '<div class="en">' + esc(it.en) + '</div>' +
         '<p>' + esc(it.tagline.slice(0, 44)) + '…</p></div>' +
       '</a>';
-    }).join("");
+    }).join("") : '<div class="grid-empty">还没有收藏展品——点展品卡片上的「藏」或详情页收藏按钮即可加入珍藏。</div>';
+    $$(".fav-ghost", grid).forEach(function (b) {
+      b.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFav(b.getAttribute("data-fav"));
+        drawHallGrid();
+      });
+    });
     observeReveals(grid);
   }
 
   function bindHallFilter() {
     var bar = $("#filter-bar");
     if (!bar) return;
-    $$("button", bar).forEach(function (b) {
+    function bindOne(b) {
       b.addEventListener("click", function () {
-        hallFilter = b.getAttribute("data-f");
+        var f = b.getAttribute("data-f");
+        if (f === "favclear") {
+          favs = [];
+          try { localStorage.setItem("fy_favs", "[]"); } catch (e) {}
+          renderHall();
+          return;
+        }
+        if (f === "favout") {
+          var txt = "我的河南非遗收藏清单（非遗智汇）：\n" + favs.map(function (id) {
+            var it = byId.filter(function (i) { return i.id === id; })[0];
+            return "· " + (it ? it.name : id);
+          }).join("\n");
+          var ok = false;
+          try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt); ok = true; } } catch (e) {}
+          if (!ok) {
+            try {
+              var ta = document.createElement("textarea"); ta.value = txt;
+              ta.style.position = "fixed"; ta.style.opacity = "0";
+              document.body.appendChild(ta); ta.select();
+              document.execCommand("copy"); document.body.removeChild(ta); ok = true;
+            } catch (e) {}
+          }
+          toast(ok ? "已复制收藏清单" : "复制失败，请手动记录");
+          return;
+        }
+        hallFilter = f;
         $$("button", bar).forEach(function (x) { x.classList.toggle("on", x === b); });
         drawHallGrid();
+        syncFavClear();
       });
-    });
+    }
+    function syncFavClear() {
+      var has = bar.querySelector("button.fav-clear");
+      if (hallFilter === "fav" && favs.length > 0) {
+        if (!has) {
+          var nb = document.createElement("button");
+          nb.className = "fav-clear"; nb.setAttribute("data-f", "favclear"); nb.textContent = "清空收藏";
+          var favBtn = bar.querySelector('button[data-f="fav"]');
+          if (favBtn) { favBtn.insertAdjacentElement("afterend", nb); bindOne(nb); }
+        }
+      } else if (has) {
+        has.parentNode.removeChild(has);
+      }
+    }
+    $$("button", bar).forEach(bindOne);
+    syncFavClear();
   }
 
   /* ================= ITEM ================= */
@@ -454,20 +784,30 @@
           '</div>' +
         '</div>' +
         (related.length ?
-        '<div class="related rv" style="--d:.12s"><h3>关联展品</h3><div class="grid">' +
-          related.map(function (r) {
-            return '<a class="card tilt" href="#/item/' + r.id + '">' +
-              '<div class="frame"><span class="num">' + pad(byId.indexOf(r) + 1) + '</span>' +
-              '<img src="' + r.img + '" alt="' + r.name + '" loading="lazy" decoding="async">' +
-              '<span class="cat">' + r.category + '</span>' +
-              '<span class="more">查看详情</span></div>' +
-              '<div class="meta"><h3>' + r.name + '</h3>' +
-              '<div class="en">' + esc(r.en) + '</div></div>' +
-            '</a>';
-          }).join("") +
+        '<div class="related rv" style="--d:.12s"><h3>你可能还喜欢</h3><div class="rel-wrap">' +
+          '<div class="hc-viewport rel-viewport" id="rel-viewport">' +
+            '<div class="hc-track" id="rel-track">' +
+              related.map(function (r) {
+                return '<a class="hc-slide" href="#/item/' + r.id + '">' +
+                  '<span class="hc-img"><img src="' + r.img + '" alt="' + r.name + '" loading="lazy" decoding="async">' +
+                  '<span class="hc-cat">' + r.category + '</span>' +
+                  '<span class="hc-name">' + r.name + '</span></span>' +
+                  '<span class="hc-meta"><p>' + esc(r.tagline.slice(0, 40)) + '…</p></span>' +
+                '</a>';
+              }).join("") +
+            '</div>' +
+            '<button class="hc-arrow hc-prev" id="rel-prev" type="button" aria-label="上一个">&#8249;</button>' +
+            '<button class="hc-arrow hc-next" id="rel-next" type="button" aria-label="下一个">&#8250;</button>' +
+          '</div>' +
+          '<div class="hc-dots" id="rel-dots">' +
+            related.map(function (r, k) {
+              return '<button type="button" data-k="' + k + '" aria-label="第' + (k + 1) + '项"></button>';
+            }).join("") +
+          '</div>' +
         '</div></div>' : "") +
       '</div>';
     bindItemFav(it.id);
+    initRelatedCarousel();
     observeReveals(el);
   }
 
@@ -600,7 +940,7 @@
         '<div class="section-head rv">' +
           '<div class="kicker">02 · 非遗地图</div>' +
           '<h2 class="section-title">河南版图上的文化坐标</h2>' +
-          '<p class="section-sub">十五项招牌非遗分布在中原大地的十个地市。悬停标点查看项目，点击进入详情。</p>' +
+          '<p class="section-sub">十五项招牌非遗分布在中原大地的九个地市。悬停标点查看项目，点击进入详情。</p>' +
         '</div>' +
         '<div class="map-layout">' +
           '<div class="rv" style="--d:.1s">' +
@@ -704,6 +1044,8 @@
     }, { passive: false });
     /* 拖拽平移 */
     zoomStage.addEventListener("pointerdown", function (ev) {
+      /* 点在控件按钮上：不启动拖拽、不捕获指针，保证按钮 click 正常触发 */
+      if (ev.target.closest && ev.target.closest(".zoom-ctrl")) return;
       drag = { sx: ev.clientX, sy: ev.clientY, tx: ztx, ty: zty };
       zoomStage.classList.add("dragging");
       zoomStage.setPointerCapture(ev.pointerId);
@@ -747,9 +1089,23 @@
   function zoomEsc(ev) {
     if (ev.key === "Escape") closeMapZoom();
   }
+  function clampPan() {
+    if (!zoomStage) return;
+    var W = zoomStage.clientWidth, H = zoomStage.clientHeight;
+    if (zs <= 1.001) { ztx = 0; zty = 0; return; }
+    /* 平移边界：地图始终覆盖整个视窗，拖到边缘"顶住"，不露出空白 */
+    ztx = Math.min(0, Math.max(W * (1 - zs), ztx));
+    zty = Math.min(0, Math.max(H * (1 - zs), zty));
+  }
   function applyZoom() {
     if (!zoomView) return;
+    clampPan();
     zoomView.style.transform = "translate(" + ztx + "px," + zty + "px) scale(" + zs + ")";
+    if (zoomModal) {
+      var zi = zoomModal.querySelector(".zoom-in"), zo = zoomModal.querySelector(".zoom-out");
+      if (zi) zi.disabled = zs >= 4.999;
+      if (zo) zo.disabled = zs <= 1.001;
+    }
   }
   function closeMapZoom(restoreFocus) {
     if (!zoomModal) return;
@@ -767,7 +1123,9 @@
   }
 
 
+  var _mapSvgCache = null;
   function mapSvgHtml() {
+    if (_mapSvgCache) return _mapSvgCache;
     var cityG = Object.keys(HENAN_CITY_PATHS).map(function (ck) {
       var lb = HENAN_CITY_LABELS[ck];
       return '<g class="map-city" data-city="' + ck + '" tabindex="0" role="button" aria-label="' + ck + '">' +
@@ -780,10 +1138,11 @@
       return '<g class="map-dot" data-id="' + it.id + '" tabindex="0" role="button" aria-label="' + it.name + '，' + it.category + '，点击查看详情" transform="translate(' + p.x + ',' + p.y + ')">' +
         '<circle r="1.9"></circle><text y="-3.6" text-anchor="middle">' + it.name + '</text></g>';
     }).join("");
-    return '<svg viewBox="0 0 ' + HENAN_VIEW.w + ' ' + HENAN_VIEW.h + '" role="img" aria-label="河南非遗分布地图（真实行政区划）">' +
+    _mapSvgCache = '<svg viewBox="0 0 ' + HENAN_VIEW.w + ' ' + HENAN_VIEW.h + '" role="img" aria-label="河南非遗分布地图（真实行政区划）">' +
         '<g class="map-cities">' + cityG + '</g>' +
         dots +
       '</svg>';
+    return _mapSvgCache;
   }
   function drawMap() {
     var box = $("#map-canvas");
@@ -1024,11 +1383,14 @@
     observeReveals(el);
   }
 
+  var _graphCache = null;
   function drawGraph() {
     var stage = $("#graph-stage");
     if (!stage) return;
-    var G = buildGraph();
-    var pos = layoutGraph(G.nodes, G.edges);
+    if (!_graphCache) _graphCache = { G: buildGraph(), pos: null };
+    var G = _graphCache.G;
+    var pos = _graphCache.pos || layoutGraph(G.nodes, G.edges);
+    _graphCache.pos = pos;
     var nodeList = G.nodes.map(function (nd, i) {
       var p = pos[i];
       var el = '<g class="g-node" data-i="' + i + '"' +
@@ -1105,20 +1467,11 @@
       }, { passive: false });
     }
 
-    /* 入场动画：节点分批渐显 + 连线渐显（M8.10） */
+    /* 入场：整图一次快速淡入（替代逐节点 stagger，打开即整体清晰，更快更克制） */
     if (!REDUCED) {
-      var _gn = stage.querySelectorAll(".g-node"), _gl = stage.querySelectorAll(".g-link");
-      for (var _gi = 0; _gi < _gn.length; _gi++) _gn[_gi].style.opacity = "0";
-      for (var _li = 0; _li < _gl.length; _li++) _gl[_li].style.opacity = "0";
-      _gn.forEach(function (g, i) {
-        var d = 120 + (i % 3) * 70 + Math.floor(i / 3) * 22;
-        g.style.transition = "opacity .5s cubic-bezier(.22,1,.36,1) " + d + "ms";
-        setTimeout(function () { g.style.opacity = "1"; }, 40);
-      });
-      _gl.forEach(function (l, i) {
-        l.style.transition = "opacity .55s ease " + (180 + i * 10) + "ms";
-        setTimeout(function () { l.style.opacity = "1"; }, 40);
-      });
+      svgEl.style.opacity = "0";
+      svgEl.style.transition = "opacity .42s cubic-bezier(.22,1,.36,1) .06s";
+      requestAnimationFrame(function () { requestAnimationFrame(function () { svgEl.style.opacity = "1"; }); });
     }
 
     var nodes = $$(".g-node", stage), links = $$(".g-link", stage);
@@ -1344,7 +1697,7 @@
       if (score > bestScore) { bestScore = score; best = k; }
     });
     if (best && bestScore >= 2) {
-      lastTopic = best.itemName || best.title || "";
+      lastTopic = best.itemName || best.title || best.q || "";
       var src = "来自内置知识库" + (best.itemName ? " · " + best.itemName + "条目" : " · 总览条目");
       return { a: best.a, src: src };
     }
@@ -1355,7 +1708,22 @@
   }
 
   /* ================= IMMERSE ================= */
-  var immerseIdx = 0, immerseTimer = null, immersePaused = false, immerseLine = 0;
+  /* ============ 沉浸演绎（夜戏台 · 权威视频/官方嵌入/水墨图三态，按数据自动选择） ============ */
+  var ICON = {
+    muteOff: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>',
+    muteOn: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+    full: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'
+  };
+  var immerseIdx = 0, immerseTimer = null, immersePaused = false, immerseLine = 0, immerseMode = "image";
+
+  function immerseMedia(it) {
+    if (!immerseFallback[it.id]) {
+      if (it.embed && navigator.onLine !== false) return { type: "embed", src: it.embed };
+      if (it.video) return { type: "video", src: it.video };
+      if (window.HALL_VIDEOS && HALL_VIDEOS[it.id]) return { type: "video", src: HALL_VIDEOS[it.id] };
+    }
+    return { type: "image", src: it.img };
+  }
 
   function renderImmerse() {
     var el = $("#view-immerse");
@@ -1366,7 +1734,7 @@
         '<div class="section-head rv">' +
           '<div class="kicker">05 · 沉浸演绎</div>' +
           '<h2 class="section-title">走进一件非遗</h2>' +
-          '<p class="section-sub">选择一项，光影与文字将带你走进它的世界。全屏建议。</p>' +
+          '<p class="section-sub">权威影像与光影文字，带你走进它的世界。全屏建议。</p>' +
         '</div>' +
         '<div class="immerse-pick rv" style="--d:.1s" id="immerse-pick">' +
           byId.map(function (it, k) {
@@ -1376,6 +1744,7 @@
         '<div class="immerse-stage rv" style="--d:.18s" id="immerse-stage"></div>' +
       '</div>';
     bindImmersePick();
+    bindImmerseNet();
     drawImmerse();
     observeReveals(el);
   }
@@ -1384,48 +1753,143 @@
     var stage = $("#immerse-stage");
     if (!stage) return;
     var it = byId[immerseIdx];
-    var lines = it.deep.slice(0, 3);
-    stage.innerHTML =
-      '<div class="stage-img" style="background-image:url(' + it.img + ')"></div>' +
-      '<div class="stage-veil"></div>' +
+    var m = immerseMedia(it);
+    immerseMode = m.type; immersePaused = false; immerseLine = 0;
+    var mediaHtml;
+    if (m.type === "embed") {
+      mediaHtml = '<iframe class="stage-embed" id="stage-media" src="' + esc(m.src) +
+        '" frameborder="0" allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>';
+    } else if (m.type === "video") {
+      mediaHtml = '<video class="stage-video" id="stage-media" src="' + esc(m.src) +
+        '" autoplay muted loop playsinline preload="metadata"></video>';
+    } else {
+      mediaHtml = '<div class="stage-img" id="stage-media" style="background-image:url(' + it.img + ')"></div>';
+    }
+    var ctrl =
+      '<button id="st-prev" aria-label="上一项">‹</button>' +
+      (m.type === "embed" ? "" : '<button id="st-play" aria-label="播放或暂停">‖</button>') +
+      '<button id="st-next" aria-label="下一项">›</button>' +
+      (m.type === "video" ? '<button id="st-mute" aria-label="声音开关">' + ICON.muteOff + '</button>' : "") +
+      (m.type === "video" || m.type === "embed"
+        ? '<button id="st-full" aria-label="全屏">' + ICON.full + '</button>'
+        : "");
+    var arrows =
       '<button class="stage-arrow sta-prev" id="st-arrow-prev" type="button" aria-label="上一项">‹</button>' +
-      '<button class="stage-arrow sta-next" id="st-arrow-next" type="button" aria-label="下一项">›</button>' +
-      '<div class="stage-num">' + pad(immerseIdx + 1) + ' / ' + pad(byId.length) + '</div>' +
-      '<div class="stage-title">' + it.name + '<small>' + esc(it.en) + ' · ' + it.category + '</small></div>' +
-      '<div class="stage-line" id="stage-line">' + esc(lines[0]) + '</div>' +
-      '<div class="stage-progress" id="stage-progress"></div>' +
-      '<div class="stage-ctrl">' +
-        '<button id="st-prev" aria-label="上一项">‹</button>' +
-        '<button id="st-play" aria-label="播放或暂停">' + (immersePaused ? "▶" : "‖") + '</button>' +
-        '<button id="st-next" aria-label="下一项">›</button>' +
-      '</div>';
-    immerseLine = 0;
+      '<button class="stage-arrow sta-next" id="st-arrow-next" type="button" aria-label="下一项">›</button>';
+    var overlay = arrows;
+    if (m.type !== "embed") {
+      overlay =
+        '<div class="stage-veil"></div>' + arrows +
+        '<div class="stage-num">' + pad(immerseIdx + 1) + ' / ' + pad(byId.length) + '</div>' +
+        '<div class="stage-title">' + it.name + '<small>' + esc(it.en) + ' · ' + it.category + '</small></div>' +
+        '<div class="stage-line" id="stage-line">' + esc(it.deep[0]) + '</div>' +
+        '<div class="stage-progress" id="stage-progress"></div>' +
+        '<div class="stage-ctrl">' + ctrl + '</div>';
+    }
+    stage.innerHTML = mediaHtml + overlay;
     bindStageCtrl();
-    startImmerseTimer();
+    if (m.type === "video") bindStageVideo(it);
+    else if (m.type === "embed") bindEmbedFallback(it);
+    else startImageTimer();
   }
 
-  function startImmerseTimer() {
+  function bindStageVideo(it) {
+    var v = $("#stage-media"), prog = $("#stage-progress");
+    if (prog) prog.style.transition = "none";
+    if (!v) return;
+    v.addEventListener("error", function () { downgradeToImage(it); });
+    v.addEventListener("timeupdate", function () {
+      if (prog && v.duration) prog.style.width = (v.currentTime / v.duration * 100) + "%";
+    });
+    v.addEventListener("click", toggleVideoPlay);
+    var mb = $("#st-mute");
+    if (mb) mb.addEventListener("click", function () {
+      v.muted = !v.muted;
+      mb.innerHTML = v.muted ? ICON.muteOff : ICON.muteOn;
+      if (!v.muted && v.paused) v.play();
+    });
+    bindFullscreen();
+  }
+
+  function toggleVideoPlay() {
+    var v = $("#stage-media"), play = $("#st-play");
+    if (!v) return;
+    if (v.paused) { v.play(); immersePaused = false; if (play) play.textContent = "‖"; }
+    else { v.pause(); immersePaused = true; if (play) play.textContent = "▶"; }
+  }
+
+  var immerseFallback = {};
+  var immerseNetBound = false;
+
+  function bindImmerseNet() {
+    if (immerseNetBound) return;
+    immerseNetBound = true;
+    window.addEventListener("offline", function () {
+      /* 断网即时降级：正在播 embed 立即切静态海报，不等探针超时 */
+      if (byId[immerseIdx] && immerseMode === "embed") downgradeToImage(byId[immerseIdx]);
+    });
+    window.addEventListener("online", function () {
+      /* 联网自动恢复：该展品有 embed 且此前被降级 → 重画为视频 */
+      if (!byId[immerseIdx]) return;
+      var it = byId[immerseIdx];
+      if (immerseFallback[it.id] && !it.video && !(window.HALL_VIDEOS && HALL_VIDEOS[it.id])) {
+        delete immerseFallback[it.id];
+        drawImmerse();
+      }
+    });
+  }
+
+  function bindEmbedFallback(it) {
+    /* 即时判定：打开时已离线 → 不建 iframe 直接降级 */
+    if (navigator.onLine === false) { downgradeToImage(it); return; }
+    var probe = new Image();
+    var done = false, timer;
+    var fail = function () {
+      if (done || byId[immerseIdx] !== it) return;
+      done = true;
+      downgradeToImage(it);
+    };
+    probe.onload = function () { done = true; if (timer) clearTimeout(timer); };
+    probe.onerror = fail;
+    probe.src = "https://www.bilibili.com/favicon.ico?_=" + Date.now();
+    timer = setTimeout(fail, 4500);
+  }
+
+  function downgradeToImage(it) {
+    if (immerseMode === "image" || byId[immerseIdx] !== it) return;
+    immerseFallback[it.id] = true;
+    drawImmerse();
+  }
+
+  function bindFullscreen() {
+    var fb = $("#st-full"), stage = $("#immerse-stage");
+    if (!fb || !stage) return;
+    fb.addEventListener("click", function () {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (stage.requestFullscreen) stage.requestFullscreen();
+    });
+  }
+
+  function startImageTimer() {
     clearInterval(immerseTimer);
     var lineEl = $("#stage-line"), prog = $("#stage-progress");
     if (!lineEl) return;
+    if (prog) { prog.style.display = ""; prog.style.transition = "width .6s linear"; }
+    var it = byId[immerseIdx];
+    var lines = it.deep.slice(0, 3);
     var t0 = performance.now();
     if (immersePaused && prog) { prog.style.width = "0%"; return; }
     immerseTimer = setInterval(function () {
-      var it = byId[immerseIdx];
-      var lines = it.deep.slice(0, 3);
-      var el = 3000;
-      var dt = performance.now() - t0;
+      var el = 3000, dt = performance.now() - t0;
       if (prog) prog.style.width = Math.min(100, dt / (el * lines.length) * 100) + "%";
       var ci = Math.floor(dt / el) % lines.length;
       if (ci !== immerseLine) {
         immerseLine = ci;
-        if (lineEl) {
-          lineEl.classList.add("fade");
-          setTimeout(function () {
-            lineEl.textContent = lines[ci];
-            lineEl.classList.remove("fade");
-          }, 750);
-        }
+        lineEl.classList.add("fade");
+        setTimeout(function () {
+          lineEl.textContent = lines[ci];
+          lineEl.classList.remove("fade");
+        }, 750);
       }
     }, 220);
   }
@@ -1438,18 +1902,20 @@
     if (ap) ap.addEventListener("click", function () { stepImmerse(-1); });
     if (an) an.addEventListener("click", function () { stepImmerse(1); });
     if (play) play.addEventListener("click", function () {
+      if (immerseMode === "video") { toggleVideoPlay(); return; }
       immersePaused = !immersePaused;
       play.textContent = immersePaused ? "▶" : "‖";
-      startImmerseTimer();
+      startImageTimer();
     });
   }
 
   function stepImmerse(d) {
+    clearInterval(immerseTimer);
     immerseIdx = (immerseIdx + d + byId.length) % byId.length;
     updatePick(); drawImmerse();
   }
 
-  /* 键盘 ← → 切换展品（仅沉浸视图激活时；避开输入框；一次性注册） */
+  /* 键盘：← → 切换展品，空格 播放/暂停（仅沉浸视图；避开输入框；一次性注册） */
   if (!window._imKeysBound) {
     window._imKeysBound = true;
     document.addEventListener("keydown", function (e) {
@@ -1459,6 +1925,10 @@
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
       if (e.key === "ArrowLeft") { e.preventDefault(); stepImmerse(-1); }
       else if (e.key === "ArrowRight") { e.preventDefault(); stepImmerse(1); }
+      else if (e.key === " ") {
+        e.preventDefault();
+        var pl = $("#st-play"); if (pl) pl.click();
+      }
     });
   }
 
@@ -1538,6 +2008,55 @@
     observeReveals(el);
   }
 
+  function renderEvolution() {
+    var el = $("#view-evolution");
+    var cards = EVOLUTION.map(function (e) {
+      var pr = e.prompt
+        ? '<div class="evo-pr"><p>' + esc(e.prompt) + '</p><small>关键 Prompt</small></div>'
+        : "";
+      var ai = e.ai
+        ? '<div class="evo-ai"><p>' + esc(e.ai) + '</p><small>AI 协作要点</small></div>'
+        : "";
+      var fix = e.fix
+        ? '<div class="evo-fix"><p>' + esc(e.fix) + '</p><small>引导修复</small></div>'
+        : "";
+      var vfy = (e.verify || []).map(function (v) {
+        return '<span>' + esc(v) + '</span>';
+      }).join("");
+      return '<div class="evo-row rv" style="--d:' + (0.04 * (+e.n % 6)) + 's">' +
+        '<div class="evo-no">' + e.n + '</div>' +
+        '<div class="evo-node" aria-hidden="true"></div>' +
+        '<div class="evo-card">' +
+          '<div class="evo-head"><h3>' + esc(e.t) + '</h3><span class="evo-tag">迭代 ' + e.n + '</span></div>' +
+          '<p class="evo-brief">' + esc(e.brief) + '</p>' +
+          pr + ai + fix +
+          (vfy ? '<div class="evo-vfy">' + vfy + '</div>' : "") +
+        '</div>' +
+      '</div>';
+    }).join("");
+    el.innerHTML =
+      '<div class="section-wrap">' +
+        '<div class="evo-hero rv">' +
+          '<div class="kicker">09 · 演进馆</div>' +
+          '<h2>从一句 <em>Prompt</em><br>到一方展厅</h2>' +
+          '<p class="evo-sub">Vibe Coding 全链路可复现：每一次功能迭代的提问、AI 建议、引导修复与验证方式，与仓库 Git 提交日志、AI 对话快照一一对应。评委可一键复现。</p>' +
+        '</div>' +
+        '<div class="evo-stats rv" style="--d:.08s">' +
+          '<div class="evo-stat"><b>12</b><span>核心迭代</span></div>' +
+          '<div class="evo-stat"><b>12</b><span>Prompt 链</span></div>' +
+          '<div class="evo-stat"><b>8+</b><span>Bug 引导修复</span></div>' +
+          '<div class="evo-stat"><b>0</b><span>线上依赖</span></div>' +
+        '</div>' +
+        '<p class="evo-note">完整材料见仓库 <code>README.md</code>：Git 提交历史 · Prompt 快照 · 10 分钟极速复现指南 · 环境清单</p>' +
+        '<div class="evo-timeline">' + cards +
+          '<div class="evo-row"><div class="evo-no"></div><div class="evo-node" aria-hidden="true"></div>' +
+            '<div class="evo-end"><h3>交付即验收</h3><p>三重思维检查：技术可行性（断网渲染 / 帧率）/ 交互与内容深度（看全·看细·拆得开·讲得清·讲得出怎么做）/ 工程质量与交付合规（真离线 · 可复现 · 合规授权）。</p></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    observeReveals(el);
+  }
+
   function copyText(t) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(t).then(function () { toast("分享文案已复制"); }, function () { fallbackCopy(t); });
@@ -1564,7 +2083,7 @@
       var it = byId[createIdx] || byId[0];
       var st = CREATE_STYLES.filter(function (s) { return s.id === createStyle; })[0] || CREATE_STYLES[0];
       copyText("我在「非遗智汇 · 河南非遗 AI 数字展厅」用 AI 生成了一张「" + it.name + "」" + st.label +
-        "文创海报——15 项河南招牌非遗、6 大门类、10 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
+        "文创海报——15 项河南招牌非遗、6 大门类、9 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
         "（传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
     });
     var items = $("#create-items"), styles = $("#create-styles");
@@ -1774,11 +2293,27 @@
       if (ev.key === "Escape") {
         nav.classList.remove("open");
         burger.classList.remove("open");
+        closeSources();
       }
     });
+
+    /* 数据来源与声明弹层 */
+    var srcBtn = $("#btn-sources"), srcModal = $("#src-modal"), srcClose = $("#src-close");
+    if (srcBtn && srcModal) {
+      srcBtn.addEventListener("click", function () { srcModal.hidden = false; });
+      if (srcClose) srcClose.addEventListener("click", closeSources);
+      srcModal.addEventListener("click", function (ev) {
+        if (ev.target === srcModal) closeSources();
+      });
+    }
+  }
+  function closeSources() {
+    var m = $("#src-modal");
+    if (m) m.hidden = true;
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    finishBoot();
     initLenis();
     initScrollProgress();
     initPointerFX();
@@ -1786,4 +2321,75 @@
     bindGlobal();
     navigate();
   });
+  /* 启动遮罩：脚本解析期伪进度 → 就绪 100% 淡出 */
+  var _bootP = 0, _bootTimer = setInterval(function () {
+    _bootP = Math.min(90, _bootP + 7 + Math.random() * 9);
+    var f = $("#boot-fill"); if (f) f.style.width = _bootP + "%";
+  }, 150);
+  function finishBoot() {
+    clearInterval(_bootTimer);
+    var f = $("#boot-fill"); if (f) f.style.width = "100%";
+    setTimeout(function () {
+      var l = $("#boot-load");
+      if (l) { l.classList.add("done"); setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 380); }
+    }, 120);
+  }
+})();
+
+/* ================= 鼠标动态粒子 · 墨·朱砂·金 墨迹飘散（第一版还原） =================
+   鼠标移动时带出细碎墨点，向四周飘散渐隐，如宣纸落墨；
+   粒子小且半透明，不遮盖、不改变背景与文字颜色观感；
+   pointer-events 穿透不挡交互；动效敏感 / 触屏自动禁用；页面隐藏暂停 */
+(function () {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (("ontouchstart" in window) || (navigator.maxTouchPoints || 0) > 0) return;
+  var cv = document.createElement("canvas");
+  cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:55;";
+  document.body.appendChild(cv);
+  var x = cv.getContext("2d"), raf = null, parts = [], POOL = 140;
+  function size() {
+    cv.width = window.innerWidth * window.devicePixelRatio;
+    cv.height = window.innerHeight * window.devicePixelRatio;
+    x.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  }
+  size();
+  window.addEventListener("resize", size);
+  window.addEventListener("mousemove", function (e) {
+    if (parts.length >= POOL) return;
+    /* 每帧在光标处洒出 3 粒墨点，随机方向飘散 */
+    for (var i = 0; i < 3; i++) {
+      var pal = ["rgba(178,64,50,", "rgba(196,152,72,", "rgba(52,38,30,"];
+      var a0 = Math.random() * Math.PI * 2, sp = 0.3 + Math.random() * 1.5;
+      parts.push({
+        x: e.clientX + (Math.random() - 0.5) * 10,
+        y: e.clientY + (Math.random() - 0.5) * 10,
+        vx: Math.cos(a0) * sp,
+        vy: Math.sin(a0) * sp,
+        life: 1, decay: 1.4 + Math.random() * 0.8,
+        r: 0.5 + Math.random() * 1.7,
+        c: pal[Math.floor(Math.random() * 3)]
+      });
+    }
+  });
+  function tick() {
+    raf = requestAnimationFrame(tick);
+    if (document.hidden) return;
+    x.clearRect(0, 0, cv.width / window.devicePixelRatio, cv.height / window.devicePixelRatio);
+    var i = parts.length;
+    while (i--) {
+      var p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94;
+      p.life -= 0.025 * p.decay;
+      if (p.life <= 0) { parts.splice(i, 1); continue; }
+      /* 半透明墨点：峰值约 0.85，明显可见但不染色 */
+      var a = Math.min(0.85, p.life * 0.85);
+      x.globalAlpha = a;
+      x.fillStyle = p.c + a + ")";
+      x.beginPath();
+      x.arc(p.x, p.y, p.r * (0.5 + p.life * 0.5), 0, 7);
+      x.fill();
+    }
+    x.globalAlpha = 1;
+  }
+  tick();
 })();

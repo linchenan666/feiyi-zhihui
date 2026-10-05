@@ -79,7 +79,8 @@
     $("#nav-burger").classList.remove("open");
     $("#nav-burger").setAttribute("aria-expanded", "false");
 
-    /* 渲染当前视图 */
+    /* 渲染当前视图（进入展品总览时默认「全部」筛选） */
+    if (r.view === "hall") hallFilter = "全部";
     var R = {
       home: renderHome, hall: renderHall, item: function () { renderItem(r.id); },
       map: renderMap, region: function () { renderRegion(r.id); }, graph: renderGraph, treasury: renderTreasury, ask: renderAsk,
@@ -661,8 +662,22 @@
       b.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        toggleFav(b.getAttribute("data-fav"));
-        drawHallGrid();
+        var id = b.getAttribute("data-fav");
+        var nowFav = !isFav(id);
+        toggleFav(id);
+        var barBtn = document.querySelector('#filter-bar button[data-f="fav"]');
+        if (barBtn) barBtn.textContent = "已收藏 · " + favs.length;
+        if (hallFilter === "fav") {
+          if (!nowFav) {
+            var card = b.closest(".card");
+            if (card && card.parentNode) card.parentNode.removeChild(card);
+            if (!favs.length) drawHallGrid();
+          } else {
+            b.classList.add("on");
+          }
+        } else {
+          b.classList.toggle("on", nowFav);
+        }
       });
     });
     observeReveals(grid);

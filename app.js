@@ -549,6 +549,7 @@
             return '<button type="button" data-k="' + k + '" aria-label="第' + (k + 1) + '项"></button>';
           }).join("") +
         '</div>' +
+        '<div class="seg-fade" aria-hidden="true"></div>' +
       '</div>' +
     '</section>';
   }

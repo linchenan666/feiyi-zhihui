@@ -318,6 +318,12 @@ main{position:relative}
     linear-gradient(90deg,rgba(33,29,24,.78) 0%,rgba(33,29,24,.52) 42%,rgba(244,237,223,.06) 78%),
     linear-gradient(0deg,rgba(33,29,24,.72) 0%,transparent 26%,transparent 70%,rgba(33,29,24,.35) 100%);
 }
+/* 首页模块衔接：hero → 招牌速览 渐变过渡 */
+.hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(64px,9vw,128px);
+  background:linear-gradient(180deg,transparent,rgba(31,26,20,.78) 66%,#1F1A14 100%);
+  pointer-events:none;z-index:1;
+}
 .hero-inner{max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,56px);width:100%}
 /* 非遗钤印 logo · JS 无规律漫游（点击随机换向） */
 .hero-seal{
@@ -1356,7 +1362,12 @@ body:has(.region-bg) footer .foot-meta b{color:#F3D9A4}
 }
 
 /* ---------- 作者的话（首页 · 第一人称信笺） ---------- */
-.author-note{background:linear-gradient(180deg,#EFE6D2,#E6DBC4);position:relative;border-top:1px solid rgba(33,29,24,.12)}
+.author-note{background:linear-gradient(180deg,#EFE6D2,#E6DBC4);position:relative;border-top:1px solid rgba(33,29,24,.08)}
+/* 首页模块衔接：招牌速览 → 作者的话 渐变过渡 */
+.home-carousel .seg-fade{
+  position:absolute;left:0;right:0;bottom:0;height:clamp(56px,8vw,112px);pointer-events:none;z-index:2;
+  background:linear-gradient(180deg,transparent 0%,rgba(22,18,13,.68) 55%,#EFE6D2 100%);
+}
 .author-note::before{content:"";position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(rgba(33,29,24,.055) 1px,transparent 1px);background-size:22px 22px}
 .an-wrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(30px,5vw,74px);align-items:start;

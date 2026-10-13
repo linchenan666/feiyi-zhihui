@@ -319,18 +319,32 @@ main{position:relative}
     linear-gradient(0deg,rgba(33,29,24,.72) 0%,transparent 26%,transparent 70%,rgba(33,29,24,.35) 100%);
 }
 .hero-inner{max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,56px);width:100%}
-/* 非遗钤印浮动 logo（左上角 · 朱砂印章） */
+/* 非遗钤印 logo · 全屏漫游 */
 .hero-seal{
-  position:absolute;top:7vh;left:clamp(20px,5vw,56px);
+  position:absolute;top:6vh;left:3vw;
   width:clamp(88px,8.5vw,120px);aspect-ratio:1;z-index:2;pointer-events:none;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,.38));
-  animation:sealFloat 6.5s ease-in-out infinite;
+  animation:sealRoam 26s linear infinite;
 }
 .hero-seal svg{width:100%;height:100%;display:block;overflow:visible}
-@keyframes sealFloat{0%,100%{transform:translateY(0) rotate(-1.4deg)}50%{transform:translateY(-13px) rotate(1.4deg)}}
+@keyframes sealRoam{
+  0%{transform:translate(0,0) rotate(-2deg)}
+  16%{transform:translate(76vw,-1vh) rotate(2deg)}
+  32%{transform:translate(83vw,66vh) rotate(-2deg)}
+  50%{transform:translate(44vw,78vh) rotate(2deg)}
+  68%{transform:translate(5vw,72vh) rotate(-2deg)}
+  84%{transform:translate(0,14vh) rotate(2deg)}
+  100%{transform:translate(0,0) rotate(-2deg)}
+}
 @media (max-width:760px){
-  .hero-seal{top:5.5vh;left:50%;animation:sealFloatM 6.5s ease-in-out infinite}
-  @keyframes sealFloatM{0%,100%{transform:translate(-50%,0) rotate(-1.4deg)}50%{transform:translate(-50%,-10px) rotate(1.4deg)}}
+  .hero-seal{top:4vh;left:6vw;width:clamp(72px,20vw,96px);animation:sealRoamM 20s linear infinite}
+  @keyframes sealRoamM{
+    0%{transform:translate(0,0) rotate(-2deg)}
+    25%{transform:translate(60vw,2vh) rotate(2deg)}
+    50%{transform:translate(64vw,70vh) rotate(-2deg)}
+    75%{transform:translate(2vw,74vh) rotate(2deg)}
+    100%{transform:translate(0,0) rotate(-2deg)}
+  }
 }
 @media (prefers-reduced-motion:reduce){.hero-seal{animation:none}}
 .hero-tag{

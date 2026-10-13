@@ -308,12 +308,28 @@
   }
 
   /* ================= HOME ================= */
+  var SEAL_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs><linearGradient id="sealGrad" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="#C8452F"/><stop offset="1" stop-color="#8A2A1A"/></linearGradient></defs>' +
+    '<circle cx="60" cy="60" r="57" fill="none" stroke="#E8C57E" stroke-width="2" stroke-dasharray="7 5" opacity=".85"/>' +
+    '<circle cx="60" cy="60" r="49" fill="url(#sealGrad)" stroke="#F0D492" stroke-width="2.5"/>' +
+    '<circle cx="60" cy="60" r="45.5" fill="none" stroke="#F0D492" stroke-width=".8" opacity=".65"/>' +
+    '<path d="M60 15.5c-5.6 0-9.1 3.8-9.1 8.5 0 .8.1 1.7.4 2.5-3.6.8-6.2 3.7-6.2 7.4 0 4.4 3.6 7.4 8.2 7.4h13.4c4.6 0 8.2-3 8.2-7.4 0-3.7-2.6-6.6-6.2-7.4.3-.8.4-1.7.4-2.5 0-4.7-3.5-8.5-9.1-8.5z" fill="#F0D492" opacity=".5"/>' +
+    '<path d="M60 104.5c5.6 0 9.1-3.8 9.1-8.5 0-.8-.1-1.7-.4-2.5 3.6-.8 6.2-3.7 6.2-7.4 0-4.4-3.6-7.4-8.2-7.4H53.3c-4.6 0-8.2 3-8.2 7.4 0 3.7 2.6 6.6 6.2 7.4-.3.8-.4 1.7-.4 2.5 0 4.7 3.5 8.5 9.1 8.5z" fill="#F0D492" opacity=".5"/>' +
+    '<circle cx="23" cy="60" r="2.6" fill="#F0D492" opacity=".8"/><circle cx="97" cy="60" r="2.6" fill="#F0D492" opacity=".8"/>' +
+    '<text x="60" y="46" text-anchor="middle" font-family="&quot;Noto Serif SC&quot;,&quot;STSong&quot;,&quot;SimSun&quot;,serif" font-size="20" font-weight="900" fill="#F6ECD9">非</text>' +
+    '<text x="60" y="68" text-anchor="middle" font-family="&quot;Noto Serif SC&quot;,&quot;STSong&quot;,&quot;SimSun&quot;,serif" font-size="20" font-weight="900" fill="#F6ECD9">遗</text>' +
+    '<text x="60" y="90" text-anchor="middle" font-family="&quot;Noto Serif SC&quot;,&quot;STSong&quot;,&quot;SimSun&quot;,serif" font-size="20" font-weight="900" fill="#F6ECD9">智</text>' +
+    '<text x="60" y="112" text-anchor="middle" font-family="&quot;Noto Serif SC&quot;,&quot;STSong&quot;,&quot;SimSun&quot;,serif" font-size="20" font-weight="900" fill="#F6ECD9">汇</text>' +
+    '</svg>';
+
   function renderHome() {
     var el = $("#view-home");
     el.innerHTML =
       '<div class="hero">' +
         '<div class="hero-bg-zone"><div class="hero-bg" role="img" aria-label="河南非遗水墨长卷"></div></div>' +
         '<div class="hero-veil"></div>' +
+        '<div class="hero-seal" aria-hidden="true">' + SEAL_SVG + '</div>' +
         '<div class="hero-inner">' +
           '<span class="hero-tag">河南非遗 AI 数字展厅 · 2026</span>' +
           '<h1 class="hero-title">' +

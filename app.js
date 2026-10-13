@@ -325,7 +325,7 @@
     sealX = Math.random() * (pw - w);
     sealY = Math.random() * (ph - h);
     var ang = Math.random() * Math.PI * 2;
-    sealSpeed = Math.max(40, Math.min(88, (pw + ph) / 42));
+    sealSpeed = Math.max(56, Math.min(110, (pw + ph) / 28));
     sealVX = Math.cos(ang) * sealSpeed; sealVY = Math.sin(ang) * sealSpeed;
     sealLast = 0;
     el.style.left = sealX + "px"; el.style.top = sealY + "px";

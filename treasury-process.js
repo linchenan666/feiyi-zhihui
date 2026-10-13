@@ -1,6 +1,13 @@
-/* ================= 3D 珍品馆 · L2 工艺流程演示 + L3 工艺知识层 =================
-   每件文物 = 6 道工序（逐步拆解·可暂停·可回到任意步骤）+ 工艺知识卡（术语/材料/口诀/禁忌/历史）
-   纯离线：工序动画驱动本地 T3D 引擎，口述短句用本地语音合成，无任何外部依赖 */
+/* ================= 珍品馆 · L2 工艺流程图文演示 + L3 工艺知识层 =================
+   每件文物 = 6 道工序（图文卡自动/手动步进·可暂停·可回到任意步骤）+ 工艺知识卡（术语/材料/口诀/禁忌/历史）
+   纯离线：无语音合成、无 3D 依赖，讲解提要以字幕图文直接呈现 */
+
+if (typeof window.$q !== "function") {
+  window.$q = function (sel, root) { return (root || document).querySelector(sel); };
+}
+if (typeof window.$qa !== "function") {
+  window.$qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+}
 
 /* ---------- L2 工序数据 ---------- */
 var TREASURY_PROCESS = {
@@ -130,12 +137,10 @@ var TREASURY_KNOWLEDGE = {
   ]
 };
 
-/* ---------- L2 工序播放器 ---------- */
+/* ---------- L2 工序播放器（纯图文步进） ---------- */
 var TP = {
-  on: false, el: null, stepsEl: null, cardEl: null, progEl: null, artEl: null,
-  idx: 0, state: "idle", timer: 0, loop: false, STEP_MS: 7000,
-  anim: false, a0: 0, a1: 0, at: 0, ad: 1,
-  c0: null, c1: null, ct: 0, cd: 1, h: 0
+  on: false, el: null, stepsEl: null, cardEl: null, voiceEl: null, progEl: null, artEl: null,
+  idx: 0, state: "idle", iv: 0, loop: false, STEP_MS: 7000
 };
 
 function procHTML() {
@@ -144,14 +149,15 @@ function procHTML() {
     '<div class="tp-title">工艺流程 · <span class="tp-art" id="tp-art"></span></div>' +
     '<div class="tp-ctrl">' +
     '<button class="tp-btn" data-p="prev">上一步</button>' +
-    '<button class="tp-btn" data-p="play">播放</button>' +
+    '<button class="tp-btn" data-p="play">自动播放</button>' +
     '<button class="tp-btn" data-p="next">下一步</button>' +
-    '<button class="tp-btn" data-p="loop">单步往复</button>' +
+    '<button class="tp-btn" data-p="loop">循环演示</button>' +
     '<button class="tp-btn" data-p="reset">复位</button>' +
     '<button class="tp-btn" data-p="close">收起</button>' +
     "</div>" +
     "</div>" +
     '<div class="tp-steps" id="tp-steps"></div>' +
+    '<div class="tp-voice" id="tp-voice"></div>' +
     '<div class="tp-card" id="tp-card"></div>' +
     '<div class="tp-progress"><i id="tp-bar"></i></div>' +
     "</div>";
@@ -173,6 +179,7 @@ function openProcess() {
     TP.el = $q("#t3d-proc");
     TP.stepsEl = $q("#tp-steps");
     TP.cardEl = $q("#tp-card");
+    TP.voiceEl = $q("#tp-voice");
     TP.progEl = $q("#tp-bar");
     TP.artEl = $q("#tp-art");
     TP.el.addEventListener("click", function (e) {
@@ -200,17 +207,15 @@ function openProcess() {
   if (lb) lb.classList.remove("on");
   renderSteps();
   applyStep(0);
+  TP.setPlayBtn();
 }
 
 function closeProcess() {
   TP.on = false;
   if (!TP.el) return;
-  TP.stopTTS();
   TP.state = "idle";
-  clearTimeout(TP.timer);
+  clearInterval(TP.iv);
   TP.el.style.display = "none";
-  animExpl(0, 0.4);
-  clearHighlight();
 }
 
 function renderSteps() {
@@ -220,7 +225,6 @@ function renderSteps() {
 }
 
 function setStepUI() {
-  var p = TREASURY_PROCESS[T3D.cur.id];
   $qa("#tp-steps .tp-step").forEach(function (b, i) {
     b.classList.remove("now", "done");
     if (i < TP.idx) b.classList.add("done");
@@ -228,75 +232,23 @@ function setStepUI() {
   });
 }
 
-function speakStep(st) {
-  TP.stopTTS();
-  if (!st.voice || !("speechSynthesis" in window)) return;
-  try {
-    var u = new SpeechSynthesisUtterance(st.voice);
-    u.lang = "zh-CN"; u.rate = 1.0;
-    var vs = window.speechSynthesis.getVoices();
-    var zv = vs.filter(function (v) { return /^zh/i.test(v.lang); })[0];
-    if (zv) u.voice = zv;
-    window.speechSynthesis.speak(u);
-  } catch (e) {}
-}
-
-TP.stopTTS = function () {
-  try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (e) {}
-};
-
 function applyStep(i) {
   var p = TREASURY_PROCESS[T3D.cur.id];
   if (i < 0 || i >= p.steps.length) return;
   TP.idx = i;
   TP.state = "idle";
-  clearTimeout(TP.timer);
+  clearInterval(TP.iv);
   var st = p.steps[i];
-  animExpl(st.expl, 0.5);
-  animCam(st.d, st.h, 0.7);
-  if (st.focus) {
-    var f = T3D.parts.filter(function (m) { return m.userData.part && m.userData.part.key === st.focus; })[0];
-    if (f) highlightPart(f);
-  } else clearHighlight();
+  TP.voiceEl.innerHTML = '<span class="tp-vk">本步提要</span>' + (st.voice || "");
   TP.cardEl.innerHTML = '<span class="tp-k">' + (st.card ? st.card[0] : "") + "</span>" + (st.card ? st.card[1] : "");
   setStepUI();
   TP.progEl.style.width = "0%";
-  speakStep(st);
 }
 
-/* expl 渐变（0.5s 默认） */
-function animExpl(to, dur) {
-  TP.a0 = T3D.expl; TP.a1 = to; TP.at = 0; TP.ad = dur || 0.5;
-  if (!TP.anim) { TP.anim = true; tpAnimTick(); }
-}
-/* 相机渐变：d = dist×h 倍数，h = 高度倍数 */
-function animCam(d, hgt, dur) {
-  var h = T3D.camH || 1;
-  TP.c0 = { y: T3D.camera.position.y, z: T3D.camera.position.z };
-  TP.c1 = { y: hgt * h, z: d * h };
-  TP.ct = 0; TP.cd = dur || 0.7;
-  if (!TP.anim) { TP.anim = true; tpAnimTick(); }
-}
-
-function tpAnimTick() {
-  var done = true;
-  if (TP.at < TP.ad) {
-    TP.at += 16; var k = Math.min(1, TP.at / TP.ad);
-    var e = 1 - Math.pow(1 - k, 3);
-    T3D.expl = TP.a0 + (TP.a1 - TP.a0) * e;
-    if (T3D.group) applyExplode();
-    done = false;
-  }
-  if (TP.ct < TP.cd && TP.c0 && T3D.camera) {
-    TP.ct += 16; var k2 = Math.min(1, TP.ct / TP.cd);
-    var e2 = 1 - Math.pow(1 - k2, 3);
-    T3D.camera.position.set(0, TP.c0.y + (TP.c1.y - TP.c0.y) * e2, TP.c0.z + (TP.c1.z - TP.c0.z) * e2);
-    T3D.camera.lookAt(0, T3D.camH * 0.42, 0);
-    done = false;
-  }
-  if (done) { TP.anim = false; return; }
-  requestAnimationFrame(tpAnimTick);
-}
+TP.setPlayBtn = function () {
+  var b = TP.el && TP.el.querySelector('[data-p="play"]');
+  if (b) b.textContent = TP.state === "playing" ? "暂停" : "自动播放";
+};
 
 /* 控制 */
 TP.play = function () {
@@ -316,6 +268,7 @@ function stepTimer() {
     else { TP.done(); return; }
   }
   applyStep(TP.idx);
+  TP.state = "playing";
   TP.progEl.style.width = "0%";
   var t0 = Date.now();
   var bar = TP.progEl;
@@ -325,71 +278,62 @@ function stepTimer() {
     bar.style.width = (k * 100) + "%";
     if (k >= 1) { clearInterval(iv); stepTimer(); }
   }, 80);
-  TP._iv = iv;
+  TP.iv = iv;
+  TP.setPlayBtn();
 }
 
 TP.done = function () {
   TP.state = "idle";
-  TP.stopTTS();
-  TP.cardEl.innerHTML = '<span class="tp-k">成器 · 回装</span>' + (T3D.cur.name + "：六道工序走完，器物复位。再点一次播放，可重看整条工艺链。");
-  animExpl(0, 0.6);
-  clearHighlight();
+  TP.voiceEl.innerHTML = '<span class="tp-vk">成器</span>' + (T3D.cur.name + "：六道工序走完，器物始成。再点一次自动播放，可重看整条工艺链。");
+  TP.cardEl.innerHTML = '<span class="tp-k">成器 · 六道齐备</span>从选泥到成器，每一步都有不可逆的火候与分寸——这正是非遗技艺“手与火”的分量。';
   TP.progEl.style.width = "100%";
+  $qa("#tp-steps .tp-step").forEach(function (b) { b.classList.add("done"); b.classList.remove("now"); });
+  TP.setPlayBtn();
 };
 
 TP.togglePlay = function () {
   if (TP.state === "playing") {
     TP.state = "idle";
-    TP.stopTTS();
-    clearInterval(TP._iv);
+    clearInterval(TP.iv);
   } else TP.play();
-  var b = TP.el && TP.el.querySelector('[data-p="play"]');
-  if (b) b.textContent = TP.state === "playing" ? "暂停" : "播放";
+  TP.setPlayBtn();
 };
 
 TP.next = function () {
   var p = TREASURY_PROCESS[T3D.cur.id];
   if (!p) return;
   TP.state = "idle";
-  clearInterval(TP._iv);
-  TP.stopTTS();
+  clearInterval(TP.iv);
   var i = Math.min(TP.idx + 1, p.steps.length - 1);
   if (i === TP.idx) TP.done(); else applyStep(i);
-  var b = TP.el && TP.el.querySelector('[data-p="play"]');
-  if (b) b.textContent = "播放";
+  TP.setPlayBtn();
 };
 
 TP.prev = function () {
   if (TP.idx <= 0) { TP.go(0); return; }
   TP.state = "idle";
-  clearInterval(TP._iv);
-  TP.stopTTS();
+  clearInterval(TP.iv);
   applyStep(TP.idx - 1);
-  var b = TP.el && TP.el.querySelector('[data-p="play"]');
-  if (b) b.textContent = "播放";
+  TP.setPlayBtn();
 };
 
 TP.go = function (i) {
   TP.state = "idle";
-  clearInterval(TP._iv);
-  TP.stopTTS();
+  clearInterval(TP.iv);
   applyStep(i);
-  var b = TP.el && TP.el.querySelector('[data-p="play"]');
-  if (b) b.textContent = "播放";
+  TP.setPlayBtn();
 };
 
 TP.reset = function () {
   TP.state = "idle";
-  clearInterval(TP._iv);
-  TP.stopTTS();
-  animExpl(0, 0.4);
-  clearHighlight();
+  clearInterval(TP.iv);
   TP.idx = 0;
   setStepUI();
-  TP.cardEl.innerHTML = '<span class="tp-k">复位</span>已回到完整器物，可从第 1 道工序重新开始。';
+  var p0 = TREASURY_PROCESS[T3D.cur.id].steps[0];
+  TP.voiceEl.innerHTML = '<span class="tp-vk">本步提要</span>' + (p0.voice || "");
+  TP.cardEl.innerHTML = '<span class="tp-k">' + p0.card[0] + "</span>" + p0.card[1];
   TP.progEl.style.width = "0%";
-  var b = TP.el && TP.el.querySelector('[data-p="play"]');
-  if (b) b.textContent = "播放";
+  TP.setPlayBtn();
 };
 
 /* 切换文物时同步 */
@@ -397,15 +341,15 @@ function onArtifactProcess() {
   if (!TP.on || !TP.el) return;
   if (!TREASURY_PROCESS[T3D.cur.id]) { closeProcess(); return; }
   TP.state = "idle";
-  clearInterval(TP._iv);
-  TP.stopTTS();
+  clearInterval(TP.iv);
   TP.idx = 0;
   renderSteps();
   applyStep(0);
+  TP.setPlayBtn();
 }
 
 /* ---------- L3 知识模态 ---------- */
-var KNOW = { veil: null, built: false };
+var KNOW = { veil: null };
 
 function knowHTML(knowledge) {
   return '<div class="th-know-veil" id="t3d-know">' +
@@ -426,50 +370,32 @@ function knowHTML(knowledge) {
     "</div>";
 }
 
+function bindKnowEvents(veil) {
+  veil.addEventListener("click", function (e) {
+    var x = e.target.closest('[data-k="close"]');
+    if (x || e.target === veil) closeKnow();
+    var it = e.target.closest(".tk-item");
+    if (it) {
+      var on = it.classList.contains("on");
+      $qa(".tk-item", veil).forEach(function (c) { c.classList.remove("on"); });
+      if (!on) it.classList.add("on");
+    }
+  });
+}
+
 function openKnow() {
   var knowledge = TREASURY_KNOWLEDGE[T3D.cur.id];
   if (!knowledge) return;
-  if (!KNOW.built) {
-    var holder = document.createElement("div");
-    holder.innerHTML = knowHTML(knowledge);
-    document.body.appendChild(holder.firstChild);
-    KNOW.veil = $q("#t3d-know");
-    KNOW.veil.addEventListener("click", function (e) {
-      var x = e.target.closest('[data-k="close"]');
-      if (x || e.target === KNOW.veil) closeKnow();
-      var it = e.target.closest(".tk-item");
-      if (it) {
-        var on = it.classList.contains("on");
-        $qa(".tk-item", KNOW.veil).forEach(function (c) { c.classList.remove("on"); });
-        if (!on) it.classList.add("on");
-      }
-    });
-    KNOW.built = true;
-  } else {
-    KNOW.veil.innerHTML = knowHTML(knowledge).replace(/^<div class="th-know-veil" id="t3d-know">/, "").replace(/<\/div>$/, "");
-    /* 重新构建列表（换文物） */
-    var inner = KNOW.veil;
-    var wrap = document.createElement("div");
-    wrap.innerHTML = knowHTML(knowledge);
-    var fresh = wrap.firstChild;
-    fresh.style.display = "flex";
-    inner.parentNode.replaceChild(fresh, inner);
-    KNOW.veil = fresh;
-    KNOW.veil.addEventListener("click", function (e) {
-      var x = e.target.closest('[data-k="close"]');
-      if (x || e.target === KNOW.veil) closeKnow();
-      var it = e.target.closest(".tk-item");
-      if (it) {
-        var on = it.classList.contains("on");
-        $qa(".tk-item", KNOW.veil).forEach(function (c) { c.classList.remove("on"); });
-        if (!on) it.classList.add("on");
-      }
-    });
-  }
+  if (KNOW.veil && KNOW.veil.parentNode) KNOW.veil.parentNode.removeChild(KNOW.veil);
+  var holder = document.createElement("div");
+  holder.innerHTML = knowHTML(knowledge);
+  var fresh = holder.firstChild;
+  document.body.appendChild(fresh);
+  KNOW.veil = fresh;
+  bindKnowEvents(KNOW.veil);
   KNOW.veil.classList.add("open");
 }
 
 function closeKnow() {
   if (KNOW.veil) KNOW.veil.classList.remove("open");
 }
-

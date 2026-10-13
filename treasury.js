@@ -1,1063 +1,470 @@
-/* ================= 3D 珍品馆 · 引擎（Three.js 程序化建模，纯离线） ================= */
-/* 独立脚本助手：不依赖 app.js 闭包内的 $ / $$ */
-function $q(s, r) { return (r || document).querySelector(s); }
-function $qa(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
-var _TIT = {};
-if (typeof byId !== "undefined") byId.forEach(function (it) { _TIT[it.id] = it; });
+/* ================= 珍品馆 · 数字讲解员（真人口播 + 图文同步） =================
+   照片级讲解员「文昭」驻场，真人真声逐件导览五件镇馆珍品；
+   口唇随讲解音频自然开合、声波实时起伏，字幕与图文考据点按讲解进度同步高亮，
+   可暂停、拖动进度、点段重听，并可调阅实物影像、六步工艺流程与工艺知识卡。
+   纯离线：音频/人像/影像全部内联，无外部依赖。 */
 
-var T3D = {
-  built: false, stage: null, canvas: null,
-  renderer: null, scene: null, camera: null, raycaster: null,
-  group: null, parts: [], labelSpheres: [], cur: null,
-  idx: 0, expl: 0, varg: 0.5, cut: false, rot: true,
-  showScale: false, showLabel: true,
-  tex: { crackle: true, glaze: true, streak: true },
-  light: "museum", dragging: false, moved: false,
-  lastX: 0, lastY: 0, pinchDist: 0, animId: 0, running: false,
-  lights: {}, scaleEl: null, cardEl: null, fallbackEl: null,
-  segButtons: []
+/* 精简全局：仅承载当前展品，供 L2/L3 层（treasury-process.js）引用 */
+var T3D = { cur: null, idx: 0 };
+
+var TH = {
+  idx: 0,
+  segs: [],                 // 三件分段（字幕段，与 points 一一对应）
+  audio: null,
+  ac: null, analyser: null, freq: null, srcNode: null,
+  level: 0,
+  rafId: 0,
+  muted: false,
+  dragging: false,
+  inited: false
 };
 
-function renderTreasury() {
-  var root = $q("#view-treasury");
-  if (!root) return;
-  if (!T3D.built) {
-    root.innerHTML = treasuryHTML();
-    T3D.stage = $q("#t3d-stage");
-    T3D.cardEl = $q("#t3d-card");
-    T3D.fallbackEl = $q("#t3d-fallback");
-    bindTreasuryUI();
-    initT3DScene();
-    T3D.built = true;
+var TH_SHORT = { junci: "钧瓷", ruci: "汝瓷", sancai: "唐三彩", nigugu: "泥咕咕", ninigou: "泥泥狗" };
+
+/* ---------- 工具 ---------- */
+function $q(sel, root) {
+  return (root || document).querySelector(sel);
+}
+function $qa(sel, root) {
+  return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+}
+function fmtTime(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  var m = Math.floor(s / 60), ss = Math.floor(s % 60);
+  return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss;
+}
+
+/* 将讲解词切为 3 段（与 3 个图文考据点一一对应）；句不足时按逗号补切 */
+function split3(text) {
+  var sents = [], buf = "";
+  for (var i = 0; i < text.length; i++) {
+    buf += text[i];
+    var c = text[i];
+    if (c === "。" || c === "！" || c === "？" || c === "；") { sents.push(buf); buf = ""; }
   }
-  loadTreasuryArtifact(T3D.idx);
-  startT3DLoop();
+  if (buf.trim()) sents.push(buf);
+  var guard = 0;
+  while (sents.length < 3 && guard++ < 12) {
+    var k = 0;
+    for (var j = 1; j < sents.length; j++) if (sents[j].length > sents[k].length) k = j;
+    var str = sents[k], ci = str.indexOf("，");
+    if (ci < 2 || ci > str.length - 4) break;
+    sents.splice(k, 1, str.slice(0, ci + 1), str.slice(ci + 1));
+  }
+  /* 多于 3 段时，把尾段并入第 3 段 */
+  while (sents.length > 3) {
+    sents[2] = sents[2] + sents[3];
+    sents.splice(3, 1);
+  }
+  return sents.map(function (s) { return s.trim(); }).filter(Boolean);
+}
+
+/* 按字数比例计算每段时间区间（中文朗读近似均匀） */
+function segBounds(segs, dur) {
+  var lens = segs.map(function (s) { return Array.from(s).length; });
+  var total = lens.reduce(function (a, b) { return a + b; }, 0) || 1;
+  var acc = 0, out = [];
+  for (var i = 0; i < segs.length; i++) {
+    var st = dur * acc / total;
+    acc += lens[i];
+    out.push([st, dur * acc / total]);
+  }
+  return out;
+}
+
+/* ---------- 视图 ---------- */
+function thIconPlay() {
+  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.52.86l10.2-6.5a1 1 0 0 0 0-1.72L9.52 4.64A1 1 0 0 0 8 5.5z"/></svg>';
+}
+function thIconPause() {
+  return '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.1"/><rect x="14" y="5" width="4" height="14" rx="1.1"/></svg>';
 }
 
 function treasuryHTML() {
-  var arts = TREASURY_3D.map(function (a, i) {
-    return '<button class="th-art' + (i === 0 ? " on" : "") + '" data-i="' + i + '"><i></i><span>' + a.name + "</span></button>";
-  }).join("");
-  return (
-    '<div class="treasury-wrap">' +
-    '<header class="th-head">' +
-    '<div class="th-kicker">3D · 数字珍品馆</div>' +
-    '<h2 class="th-title">3D 珍品馆</h2>' +
-    '<p class="th-sub">指尖拆解千年窑火 · 每一道釉色都能近观细察</p>' +
-    "</header>" +
+  var wave = "";
+  for (var i = 0; i < 5; i++) wave += '<i></i>';
+  return '' +
+  '<div class="treasury-wrap" id="th-wrap">' +
+    '<div class="th-head">' +
+      '<div class="th-kicker">数字讲解员 · 珍品馆</div>' +
+      '<h2 class="th-title">真人口播 · 镇馆五珍</h2>' +
+      '<p class="th-sub">数字讲解员「文昭」以真人真声逐件导览，口唇随音起伏，字幕与图文考据点同步呈现；可暂停、拖动进度、点段重听。</p>' +
+    '</div>' +
     '<div class="th-main">' +
-    '<div class="th-stage" id="t3d-stage">' +
-    '<div class="th-fallback" id="t3d-fallback" style="display:none"></div>' +
-    '<div class="th-hint" id="t3d-hint">拖拽旋转 · 滚轮缩放 · 点击部件与标注查看考据</div>' +
-    '<div class="th-card" id="t3d-card"></div>' +
-    '<div class="th-scale" id="t3d-scale" style="display:none">' +
-    '<span class="ts-line"></span><span class="ts-tag">170cm 参照</span>' +
-    '<svg viewBox="0 0 60 120" aria-hidden="true"><path d="M30 118 L30 78 Q30 62 20 58 L12 52 Q9 50 10 47 L18 49 Q26 51 30 56 L30 44 L26 30 Q25 26 27 24 L29 30 L31 22 Q33 20 34 22 L33 32 L34 44 L38 56 Q42 52 48 49 L54 47 Q55 50 52 52 L44 58 Q34 62 34 78 L34 118 Z" fill="rgba(232,224,200,0.5)"/></svg>' +
-    "</div>" +
-    "</div>" +
-    '<aside class="th-panel">' +
-    '<div class="th-art-row" id="t3d-artrow">' + arts + "</div>" +
-    '<div class="th-group">' +
-    '<div class="th-label"><span>爆炸拆解</span><em id="t3d-explv">0%</em></div>' +
-    '<input type="range" id="t3d-expl" min="0" max="100" value="0">' +
-    "</div>" +
-    '<div class="th-group">' +
-    '<div class="th-label"><span>窑变釉色 · 彩蛋</span><em id="t3d-vargv">中</em></div>' +
-    '<input type="range" id="t3d-varg" min="0" max="100" value="50">' +
-    "</div>" +
-    '<div class="th-grid">' +
-    '<button class="th-btn on" data-t="real">实物影像</button>' +
-    '<button class="th-btn" data-t="process">工艺演示</button>' +
-    '<button class="th-btn" data-t="know">工艺知识</button>' +
-    '<button class="th-btn" data-t="cut">半剖观胎</button>' +
-    '<button class="th-btn on" data-t="rot">自动旋转</button>' +
-    '<button class="th-btn" data-t="scale">比例尺</button>' +
-    '<button class="th-btn on" data-t="label">年代标注</button>' +
-    '<button class="th-btn" data-t="audio">语音讲解</button>' +
-    '<button class="th-btn" data-t="shot">截图存档</button>' +
-    "</div>" +
-    '<div class="th-seg" id="t3d-light">' +
-    '<button data-l="museum" class="on">博物馆灯</button><button data-l="kiln">窑火</button><button data-l="day">日光</button>' +
-    "</div>" +
-    '<div class="th-seg" id="t3d-tex">' +
-    '<button data-x="crackle" class="on">开片纹</button><button data-x="glaze">釉面清漆</button><button data-x="streak">流釉·彩绘</button>' +
-    "</div>" +
-    '<div class="th-art-info"><div class="th-ai-name" id="t3d-name"></div><div class="th-ai-meta" id="t3d-meta"></div></div>' +
-    "</aside>" +
-    "</div>" +
-    "</div>"
-  );
+      '<div class="th-stage">' +
+        '<button class="th-mute" id="th-mute" type="button" aria-label="讲解声音开关" title="讲解声音开关">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M11 5 6.5 9H3v6h3.5L11 19V5z"/><path class="mute-off" d="M15.5 9a4 4 0 0 1 0 6"/><path class="mute-off" d="M18 6.5a8 8 0 0 1 0 11"/><path class="mute-on" d="m16 9.5 5 5m0-5-5 5" style="display:none"/></svg>' +
+        '</button>' +
+        '<div class="th-docent" id="th-docent">' +
+          '<img class="td-face td-close" id="td-close" src="assets/guide-close.jpg" alt="数字讲解员文昭（静）">' +
+          '<img class="td-face td-talk" id="td-talk" src="assets/guide-talk.jpg" alt="数字讲解员文昭（讲解中）">' +
+          '<div class="td-wave" id="td-wave">' + wave + '</div>' +
+          '<div class="td-nameplate">数字讲解员 · 文昭</div>' +
+        '</div>' +
+        '<div class="th-showcase">' +
+          '<div class="ts-halo"></div>' +
+          '<div class="ts-case"><img id="ts-img" alt="当前讲解的实物影像"></div>' +
+          '<div class="ts-plinth">' +
+            '<div class="ts-name" id="ts-name"></div>' +
+            '<div class="ts-meta" id="ts-meta"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="th-caption">' +
+          '<div class="cap-segs" id="cap-segs"></div>' +
+          '<div class="cap-text" id="cap-text">点击播放，听讲解员为您讲述……</div>' +
+        '</div>' +
+        '<div class="th-controls">' +
+          '<button class="th-play" id="th-play" type="button" aria-label="播放讲解">' + thIconPlay() + '</button>' +
+          '<span class="th-time" id="th-time">00:00 / 00:00</span>' +
+          '<div class="th-bar" id="th-bar"><i class="th-bar-fill" id="th-fill"></i><span class="th-bar-ticks" id="th-ticks"></span></div>' +
+          '<button class="th-step" id="th-prev" type="button">上一件</button>' +
+          '<button class="th-step" id="th-next" type="button">下一件</button>' +
+        '</div>' +
+        '<audio id="th-audio" preload="metadata"></audio>' +
+      '</div>' +
+      '<aside class="th-panel">' +
+        '<div class="th-art-row" id="th-arts"></div>' +
+        '<div class="th-card" id="th-infocard">' +
+          '<div class="tc-title">展品档案</div>' +
+          '<div class="tc-body" id="tc-body"></div>' +
+        '</div>' +
+        '<div class="th-card">' +
+          '<div class="tc-title">图文考据 · 随讲解同步点亮</div>' +
+          '<div class="th-points" id="th-points"></div>' +
+        '</div>' +
+        '<div class="th-grid">' +
+          '<button class="th-btn" id="th-real" type="button">实物影像</button>' +
+          '<button class="th-btn" id="th-proc" type="button">工艺流程</button>' +
+          '<button class="th-btn" id="th-know" type="button">工艺知识</button>' +
+        '</div>' +
+      '</aside>' +
+    '</div>' +
+  '</div>';
 }
 
-/* ---------- UI 绑定 ---------- */
+/* ---------- 渲染入口 ---------- */
+function renderTreasury() {
+  var root = $q("#view-treasury");
+  if (!root) return;
+  root.innerHTML = treasuryHTML();
+  TH.audio = $q("#th-audio");
+  TH.ac = null; TH.analyser = null; TH.freq = null; TH.srcNode = null;
+  TH.level = 0;
+  cancelAnimationFrame(TH.rafId);
+  bindTreasuryUI();
+  loadArtifact(TH.idx, false);
+  thLoop();
+}
+
+/* ---------- 绑定 ---------- */
 function bindTreasuryUI() {
-  $q("#t3d-artrow").addEventListener("click", function (e) {
+  var root = $q("#view-treasury");
+  $q("#th-play", root).addEventListener("click", function () {
+    if (TH.audio.paused) playAudio();
+    else { TH.audio.pause(); }
+  });
+  TH.audio.addEventListener("play", function () {
+    $q("#th-play").innerHTML = thIconPause();
+    $q("#th-docent").classList.add("speaking");
+  });
+  TH.audio.addEventListener("pause", function () {
+    $q("#th-play").innerHTML = thIconPlay();
+    $q("#th-docent").classList.remove("speaking");
+    setTalk(0);
+  });
+  TH.audio.addEventListener("ended", function () {
+    $q("#th-play").innerHTML = thIconPlay();
+    $q("#th-docent").classList.remove("speaking");
+    setTalk(0);
+    $qa("#cap-segs .cap-seg").forEach(function (s) { s.classList.add("done"); s.classList.remove("on"); });
+  });
+
+  /* 上一件 / 下一件 */
+  $q("#th-prev", root).addEventListener("click", function () {
+    loadArtifact((TH.idx + TREASURY_ARTIFACTS.length - 1) % TREASURY_ARTIFACTS.length, true);
+  });
+  $q("#th-next", root).addEventListener("click", function () {
+    loadArtifact((TH.idx + 1) % TREASURY_ARTIFACTS.length, true);
+  });
+
+  /* 五件切换 */
+  $q("#th-arts", root).addEventListener("click", function (e) {
     var b = e.target.closest(".th-art");
     if (!b) return;
-    $qa("#t3d-artrow .th-art").forEach(function (x) { x.classList.remove("on"); });
-    b.classList.add("on");
-    loadTreasuryArtifact(+b.getAttribute("data-i"));
+    loadArtifact(+b.getAttribute("data-i"), true);
   });
 
-  var ex = $q("#t3d-expl");
-  ex.addEventListener("input", function () {
-    T3D.expl = +ex.value / 100;
-    $q("#t3d-explv").textContent = ex.value + "%";
-    applyExplode();
+  /* 图文考据 / 字幕段：点击跳段重听 */
+  $q("#th-points", root).addEventListener("click", function (e) {
+    var p = e.target.closest(".tp-pt");
+    if (!p) return;
+    seekSegment(+p.getAttribute("data-i"));
+  });
+  $q("#cap-segs", root).addEventListener("click", function (e) {
+    var s = e.target.closest(".cap-seg");
+    if (!s) return;
+    seekSegment(+s.getAttribute("data-i"));
   });
 
-  var vg = $q("#t3d-varg");
-  vg.addEventListener("input", function () {
-    T3D.varg = +vg.value / 100;
-    var t = T3D.varg < 0.35 ? "冷" : T3D.varg > 0.7 ? "暖" : "中";
-    $q("#t3d-vargv").textContent = t;
-    rebuildBodyTexture();
-  });
-
-  $qa(".th-btn").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var t = b.getAttribute("data-t");
-      if (t === "cut") { T3D.cut = !T3D.cut; b.classList.toggle("on", T3D.cut); applyCut(); }
-      else if (t === "rot") { T3D.rot = !T3D.rot; b.classList.toggle("on", T3D.rot); }
-      else if (t === "scale") { T3D.showScale = !T3D.showScale; b.classList.toggle("on", T3D.showScale); T3D.scaleEl.style.display = T3D.showScale ? "block" : "none"; }
-      else if (t === "label") { T3D.showLabel = !T3D.showLabel; b.classList.toggle("on", T3D.showLabel); applyLabels(); }
-      else if (t === "process") { openProcess(); }
-      else if (t === "know") { openKnow(); }
-      else if (t === "real") { openT3DReal(); }
-      else if (t === "audio") { speakTreasury(); }
-      else if (t === "shot") { shotTreasury(); }
-    });
-  });
-
-  $qa("#t3d-light button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      T3D.light = b.getAttribute("data-l");
-      $qa("#t3d-light button").forEach(function (x) { x.classList.remove("on"); });
-      b.classList.add("on");
-      applyLight();
-    });
-  });
-
-  $qa("#t3d-tex button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var x = b.getAttribute("data-x");
-      T3D.tex[x] = !T3D.tex[x];
-      b.classList.toggle("on", T3D.tex[x]);
-      if (x === "glaze") applyGlaze(); else rebuildBodyTexture();
-    });
-  });
-}
-
-/* ---------- 场景 ---------- */
-/* 低配档探测：集显笔记本 / 低内存设备 / 窄屏触屏 → 关闭抗锯齿与阴影、降几何段数，保 30FPS */
-function detectLowPerf() {
-  try {
-    var cores = navigator.hardwareConcurrency || 8;
-    var mem = navigator.deviceMemory || 8;
-    if (cores <= 2 || mem <= 2) return true;
-    if (cores <= 4 && mem <= 4) return true;
-  } catch (e) {}
-  if (window.innerWidth <= 480) return true;
-  return false;
-}
-function segN(n) {
-  return T3D.lowPerf ? Math.max(6, Math.round(n * 0.4)) : n;
-}
-function initT3DScene() {
-  T3D.scaleEl = $q("#t3d-scale");
-  T3D.lowPerf = detectLowPerf();
-  var ok = false;
-  try {
-    T3D.renderer = new THREE.WebGLRenderer({ antialias: !T3D.lowPerf, alpha: true, preserveDrawingBuffer: true });
-    ok = true;
-  } catch (e) { ok = false; }
-  if (!ok) {
-    $q("#t3d-hint").textContent = "";
-    T3D.fallbackEl.style.display = "flex";
-    T3D.fallbackEl.innerHTML = '<div class="tf-badge">当前设备不支持 WebGL</div><img alt="展品图" src="' + $q("#view-treasury").getAttribute("data-fb") + '">';
-    return;
+  /* 进度条：点击与拖动 seek */
+  var bar = $q("#th-bar", root);
+  function barSeek(e) {
+    if (!TH.audio || !isFinite(TH.audio.duration)) return;
+    var r = bar.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    var ratio = Math.max(0, Math.min(1, x / r.width));
+    TH.audio.currentTime = ratio * TH.audio.duration;
+    updateClockUI();
   }
-  T3D.renderer.setPixelRatio(T3D.lowPerf ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
-  T3D.renderer.setClearColor(0x000000, 0);
-  if (T3D.lowPerf) {
-    T3D.renderer.shadowMap.enabled = false;
-  } else {
-    T3D.renderer.shadowMap.enabled = true;
-    T3D.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  }
-  T3D.stage.appendChild(T3D.renderer.domElement);
-  T3D.canvas = T3D.renderer.domElement;
-  T3D.canvas.className = "th-canvas";
-  T3D.scene = new THREE.Scene();
-  /* 展厅环境反射（程序化六面，供釉面反光） */
-  if (typeof T3DM !== "undefined" && T3DM.makeEnvCube) {
-    T3D.scene.environment = T3DM.makeEnvCube();
-  }
-  T3D.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 600);
-  T3D.raycaster = new THREE.Raycaster();
+  bar.addEventListener("pointerdown", function (e) {
+    TH.dragging = true;
+    bar.setPointerCapture && bar.setPointerCapture(e.pointerId);
+    barSeek(e);
+  });
+  bar.addEventListener("pointermove", function (e) { if (TH.dragging) barSeek(e); });
+  bar.addEventListener("pointerup", function () { TH.dragging = false; });
+  bar.addEventListener("pointercancel", function () { TH.dragging = false; });
 
-  /* 灯光组：博物馆射灯（暖主光左上 45° + 冷补光 + 天光 + 背后冷色轮廓光） */
-  var ls = T3D.lights = {
-    amb: new THREE.AmbientLight(0xffffff, 0.42),
-    dir: new THREE.DirectionalLight(0xfff2e0, 0.85),
-    point: new THREE.PointLight(0xffe8c8, 0.5, 80, 2),
-    spot: new THREE.SpotLight(0xffe0c0, 1.35, 0, 0.52, 0.62, 1.4),
-    fill: new THREE.DirectionalLight(0x9ab0ff, 0.22),
-    rim: new THREE.DirectionalLight(0x8aa4e8, 0.55)
-  };
-  ls.dir.position.set(9, 18, 11); ls.dir.target.position.set(0, 4, 0);
-  ls.dir.castShadow = !T3D.lowPerf;
-  ls.dir.shadow.mapSize.width = 1024;
-  ls.dir.shadow.mapSize.height = 1024;
-  ls.dir.shadow.camera.near = 1;
-  ls.dir.shadow.camera.far = 120;
-  ls.dir.shadow.camera.left = -20; ls.dir.shadow.camera.right = 20;
-  ls.dir.shadow.camera.top = 20; ls.dir.shadow.camera.bottom = -20;
-  ls.spot.position.set(-7, 22, 6); ls.spot.target.position.set(0, 3, 0);
-  ls.fill.position.set(-10, 6, -12);
-  ls.rim.position.set(0, 8, -18);
-  T3D.scene.add(ls.amb, ls.dir, ls.point, ls.spot, ls.fill, ls.rim);
-  T3D.scene.add(ls.dir.target, ls.spot.target);
-
-  /* 地面光晕（扩大承接展台） */
-  var g = document.createElement("canvas"); g.width = g.height = 512;
-  var gx = g.getContext("2d");
-  var rg = gx.createRadialGradient(256, 256, 20, 256, 256, 252);
-  rg.addColorStop(0, "rgba(8,6,5,0.62)"); rg.addColorStop(0.45, "rgba(8,6,5,0.30)"); rg.addColorStop(1, "rgba(8,6,5,0)");
-  gx.fillStyle = rg; gx.fillRect(0, 0, 512, 512);
-  var gt = new THREE.CanvasTexture(g);
-  var ground = new THREE.Mesh(
-    new THREE.CircleGeometry(70, 64),
-    new THREE.MeshBasicMaterial({ map: gt, transparent: true, depthWrite: false, opacity: 0.92 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.6;
-  ground.name = "ground";
-  T3D.scene.add(ground);
-
-  bindT3DInput();
-  window.addEventListener("resize", resizeT3D);
-
-  /* WebGL 上下文丢失自恢复：切窗口 / 长时间演示不黑屏 */
-  var cvDom = T3D.renderer.domElement;
-  cvDom.addEventListener("webglcontextlost", function (ev) {
-    ev.preventDefault();
-    if (T3D.running) { cancelAnimationFrame(T3D.animId); T3D.running = false; }
-    var h = $q("#t3d-hint"); if (h) h.textContent = "3D 画面暂不可用，正在恢复…";
-  }, false);
-  cvDom.addEventListener("webglcontextrestored", function () {
-    if (T3D.renderer && !T3D.running) startT3DLoop();
-    var h = $q("#t3d-hint"); if (h) h.textContent = "";
-  }, false);
-}
-
-function resizeT3D() {
-  if (!T3D.renderer || !T3D.stage) return;
-  var w = T3D.stage.clientWidth, h = T3D.stage.clientHeight;
-  if (!w || !h) return;
-  var pr = T3D.lowPerf ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
-  T3D.renderer.setPixelRatio(pr);
-  T3D.renderer.setSize(w, h);
-  T3D.camera.aspect = w / h;
-  T3D.camera.updateProjectionMatrix();
-}
-
-/* 每帧尺寸自愈：视图过渡期布局变化后保证缓冲与舞台一致 */
-function selfHealT3D() {
-  if (!T3D.stage || !T3D.renderer) return;
-  var w = T3D.stage.clientWidth, h = T3D.stage.clientHeight;
-  if (!w || !h) return;
-  var pr = T3D.lowPerf ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
-  var tw = Math.round(w * pr), th = Math.round(h * pr);
-  if (T3D.renderer.domElement.width !== tw || T3D.renderer.domElement.height !== th) resizeT3D();
-}
-
-/* ---------- 文物加载 ---------- */
-function loadTreasuryArtifact(i) {
-  if (!T3D.renderer) {
-    var a0 = TREASURY_3D[i];
-    var fb = $q("#view-treasury");
-    var it = _TIT[a0.id];
-    fb.setAttribute("data-fb", it ? it.img : "");
-    T3D.fallbackEl.innerHTML = '<div class="tf-badge">当前设备不支持 WebGL</div><img alt="' + a0.name + '" src="' + (it ? it.img : "") + '">';
-    return;
-  }
-  T3D.idx = i;
-  disposeGroup();
-  var a = TREASURY_3D[i];
-  T3D.cur = a;
-  var it = _TIT[a.id];
-
-  T3D.group = new THREE.Group();
-  T3D.scene.add(T3D.group);
-  T3D.parts = [];
-  T3D.labelSpheres = [];
-
-  /* 分段部件 */
-  /* 异形陶塑（泥咕咕/泥泥狗）：侧影挤出 + 附件拆解件 */
-  if (a.side) {
-    buildSideArtifact(a);
-  } else {
-    /* 旋转成型件：剖面点列（Catmull-Rom 样条平滑）逐部件构建 */
-    a.parts.forEach(function (p, pi) {
-      var pts = [];
-      a.profile.forEach(function (pt) {
-        var y = pt[1];
-        if (y >= p.y[0] - 0.001 && y <= p.y[1] + 0.001) {
-          pts.push(new THREE.Vector2(pt[0] * a.radiusCm, pt[1] * a.heightCm));
-        }
-      });
-      if (pts.length < 2) return;
-      var prof = pts.map(function (p2) { return [p2.x, p2.y]; });
-      var geo = new THREE.LatheGeometry(catmull2D(prof, 4).map(function (p2) { return new THREE.Vector2(p2[0], p2[1]); }), segN(256));
-      var mat = bodyMat(a);
-      var mesh = new THREE.Mesh(geo, mat);
-      mesh.castShadow = true;
-      mesh.userData = { part: p, pkey: p.key, pi: pi, base: new THREE.Vector3(0, 0, 0) };
-      T3D.group.add(mesh);
-      T3D.parts.push(mesh);
-
-    /* 端面封口（露胎断面） */
-    var y0 = p.y[0] * a.heightCm, y1 = p.y[1] * a.heightCm;
-    var r0 = radiusAt(a, p.y[0]), r1 = radiusAt(a, p.y[1]);
-    if (r0 > 0.0001) { var c0 = endCap(a, r0 * a.radiusCm); c0.position.y = y0; c0.userData.baseY = y0; c0.userData.partRef = mesh; T3D.group.add(c0); mesh.userData.caps = mesh.userData.caps || []; mesh.userData.caps.push(c0); }
-    if (r1 > 0.0001) { var c1 = endCap(a, r1 * a.radiusCm); c1.position.y = y1; c1.userData.baseY = y1; c1.userData.partRef = mesh; T3D.group.add(c1); mesh.userData.caps = mesh.userData.caps || []; mesh.userData.caps.push(c1); }
-    });
-  }
-
-  /* 附件：贯耳/系耳、弦纹、吹嘴、双耳 */
-  if (a.handles) addHandles(a);
-  if (a.rings) addRings(a);
-  if (a.mouthGeo) addMouth(a);
-  if (a.earsGeo) addEarsGeo(a);
-  if (a.feet) addFeet(a);
-  addPedestal(a);
-
-  /* 标注点 */
-  (a.labels || []).forEach(function (lb, li) {
-    var r = lb.r * a.radiusCm, y = lb.y * a.heightCm;
-    var s = new THREE.Mesh(
-      new THREE.SphereGeometry(Math.max(0.06, a.radiusCm * 0.055), segN(16), segN(12)),
-      new THREE.MeshStandardMaterial({ color: 0xd8b45a, emissive: 0x8a6a2a, emissiveIntensity: 0.5, metalness: 0.6, roughness: 0.35 })
-    );
-    if (a.side) s.position.set((lb.r * 2 - 1) * a.radiusCm, lb.y * a.heightCm, 0);
-    else s.position.set(r * 1.04, y, 0);
-    s.userData = { label: lb, li: li };
-    T3D.group.add(s);
-    T3D.labelSpheres.push(s);
+  /* 静音开关 */
+  try { TH.muted = localStorage.getItem("fy_th_muted") === "1"; } catch (e) { TH.muted = false; }
+  applyMute();
+  $q("#th-mute", root).addEventListener("click", function () {
+    TH.muted = !TH.muted;
+    try { localStorage.setItem("fy_th_muted", TH.muted ? "1" : "0"); } catch (e) {}
+    applyMute();
   });
 
-  /* 视角 */
-  var h = a.heightCm;
-  T3D.camH = h;
-  T3D.camera.position.set(0, h * 1.05, h * 2.3);
-  T3D.camera.lookAt(0, h * 0.42, 0);
-  T3D.zoom = 1;
-  applyLight();
-  applyExplode();
-  applyCut();
-  applyLabels();
-  applyGlaze();
-  rebuildBodyTexture(false);
-
-  /* 信息 */
-  $q("#t3d-name").textContent = a.name;
-  $q("#t3d-meta").textContent = a.place + " · " + a.level + " · " + (a.heightCm >= 20 ? "高 " + a.heightCm + " cm" : "通高 " + a.heightCm + " cm");
-  hideT3DCard();
-  /* 工艺演示/知识层同步 */
-  if (typeof onArtifactProcess === "function") onArtifactProcess();
-  if (typeof closeKnow === "function") closeKnow();
-}
-
-function radiusAt(a, y) {
-  var pts = a.profile, lo = pts[0], hi = pts[pts.length - 1];
-  for (var i = 0; i < pts.length - 1; i++) {
-    if (pts[i][1] <= y && pts[i + 1][1] >= y) { lo = pts[i]; hi = pts[i + 1]; break; }
-  }
-  var t = hi[1] === lo[1] ? 0 : (y - lo[1]) / (hi[1] - lo[1]);
-  return lo[0] + (hi[0] - lo[0]) * t;
-}
-
-function bodyMat(a) {
-  var t = getBodyTex(a);
-  var m = new THREE.MeshPhysicalMaterial({
-    map: t.map,
-    normalMap: t.normalMap,
-    bumpMap: t.bumpMap || null,
-    bumpScale: a.bumpS || 0.055,
-    clearcoatNormalMap: t.clearcoatNormalMap || null,
-    roughnessMap: t.roughnessMap,
-    metalness: a.body.metal,
-    roughness: a.body.rough,
-    clearcoat: T3D.tex.glaze ? a.body.cc : 0,
-    clearcoatRoughness: a.body.ccR || 0.25,
-    envMapIntensity: a.body.env || 0.7,
-    side: THREE.DoubleSide,
-    emissive: 0x000000
+  /* 三个功能按钮 */
+  $q("#th-real", root).addEventListener("click", openReal);
+  $q("#th-proc", root).addEventListener("click", function () {
+    if (typeof openProcess === "function") openProcess();
   });
-  return m;
-}
-
-function endCap(a, r) {
-  var g = new THREE.CircleGeometry(Math.max(0.001, r), 48);
-  var m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-    color: a.tire.color, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide
-  }));
-  m.rotation.x = Math.PI / 2;
-  return m;
-}
-
-function addFeet(a) {
-  for (var i = 0; i < a.feet; i++) {
-    var ang = (i / a.feet) * Math.PI * 2 + Math.PI / 6;
-    var foot = new THREE.Group();
-    if (a.footKind === "ru") {
-      /* 乳钉足：矮半球钉贴底（汝窑三足洗） */
-      var nail = new THREE.Mesh(
-        new THREE.SphereGeometry(a.radiusCm * 0.052, segN(20), segN(14), 0, Math.PI * 2, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: a.tire.color, roughness: 0.55, metalness: 0.0 })
-      );
-      nail.position.y = a.heightCm * 0.010;
-      foot.add(nail);
-      foot.position.set(Math.cos(ang) * a.radiusCm * 0.55, a.heightCm * 0.014, Math.sin(ang) * a.radiusCm * 0.55);
-    } else {
-      /* 兽足：上宽下收的柱 + 蹄端（唐三彩三足罐等） */
-      var k = a.footKind === "beast" ? 1.35 : 1;   /* 兽足加粗 */
-      var shank = new THREE.Mesh(
-        new THREE.CylinderGeometry(a.radiusCm * 0.055 * k, a.radiusCm * 0.085 * k, a.heightCm * 0.075 * k, segN(16)),
-        new THREE.MeshStandardMaterial({ color: a.tire.color, roughness: 0.85, metalness: 0.0 })
-      );
-      shank.position.y = a.heightCm * 0.045 * k;
-      var hoof = new THREE.Mesh(
-        new THREE.SphereGeometry(a.radiusCm * 0.085 * k, segN(16), segN(12), 0, Math.PI * 2, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: a.tire.color, roughness: 0.9, metalness: 0.0 })
-      );
-      hoof.position.y = a.heightCm * 0.008 * k;
-      foot.add(shank, hoof);
-      foot.position.set(Math.cos(ang) * a.radiusCm * 0.44, a.heightCm * 0.012, Math.sin(ang) * a.radiusCm * 0.44);
-      foot.rotation.z = Math.cos(ang) * 0.16; foot.rotation.x = Math.sin(ang) * 0.16;
-    }
-    foot.traverse(function (o) { if (o.isMesh) { o.castShadow = true; } });
-    foot.userData = { part: a.parts[2], pkey: "foot", pi: 2, base: new THREE.Vector3(0, 0, 0) };
-    T3D.group.add(foot);
-    T3D.parts.push(foot);
-  }
-}
-
-/* ========== 附件构建 ========== */
-
-/* 双贯耳（钧瓷）：方形圆角耳，立于束颈两侧 */
-function addHandles(a) {
-  if (a.handles === "guan") {
-    var w = a.radiusCm * 0.16, d = a.radiusCm * 0.10, hh = a.heightCm * 0.14;
-    var earGeo = new THREE.BoxGeometry(w, hh, d);
-    earGeo.translate(0, hh / 2 - a.heightCm * 0.10, 0);
-    /* 圆角（用 BevelBox 替代复杂几何） */
-    [-1, 1].forEach(function (s) {
-      var ear = new THREE.Mesh(earGeo, bodyMat(a));
-      ear.position.set(s * a.radiusCm * 0.30, a.heightCm * 0.80, 0);
-      ear.castShadow = true;
-      ear.userData = { part: a.parts[0], pkey: "lip", pi: 0, base: new THREE.Vector3(s * a.radiusCm * 0.30, a.heightCm * 0.80, 0) };
-      T3D.group.add(ear);
-      T3D.parts.push(ear);
-    });
-  } else if (a.handles === "xi") {
-    /* 三彩系耳：椭圆截面环形耳（陶泥盘条捏塑感，更接近真实器型） */
-    var R = a.radiusCm * 0.12, tubeR = a.radiusCm * 0.038;
-    var earPts = [];
-    for (var a2 = 0; a2 <= 22; a2++) {
-      var th = a2 / 22 * Math.PI * 1.4;
-      earPts.push(new THREE.Vector3(Math.cos(th) * R, Math.sin(th) * R * 0.82, 0));
-    }
-    var earCurve = new THREE.CatmullRomCurve3(earPts);
-    var earGeo = new THREE.TubeGeometry(earCurve, 22, tubeR, 12, false);
-    earGeo.scale(1, 1, 1.25); /* 截面压扁成椭圆，模拟盘条耳 */
-    [-1, 1].forEach(function (s) {
-      var ear = new THREE.Mesh(earGeo, bodyMat(a));
-      ear.position.set(s * a.radiusCm * 0.52, a.heightCm * 0.70, 0);
-      ear.rotation.z = s * 0.45;
-      ear.castShadow = true;
-      ear.userData = { part: a.parts[1], pkey: "belly", pi: 1, base: new THREE.Vector3(s * a.radiusCm * 0.52, a.heightCm * 0.70, 0) };
-      T3D.group.add(ear);
-      T3D.parts.push(ear);
-    });
-  } else if (a.handles === "spout") {
-    /* 花浇：细长流口斜出上翘（末端花口喇叭）+ 环形执柄连颈及腹 */
-    var hC2 = a.heightCm, rC2 = a.radiusCm;
-    var spout = new THREE.Mesh(
-      new THREE.CylinderGeometry(rC2 * 0.052, rC2 * 0.058, hC2 * 0.34, segN(14)),
-      bodyMat(a)
-    );
-    spout.position.set(rC2 * 0.70, hC2 * 0.70, 0);
-    spout.rotation.z = -0.58;
-    spout.castShadow = true;
-    spout.userData = { part: a.parts[3], pkey: "spout", pi: 3, base: spout.position.clone() };
-    T3D.group.add(spout); T3D.parts.push(spout);
-    var tip = new THREE.Mesh(
-      new THREE.CylinderGeometry(rC2 * 0.070, rC2 * 0.052, hC2 * 0.055, segN(14), 1, true),
-      bodyMat(a)
-    );
-    tip.position.set(rC2 * 0.98, hC2 * 0.90, 0);
-    tip.rotation.z = -0.58;
-    tip.castShadow = true;
-    tip.userData = { part: a.parts[3], pkey: "spout", pi: 3, base: tip.position.clone() };
-    T3D.group.add(tip); T3D.parts.push(tip);
-    /* 环形执柄 */
-    var hp = [];
-    for (var hx = 0; hx <= 16; hx++) {
-      var ht = Math.PI * (0.55 + hx / 16 * 0.95);
-      hp.push(new THREE.Vector3(Math.cos(ht) * rC2 * 0.17, Math.sin(ht) * rC2 * 0.17 * 1.3, 0));
-    }
-    var hCurve = new THREE.CatmullRomCurve3(hp);
-    var hGeo = new THREE.TubeGeometry(hCurve, 18, rC2 * 0.032, 10, false);
-    hGeo.scale(1, 1, 1.18);
-    var hnd = new THREE.Mesh(hGeo, bodyMat(a));
-    hnd.position.set(-rC2 * 0.56, hC2 * 0.60, 0);
-    hnd.rotation.z = 0.3;
-    hnd.castShadow = true;
-    hnd.userData = { part: a.parts[4], pkey: "handle", pi: 4, base: hnd.position.clone() };
-    T3D.group.add(hnd); T3D.parts.push(hnd);
-  }
-}
-
-/* 弦纹环：颈部/口下凸起环棱 */
-function addRings(a) {
-  (a.rings || []).forEach(function (ry) {
-    var rr = radiusAt(a, ry) * a.radiusCm * 1.06;
-    var ring = new THREE.Mesh(
-      new THREE.TorusGeometry(rr, a.radiusCm * 0.022, segN(12), segN(64)),
-      bodyMat(a)
-    );
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = ry * a.heightCm;
-    ring.castShadow = true;
-    ring.userData = { part: a.parts[0], pkey: "lip", pi: 0, base: new THREE.Vector3(0, ry * a.heightCm, 0) };
-    T3D.group.add(ring);
-    T3D.parts.push(ring);
+  $q("#th-know", root).addEventListener("click", function () {
+    if (typeof openKnow === "function") openKnow();
   });
-}
 
-/* 泥咕咕吹嘴：头顶小圆柱（独立拆解件） */
-function addMouth(a) {
-  var m = a.mouthGeo;
-  var tube = new THREE.Mesh(
-    new THREE.CylinderGeometry(m.r * a.radiusCm, m.r * a.radiusCm, m.h * a.heightCm, segN(14)),
-    new THREE.MeshStandardMaterial({ color: 0x1a140e, roughness: 0.9, metalness: 0.0 })
-  );
-  tube.position.set(m.x * 2 * a.radiusCm - a.radiusCm, m.y * a.heightCm + m.h * a.heightCm / 2, 0);
-  /* 吹孔凹陷 */
-  var hole = new THREE.Mesh(
-    new THREE.CircleGeometry(m.r * a.radiusCm * 0.5, 12),
-    new THREE.MeshStandardMaterial({ color: 0x0d0906, roughness: 1 })
-  );
-  hole.rotation.x = -Math.PI / 2;
-  hole.position.y = 0.01;
-  tube.add(hole);
-  tube.castShadow = true;
-  tube.userData = { part: a.parts[0], pkey: "head", pi: 0, base: tube.position.clone() };
-  T3D.group.add(tube);
-  T3D.parts.push(tube);
-}
-
-/* 泥泥狗双耳：圆锥耳（独立拆解件，沿厚度方向两侧对称） */
-function addEarsGeo(a) {
-  var e = a.earsGeo;
-  var earGeo = new THREE.ConeGeometry(e.r * a.radiusCm, e.h * a.heightCm, 10);
-  earGeo.translate(0, e.h * a.heightCm / 2, 0);
-  [-1, 1].forEach(function (s) {
-    var ear = new THREE.Mesh(earGeo, bodyMat(a));
-    ear.position.set(e.x0 * 2 * a.radiusCm - a.radiusCm, e.y * a.heightCm, s * e.gap * a.radiusCm);
-    ear.rotation.x = -s * 0.22;
-    ear.castShadow = true;
-    ear.userData = { part: a.parts[0], pkey: "head", pi: 0, base: ear.position.clone() };
-    T3D.group.add(ear);
-    T3D.parts.push(ear);
-  });
-}
-
-/* ========== 异形陶塑（侧影挤出 + 拆解件） ========== */
-function buildSideArtifact(a) {
-  var S = new THREE.Shape();
-  a.side.forEach(function (p, i) {
-    if (i === 0) S.moveTo(p[0], p[1]); else S.lineTo(p[0], p[1]);
-  });
-  S.closePath();
-  var depth = 1, bevel = 0.012;
-  var geo = new THREE.ExtrudeGeometry(S, {
-    depth: depth, bevelEnabled: true,
-    bevelThickness: bevel, bevelSize: bevel, bevelSegments: segN(3), steps: 2
-  });
-  /* 归一化坐标 → 物理尺寸（UV 保持 0-1，贴图与侧影对齐） */
-  var w = a.radiusCm * 2, h = a.heightCm;
-  geo.scale(w, h, a.thickCm);
-  geo.translate(-w / 2, 0, -a.thickCm / 2);
-
-  var mat = bodyMat(a);
-  mat.clearcoat = 0; mat.envMapIntensity = 0.25;
-  var body = new THREE.Mesh(geo, mat);
-  body.castShadow = true;
-  body.userData = { part: a.parts[1], pkey: "body", pi: 1, base: new THREE.Vector3(0, 0, 0) };
-  T3D.group.add(body);
-  T3D.parts.push(body);
-}
-
-/* 展台：木质圆台，承接文物（不参与爆炸），增强展品真实感 */
-function addPedestal(a) {
-  var r = a.radiusCm * 1.35, h = a.heightCm * 0.16;
-  var pm = new THREE.Mesh(
-    new THREE.CylinderGeometry(r * 1.05, r * 1.18, h, segN(64), 1),
-    new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 0.55, metalness: 0.12 })
-  );
-  pm.position.y = -h * 0.5;
-  pm.receiveShadow = true;
-  pm.castShadow = false;
-  pm.name = "pedestal";
-  T3D.group.add(pm);
-  /* 台面金属圈 */
-  var ring = new THREE.Mesh(
-    new THREE.RingGeometry(r * 0.82, r, 64),
-    new THREE.MeshStandardMaterial({ color: 0xc8a24a, roughness: 0.35, metalness: 0.75, side: THREE.DoubleSide })
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.y = -0.001;
-  ring.receiveShadow = true;
-  T3D.group.add(ring);
-}
-
-function disposeGroup() {
-  if (!T3D.group) return;
-  T3D.group.traverse(function (o) {
-    if (o.geometry) o.geometry.dispose();
-    if (o.material) {
-      if (o.material.map) o.material.map.dispose();
-      o.material.dispose();
-    }
-  });
-  T3D.scene.remove(T3D.group);
-  T3D.group = null;
-}
-
-/* ---------- 纹理生成（Canvas 程序化，离线） ---------- */
-function makeBodyTexture(a) {
-  var S = 512, c = document.createElement("canvas"); c.width = c.height = S;
-  var x = c.getContext("2d");
-
-  /* 底色：釉色渐变 / 彩绘黑底 / 流釉乳白 */
-  if (a.paint && a.paint.on) {
-    x.fillStyle = a.paint.base; x.fillRect(0, 0, S, S);
-  } else if (a.streaky && a.streaky.on) {
-    var bg = x.createLinearGradient(0, 0, 0, S);
-    bg.addColorStop(0, "#f2ecd8"); bg.addColorStop(0.55, "#efe6d0"); bg.addColorStop(1, "#e4d8bc");
-    x.fillStyle = bg; x.fillRect(0, 0, S, S);
-  } else if (a.grad) {
-    var gg = x.createLinearGradient(0, 0, 0, S);
-    var vg = T3D.varg;
-    a.grad.forEach(function (st, si) {
-      var p = st[0];
-      if (vg !== 0.5) {
-        p = 0.5 + (p - 0.5) * (1 + (vg - 0.5) * 1.6);
-        p = Math.max(0, Math.min(1, p));
-      }
-      gg.addColorStop(p, st[1]);
-    });
-    x.fillStyle = gg; x.fillRect(0, 0, S, S);
-  } else {
-    x.fillStyle = "#e8e0cc"; x.fillRect(0, 0, S, S);
-  }
-
-  /* 流釉竖纹 */
-  if (a.streaky && a.streaky.on && T3D.tex.streak) {
-    var cols = a.streaky.stops || [];
-    for (var k = 0; k < 26; k++) {
-      var cw = 6 + Math.random() * 16;
-      var cc = cols[k % cols.length];
-      var cg = x.createLinearGradient(0, 0, 0, S);
-      cg.addColorStop(0, hexA(cc, 0.85)); cg.addColorStop(0.55, hexA(cc, 0.45)); cg.addColorStop(1, hexA(cc, 0));
-      x.fillStyle = cg;
-      x.fillRect(Math.random() * S, 0, cw, S);
-    }
-  }
-
-  /* 开片纹 */
-  if (a.crackle && a.crackle.on && T3D.tex.crackle) {
-    x.strokeStyle = a.crackle.color;
-    x.lineWidth = 1;
-    var n = Math.round(90 * a.crackle.density);
-    for (var i = 0; i < n; i++) {
-      var sx = Math.random() * S, sy = Math.random() * S;
-      x.beginPath(); x.moveTo(sx, sy);
-      var seg = 2 + Math.floor(Math.random() * 3);
-      for (var j = 0; j < seg; j++) {
-        x.lineTo(sx + (Math.random() - 0.5) * 70, sy + (Math.random() - 0.5) * 70);
-      }
-      x.stroke();
-    }
-  }
-
-  /* 彩绘纹样 */
-  if (a.paint && a.paint.on && T3D.tex.streak) {
-    if (a.paint.kind === "ninigou") {
-      /* 四色点线图腾：白线卷 + 五彩点阵 */
-      x.strokeStyle = "rgba(242,239,230,0.9)"; x.lineWidth = 3;
-      for (var row = 0; row < 5; row++) {
-        var ry = 90 + row * 78;
-        x.beginPath();
-        for (var q = 0; q <= S; q += 12) x.lineTo(q, ry + Math.sin((q + row * 60) / 40) * 6);
-        x.stroke();
-      }
-      for (var dot = 0; dot < 46; dot++) {
-        var px = Math.random() * S, py = Math.random() * S;
-        x.fillStyle = a.paint.dots[Math.floor(Math.random() * a.paint.dots.length)];
-        x.beginPath(); x.arc(px, py, 5 + Math.random() * 4, 0, 7); x.fill();
-        x.fillStyle = "rgba(242,239,230,0.8)";
-        x.beginPath(); x.arc(px, py, 1.8, 0, 7); x.fill();
-      }
-    } else {
-      /* nigugu：点线花鸟纹 */
-      x.strokeStyle = "rgba(242,239,230,0.85)"; x.lineWidth = 4;
-      for (var r2 = 0; r2 < 4; r2++) {
-        var yy = 100 + r2 * 96;
-        x.beginPath(); x.moveTo(0, yy + (r2 % 2) * 10); x.lineTo(S, yy);
-        for (var d = 0; d < 8; d++) { x.moveTo(d * 70 + 20, yy - 14); x.lineTo(d * 70 + 42, yy - 14); }
-        x.stroke();
-      }
-      for (var d2 = 0; d2 < 40; d2++) {
-        x.fillStyle = a.paint.dots[Math.floor(Math.random() * a.paint.dots.length)];
-        x.beginPath(); x.arc(Math.random() * S, Math.random() * S, 4 + Math.random() * 3, 0, 7); x.fill();
-      }
-    }
-  }
-
-  return new THREE.CanvasTexture(c);
-}
-
-function hexA(hex, al) {
-  var h = hex.replace("#", "");
-  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-  var n = parseInt(h, 16);
-  return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + al + ")";
-}
-
-function rebuildBodyTexture(silent) {
-  if (!T3D.group || !T3D.cur) return;
-  var a = T3D.cur;
-  /* PBR：diffuse 重建（响应窑变滑条/纹理开关），normal/roughness 走缓存 */
-  if (typeof getBodyTex === "function" && typeof disposeBodyTex === "function") {
-    disposeBodyTex(a.id);
-    var t = getBodyTex(a);
-    T3D.parts.forEach(function (m) {
-      if (m.material && m.material.map) {
-        var old = m.material.map;
-        m.material.map = t.map;
-        m.material.normalMap = t.normalMap;
-        m.material.roughnessMap = t.roughnessMap;
-        m.material.needsUpdate = true;
-        old.dispose();
+  /* 离开珍品馆时暂停讲解（全局只绑一次） */
+  if (!TH.inited) {
+    TH.inited = true;
+    window.addEventListener("hashchange", function () {
+      var h = location.hash;
+      if (h.indexOf("treasury") === -1 && TH.audio) {
+        TH.audio.pause();
       }
     });
-    return;
-  }
-  var tex = makeBodyTexture(a);
-  T3D.parts.forEach(function (m) {
-    if (m.material && m.material.map) {
-      var old = m.material.map;
-      m.material.map = tex;
-      m.material.needsUpdate = true;
-      old.dispose();
-    }
-  });
-}
-
-/* ---------- 交互 ---------- */
-function bindT3DInput() {
-  var st = T3D.stage;
-  st.addEventListener("pointerdown", function (e) {
-    T3D.dragging = true; T3D.moved = false;
-    T3D.lastX = e.clientX; T3D.lastY = e.clientY;
-    st.setPointerCapture && st.setPointerCapture(e.pointerId);
-  });
-  st.addEventListener("pointermove", function (e) {
-    if (!T3D.dragging || !T3D.group) return;
-    var dx = e.clientX - T3D.lastX, dy = e.clientY - T3D.lastY;
-    if (Math.abs(dx) + Math.abs(dy) > 3) T3D.moved = true;
-    T3D.lastX = e.clientX; T3D.lastY = e.clientY;
-    T3D.group.rotation.y += dx * 0.008;
-    T3D.group.rotation.x = Math.max(-1.1, Math.min(1.1, T3D.group.rotation.x + dy * 0.005));
-  });
-  st.addEventListener("pointerup", function (e) {
-    if (!T3D.dragging) return;
-    T3D.dragging = false;
-    if (!T3D.moved) pickT3D(e);
-  });
-  st.addEventListener("wheel", function (e) {
-    e.preventDefault();
-    if (!T3D.camera || !T3D.cur) return;
-    var h = T3D.camH;
-    var d = T3D.camera.position.length();
-    var nd = Math.max(h * 1.6, Math.min(h * 6.5, d * (1 + e.deltaY * 0.0012)));
-    var dir = T3D.camera.position.clone().normalize();
-    T3D.camera.position.copy(dir.multiplyScalar(nd));
-    T3D.camera.lookAt(0, h * 0.42, 0);
-  }, { passive: false });
-
-  /* 双指缩放 */
-  st.addEventListener("touchstart", function (e) {
-    if (e.touches.length === 2) {
-      T3D.pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    }
-  }, { passive: true });
-  st.addEventListener("touchmove", function (e) {
-    if (e.touches.length === 2 && T3D.camera && T3D.cur) {
-      var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-      var h = T3D.camH;
-      var c = T3D.camera.position.length() * (T3D.pinchDist / Math.max(1, d));
-      var nd = Math.max(h * 1.6, Math.min(h * 6.5, c));
-      var dir = T3D.camera.position.clone().normalize();
-      T3D.camera.position.copy(dir.multiplyScalar(nd));
-      T3D.camera.lookAt(0, h * 0.42, 0);
-      T3D.pinchDist = d;
-    }
-  }, { passive: true });
-}
-
-function pickT3D(e) {
-  if (!T3D.renderer || !T3D.group) return;
-  var r = T3D.stage.getBoundingClientRect();
-  var nx = ((e.clientX - r.left) / r.width) * 2 - 1;
-  var ny = -(((e.clientY - r.top) / r.height) * 2 - 1);
-  T3D.raycaster.setFromCamera(new THREE.Vector2(nx, ny), T3D.camera);
-  var capsAll = [];
-  T3D.parts.forEach(function (m) { if (m.userData.caps) capsAll = capsAll.concat(m.userData.caps); });
-  var hits = T3D.raycaster.intersectObjects(T3D.parts.concat(T3D.labelSpheres, capsAll), true);
-  if (!hits.length) { hideT3DCard(); clearHighlight(); return; }
-  var hit = hits[0].object;
-  if (hit.userData.label) {
-    clearHighlight();
-    showT3DCard(hit.userData.label.text, "年代标注");
-    return;
-  }
-  /* 命中 Group 子网格时回溯到父部件（如兽足组） */
-  var pMesh = hit.userData.part ? hit : (hit.userData.partRef || (hit.parent && hit.parent.userData && hit.parent.userData.part ? hit.parent : null));
-  if (pMesh && pMesh.userData.part) {
-    highlightPart(pMesh);
-    showT3DCard(pMesh.userData.part.name, pMesh.userData.part.text);
   }
 }
 
-function _setEmis(obj, on) {
-  if (obj.material && obj.material.emissive) {
-    obj.material.emissive.setHex(on ? 0xc9a23a : 0x000000);
-    obj.material.emissiveIntensity = on ? 0.55 : 0;
+function applyMute() {
+  if (TH.audio) TH.audio.volume = TH.muted ? 0 : 1;
+  var btn = $q("#th-mute");
+  if (!btn) return;
+  btn.classList.toggle("is-muted", TH.muted);
+  var off = btn.querySelector(".mute-off"), on = btn.querySelector(".mute-on");
+  if (off) off.style.display = TH.muted ? "none" : "";
+  if (on) on.style.display = TH.muted ? "" : "none";
+}
+
+/* ---------- 播放与音频分析 ---------- */
+function ensureAudioGraph() {
+  if (!TH.ac) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    TH.ac = new AC();
+    TH.srcNode = TH.ac.createMediaElementSource(TH.audio);
+    TH.analyser = TH.ac.createAnalyser();
+    TH.analyser.fftSize = 256;
+    TH.analyser.smoothingTimeConstant = 0.55;
+    TH.srcNode.connect(TH.analyser);
+    TH.analyser.connect(TH.ac.destination);
+    TH.freq = new Uint8Array(TH.analyser.frequencyBinCount);
   }
-  if (obj.children) obj.children.forEach(function (c) { _setEmis(c, on); });
+  if (TH.ac.state === "suspended") TH.ac.resume();
 }
 
-function highlightPart(mesh) {
-  T3D.parts.forEach(function (m) { _setEmis(m, false); });
-  _setEmis(mesh, true);
+function playAudio() {
+  ensureAudioGraph();
+  applyMute();
+  var pr = TH.audio.play();
+  if (pr && pr.catch) pr.catch(function () {});
 }
 
-function clearHighlight() {
-  T3D.parts.forEach(function (m) { _setEmis(m, false); });
+function seekSegment(i) {
+  var a = TH.audio;
+  if (!a || !isFinite(a.duration) || !TH.segs.bounds) return;
+  var b = TH.segs.bounds[i];
+  if (!b) return;
+  a.currentTime = Math.max(0, b[0] + 0.02);
+  updateClockUI();
+  if (a.paused) playAudio();
 }
 
-function showT3DCard(title, body) {
-  var c = T3D.cardEl;
-  c.innerHTML = '<div class="tc-title">' + title + "</div><div class='tc-body'>" + body + "</div>";
-  c.style.display = "block";
-  c.classList.remove("tc-out");
-  void c.offsetWidth;
-  c.classList.add("tc-in");
-}
-
-function hideT3DCard() {
-  if (!T3D.cardEl) return;
-  T3D.cardEl.classList.remove("tc-in");
-  T3D.cardEl.classList.add("tc-out");
-  var self = T3D.cardEl;
-  setTimeout(function () { if (self.classList.contains("tc-out")) self.style.display = "none"; }, 260);
-}
-
-/* ---------- 效果控制 ---------- */
-function applyExplode() {
-  if (!T3D.group || !T3D.cur) return;
-  var a = T3D.cur, k = T3D.expl * a.heightCm * 0.75;
-  T3D.parts.forEach(function (m) {
-    if (!m.userData.part) return;
-    var off = m.userData.part.off;
-    var bx = m.userData.base ? m.userData.base.x : 0;
-    var by = m.userData.base ? m.userData.base.y : 0;
-    var bz = m.userData.base ? m.userData.base.z : 0;
-    m.position.set(bx + off[0] * k, by + off[1] * k, bz + off[2] * k);
-    if (m.userData.caps) m.userData.caps.forEach(function (c) {
-      c.position.x = m.position.x; c.position.z = m.position.z;
-      c.position.y = c.userData.baseY + m.position.y;
-      /* 完整器物时隐藏中间接口封口盘（浑然一体）；拆解时露胎断面 */
-      var isEnd = Math.abs(c.userData.baseY) < 0.01 || Math.abs(c.userData.baseY - T3D.cur.heightCm) < 0.01;
-      c.visible = isEnd || T3D.expl > 0.03;
-    });
-  });
-  /* 标注点跟随所属部件 */
-  T3D.labelSpheres.forEach(function (s, si) {
-    var lb = T3D.cur.labels[si];
-    var owner = null;
-    T3D.cur.parts.forEach(function (p) { if (lb.y >= p.y[0] && lb.y <= p.y[1]) owner = p; });
-    var ox = 0, oy = 0, oz = 0;
-    if (owner) { var k2 = T3D.expl * T3D.cur.heightCm * 0.75; var off = owner.off; ox = off[0] * k2; oy = off[1] * k2; oz = off[2] * k2; }
-    if (a.side) s.position.set((lb.r * 2 - 1) * a.radiusCm + ox, lb.y * a.heightCm + oy, oz);
-    else s.position.set(lb.r * a.radiusCm * 1.04 + ox, lb.y * a.heightCm + oy, oz);
-  });
-}
-
-function applyCut() {
-  if (!T3D.renderer) return;
-  if (T3D.cut && T3D.cur) {
-    var a = T3D.cur;
-    T3D.scene.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)];
-    if (!T3D.cutCap) {
-      /* 剖面盖：露胎断面（旋转件=器型剖面；异形件=侧影截面） */
-      var sh = new THREE.Shape();
-      if (a.side) {
-        a.side.forEach(function (pt, i) {
-          if (i === 0) sh.moveTo(pt[0] * 2 * a.radiusCm - a.radiusCm, pt[1] * a.heightCm);
-          else sh.lineTo(pt[0] * 2 * a.radiusCm - a.radiusCm, pt[1] * a.heightCm);
-        });
-        sh.closePath();
-      } else {
-        /* 外壁点列（盆形剖面取 y 递增段，避免自交） */
-        var prof2 = [];
-        for (var pk = 0; pk < a.profile.length; pk++) {
-          prof2.push(a.profile[pk]);
-          if (pk > 0 && a.profile[pk][1] < a.profile[pk - 1][1]) break;
-        }
-        sh.moveTo(0, 0);
-        prof2.forEach(function (pt) { sh.lineTo(pt[0] * a.radiusCm, pt[1] * a.heightCm); });
-        sh.lineTo(0, a.heightCm); sh.closePath();
-      }
-      var sg = new THREE.ShapeGeometry(sh, 24);
-      T3D.cutCap = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({
-        color: a.tire.color, roughness: 0.92, metalness: 0.0, transparent: true, opacity: 0.92, side: THREE.DoubleSide
-      }));
-      T3D.cutCap.position.set(0, 0, 0.01);
-      T3D.scene.add(T3D.cutCap);
-    }
-  } else {
-    T3D.scene.clippingPlanes = [];
-    if (T3D.cutCap) { T3D.scene.remove(T3D.cutCap); T3D.cutCap.geometry.dispose(); T3D.cutCap.material.dispose(); T3D.cutCap = null; }
-  }
-  if (T3D.renderer) { T3D.renderer.clippingPlanes = T3D.scene.clippingPlanes; }
-}
-
-function applyLight() {
-  if (!T3D.lights || !T3D.cur) return;
-  var h = T3D.camH || T3D.cur.heightCm;
-  var ls = T3D.lights, L = T3D.light;
-  if (L === "museum") {
-    ls.amb.color.setHex(0xffffff); ls.amb.intensity = 0.55;
-    ls.dir.color.setHex(0xffffff); ls.dir.intensity = 0.95; ls.dir.position.set(h * 0.6, h * 1.4, h * 1.2);
-    ls.point.color.setHex(0xffe8c8); ls.point.intensity = 0.55; ls.point.position.set(-h * 1.2, h * 0.7, h * 1.0);
-    ls.rim.color.setHex(0x8aa4e8); ls.rim.intensity = 0.55; ls.rim.position.set(0, h * 0.8, -h * 2.0);
-  } else if (L === "kiln") {
-    ls.amb.color.setHex(0xff8040); ls.amb.intensity = 0.16;
-    ls.dir.color.setHex(0xffa060); ls.dir.intensity = 0.28; ls.dir.position.set(h * 1.5, h * 1.0, h * 1.4);
-    ls.point.color.setHex(0xff5a20); ls.point.intensity = 2.6; ls.point.position.set(0, h * 0.2, h * 1.1);
-    ls.rim.color.setHex(0xff7a40); ls.rim.intensity = 0.18; ls.rim.position.set(0, h * 0.8, -h * 2.0);
-  } else {
-    ls.amb.color.setHex(0xffffff); ls.amb.intensity = 0.8;
-    ls.dir.color.setHex(0xfff5e0); ls.dir.intensity = 1.05; ls.dir.position.set(h * 0.5, h * 1.6, h * 1.1);
-    ls.point.color.setHex(0xffffff); ls.point.intensity = 0.3; ls.point.position.set(-h * 1.5, h * 1.2, h * 0.8);
-    ls.rim.color.setHex(0xffffff); ls.rim.intensity = 0.3; ls.rim.position.set(0, h * 0.8, -h * 2.0);
-  }
-}
-
-function applyGlaze() {
-  if (!T3D.parts || !T3D.cur) return;
-  var a = T3D.cur, on = T3D.tex.glaze;
-  T3D.parts.forEach(function (m) {
-    if (m.material && m.material.clearcoat !== undefined) {
-      m.material.clearcoat = on ? a.body.cc : 0;
-      m.material.needsUpdate = true;
-    }
-  });
-}
-
-function applyLabels() {
-  if (!T3D.labelSpheres) return;
-  T3D.labelSpheres.forEach(function (s) { s.visible = T3D.showLabel; });
-}
-
-/* ---------- 工具 ---------- */
-var _t3dAudio = null;
-function speakTreasury() {
-  var a = T3D.cur;
+/* ---------- 展品切换 ---------- */
+function loadArtifact(i, autoplay) {
+  var a = TREASURY_ARTIFACTS[i];
   if (!a) return;
-  /* 优先播离线内联讲解音频（T3D_AUDIO，由 treasury-audio.js 提供）；失败降级本地语音合成 */
-  var ad = (typeof T3D_AUDIO !== "undefined") ? T3D_AUDIO[a.id] : null;
-  if (ad) {
-    try {
-      if (_t3dAudio) { _t3dAudio.pause(); _t3dAudio = null; }
-      var au = new Audio(ad);
-      au.volume = 0.9;
-      au.play().catch(function () {
-        try { if ("speechSynthesis" in window) { window.speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(a.audio); u.lang = "zh-CN"; var vs = window.speechSynthesis.getVoices(); var zv = vs.filter(function (v) { return /^zh/i.test(v.lang); })[0]; if (zv) u.voice = zv; window.speechSynthesis.speak(u); } } catch (e2) {}
-      });
-      _t3dAudio = au;
-      showT3DCard("语音讲解", "正在播放《" + a.name + "》离线工艺讲解……");
-      return;
-    } catch (e) {}
+  TH.idx = i;
+  T3D.cur = a; T3D.idx = i;
+  TH.segs = { text: split3(a.audio), bounds: [] };
+  TH.level = 0;
+
+  if (TH.audio) {
+    TH.audio.pause();
+    TH.audio.src = (typeof T3D_AUDIO !== "undefined" && T3D_AUDIO[a.id]) ? T3D_AUDIO[a.id] : "";
+    TH.audio.load();
   }
-  if (!("speechSynthesis" in window)) { showT3DCard("语音不可用", "当前浏览器不支持本地语音合成"); return; }
-  window.speechSynthesis.cancel();
-  var u = new SpeechSynthesisUtterance(a.audio);
-  u.lang = "zh-CN";
-  u.rate = 1.0; u.pitch = 1.0;
-  var vs = window.speechSynthesis.getVoices();
-  var zv = vs.filter(function (v) { return /^zh/i.test(v.lang); })[0];
-  if (zv) u.voice = zv;
-  window.speechSynthesis.speak(u);
+
+  /* 展柜实物图与铭牌 */
+  var real = (typeof TREASURY_REAL !== "undefined") ? TREASURY_REAL[a.id] : null;
+  var img = $q("#ts-img");
+  if (img) {
+    img.src = real && real.src ? real.src : "assets/" + a.id + ".jpg";
+    img.alt = a.name + " 实物影像";
+  }
+  var nameEl = $q("#ts-name");
+  if (nameEl) nameEl.textContent = a.name;
+  var metaEl = $q("#ts-meta");
+  if (metaEl) metaEl.textContent = a.place + " · " + a.level + " · 通高约 " + a.heightCm + " cm";
+
+  /* 展品档案卡 */
+  var info = $q("#tc-body");
+  if (info) {
+    info.innerHTML =
+      '<div class="ti-row"><span>名称</span><b>' + a.name + '</b></div>' +
+      '<div class="ti-row"><span>产地</span><b>' + a.place + '</b></div>' +
+      '<div class="ti-row"><span>级别</span><b>' + a.level + '</b></div>' +
+      '<div class="ti-row"><span>通高</span><b>约 ' + a.heightCm + ' cm</b></div>' +
+      '<div class="ti-row"><span>门类</span><b>' + a.cat + ' 类</b></div>';
+  }
+
+  /* 五件切换 */
+  $q("#th-arts").innerHTML = TREASURY_ARTIFACTS.map(function (x, k) {
+    return '<button class="th-art' + (k === i ? " on" : "") + '" data-i="' + k + '" type="button">' +
+      (TH_SHORT[x.id] || x.name) + '</button>';
+  }).join("");
+
+  /* 图文考据点 */
+  $q("#th-points").innerHTML = a.points.map(function (p, k) {
+    return '<button class="tp-pt" data-i="' + k + '" type="button">' +
+      '<span class="pp-sn">' + ["壹", "贰", "叁"][k] + "</span>" +
+      '<span class="pp-body"><b>' + p.name + '</b><i>' + p.text + '</i></span></button>';
+  }).join("");
+
+  /* 字幕段 */
+  $q("#cap-segs").innerHTML = TH.segs.text.map(function (s, k) {
+    return '<button class="cap-seg" data-i="' + k + '" type="button">' + (a.points[k] ? a.points[k].name : "第 " + (k + 1) + " 段") + '</button>';
+  }).join("");
+  $q("#cap-text").textContent = "点击播放，听讲解员为您讲述……";
+  $q("#th-time").textContent = "00:00 / 00:00";
+  $q("#th-fill").style.width = "0%";
+  renderTicks();
+  $q("#th-play").innerHTML = thIconPlay();
+
+  /* 静音图标沿用 */
+  applyMute();
+
+  /* L2 工艺演示若开着，随展品切换 */
+  if (typeof onArtifactProcess === "function") {
+    try { onArtifactProcess(); } catch (e) {}
+  }
+
+  if (autoplay) playAudio();
 }
 
-function shotTreasury() {
-  if (!T3D.renderer) return;
-  try {
-    var a = T3D.cur;
-    var url = T3D.renderer.domElement.toDataURL("image/png");
-    var link = document.createElement("a");
-    link.download = (a ? a.name.replace(/[··]/g, "") : "非遗3D") + ".png";
-    link.href = url;
-    document.body.appendChild(link); link.click(); link.remove();
-    showT3DCard("已导出", "当前视角已保存为 PNG，仅存在本地");
-  } catch (e) {
-    showT3DCard("导出失败", "当前环境不允许保存图片");
+/* 进度条分段刻度 */
+function renderTicks() {
+  var ticks = $q("#th-ticks");
+  if (!ticks) return;
+  var a = TREASURY_ARTIFACTS[TH.idx];
+  var segs = TH.segs.text || [];
+  var lens = segs.map(function (s) { return Array.from(s).length; });
+  var total = lens.reduce(function (x, y) { return x + y; }, 0) || 1;
+  var acc = 0, html = "";
+  for (var i = 0; i < segs.length - 1; i++) {
+    acc += lens[i];
+    html += '<i style="left:' + (acc / total * 100) + '%"></i>';
   }
+  ticks.innerHTML = html;
 }
 
-/* ---------- 渲染循环 ---------- */
-function startT3DLoop() {
-  if (T3D.running || !T3D.renderer) return;
-  T3D.running = true;
-  var last = 0;
-  function tick(t) {
-    T3D.animId = requestAnimationFrame(tick);
-    var v = $q("#view-treasury");
-    if (!v || !v.classList.contains("active") || !T3D.renderer) return;
-    selfHealT3D();
-    if (T3D.rot && T3D.group && !T3D.dragging) T3D.group.rotation.y += 0.005;
-    if (T3D.light === "kiln" && T3D.lights.point) {
-      var ph = (t % 3000) / 3000;
-      T3D.lights.point.intensity = 2.2 + Math.sin(ph * Math.PI * 2) * 0.45;
+/* ---------- 主循环：口型 / 声波 / 时钟 ---------- */
+function setTalk(v) {
+  var talk = $q("#td-talk"), close = $q("#td-close");
+  if (!talk || !close) return;
+  talk.style.opacity = v.toFixed(3);
+  close.style.opacity = (1 - v).toFixed(3);
+}
+
+function thLoop() {
+  TH.rafId = requestAnimationFrame(thLoop);
+  var a = TH.audio;
+  if (!a) return;
+
+  /* 口型与声波 */
+  var waveEl = $q("#td-wave");
+  var bars = waveEl ? waveEl.querySelectorAll("i") : [];
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (TH.analyser && TH.freq && !a.paused && !reduced) {
+    TH.analyser.getByteFrequencyData(TH.freq);
+    var e = 0;
+    for (var b = 2; b <= 10; b++) e += TH.freq[b];
+    e /= 9;
+    var target = Math.max(0, Math.min(1, (e - 24) / 60));
+    TH.level += (target - TH.level) * 0.4;
+    for (var k = 0; k < bars.length; k++) {
+      var v = TH.freq[2 + k * 4] || 0;
+      var sc = 0.14 + Math.pow(v / 255, 1.3) * 0.95;
+      bars[k].style.transform = "scaleY(" + sc.toFixed(3) + ")";
     }
-    T3D.renderer.render(T3D.scene, T3D.camera);
+  } else {
+    TH.level += (0 - TH.level) * 0.25;
+    for (var k2 = 0; k2 < bars.length; k2++) bars[k2].style.transform = "scaleY(0.14)";
   }
-  requestAnimationFrame(tick);
+  setTalk(TH.level);
+
+  /* 时钟：进度 / 字幕 / 分段高亮 */
+  if (isFinite(a.duration) && a.duration > 0) {
+    if (!TH.segs.bounds || TH.segs.bounds.length !== TH.segs.text.length) {
+      TH.segs.bounds = segBounds(TH.segs.text, a.duration);
+    }
+    updateClockUI();
+  }
 }
 
-/* ---------- 实物影像（真实文物照片 · 全网检索 + 离线内联） ---------- */
-function openT3DReal() {
+function updateClockUI() {
+  var a = TH.audio;
+  if (!a || !isFinite(a.duration)) return;
+  var ratio = Math.max(0, Math.min(1, a.currentTime / a.duration));
+  $q("#th-fill").style.width = (ratio * 100) + "%";
+  $q("#th-time").textContent = fmtTime(a.currentTime) + " / " + fmtTime(a.duration);
+
+  var cur = -1;
+  for (var i = 0; i < TH.segs.bounds.length; i++) {
+    if (a.currentTime >= TH.segs.bounds[i][0] && a.currentTime < TH.segs.bounds[i][1]) { cur = i; break; }
+  }
+  if (cur === -1 && a.ended) cur = TH.segs.bounds.length - 1;
+
+  var segBtns = $qa("#cap-segs .cap-seg");
+  segBtns.forEach(function (s, k) {
+    s.classList.toggle("on", k === cur && !a.paused);
+    s.classList.toggle("done", k < cur || a.ended);
+  });
+  var pts = $qa("#th-points .tp-pt");
+  pts.forEach(function (p, k) { p.classList.toggle("on", k === cur && !a.paused); });
+  if (cur >= 0 && TH.segs.text[cur]) $q("#cap-text").textContent = TH.segs.text[cur];
+}
+
+/* ---------- 实物影像弹窗（真实文物照片 · 离线内联） ---------- */
+function openReal() {
   if (!T3D.cur) return;
   var a = T3D.cur;
   var real = (typeof TREASURY_REAL !== "undefined") ? TREASURY_REAL[a.id] : null;
-  if (!real || !real.src) { showT3DCard("实物影像", "该器物的实物影像尚未收录"); return; }
+  if (!real || !real.src) {
+    var img = $q("#ts-img");
+    if (img && img.src) { /* 退而求其次：展柜图已有 */ }
+    else { alert("该器物的实物影像尚未收录"); return; }
+  }
   if (!document.getElementById("tr-style")) {
     var st = document.createElement("style");
     st.id = "tr-style";
@@ -1071,7 +478,7 @@ function openT3DReal() {
       "#t3d-real.on .tr-case{transform:none}" +
       ".tr-head{display:flex;align-items:center;gap:12px;padding:16px 20px 10px}" +
       ".tr-seal{flex:none;width:34px;height:34px;border-radius:6px;background:linear-gradient(145deg,#c2341d,#8f1d10);" +
-      "color:#f7ecd8;font:700 17px/34px 'Noto Serif SC',serif;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.4);letter-spacing:0}" +
+      "color:#f7ecd8;font:700 17px/34px 'Noto Serif SC',serif;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}" +
       ".tr-name{font:700 clamp(17px,2.4vw,24px)/1.2 'Noto Serif SC',serif;color:#f2e6c8;letter-spacing:.05em}" +
       ".tr-x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;border:1px solid rgba(208,178,112,.4);" +
       "background:rgba(255,255,255,.05);color:#e8dcc0;font-size:18px;line-height:30px;cursor:pointer;transition:.2s}" +
@@ -1096,25 +503,28 @@ function openT3DReal() {
       '<div class="tr-head"><span class="tr-seal">真</span><span class="tr-name"></span>' +
       '<button class="tr-x" aria-label="关闭">&#10005;</button></div>' +
       '<div class="tr-img"><img alt="实物影像"></div>' +
-      '<div class="tr-foot"><div class="tr-note"></div><span class="tr-hint">真实文物影像 · 与右侧 3D 复原逐件对照 · 影像仅作展示与科普</span></div>' +
+      '<div class="tr-foot"><div class="tr-note"></div><span class="tr-hint">真实文物影像 · 与讲解员所述逐件对照 · 影像仅作展示与科普</span></div>' +
       "</div>";
     document.body.appendChild(ov);
     ov.addEventListener("click", function (e) {
-      if (e.target === ov || e.target.closest(".tr-x")) closeT3DReal();
+      if (e.target === ov || e.target.closest(".tr-x")) closeReal();
     });
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && ov.classList.contains("on")) closeT3DReal();
+      if (e.key === "Escape" && ov.classList.contains("on")) closeReal();
     });
   }
   ov.style.display = "flex";
-  ov.querySelector(".tr-name").textContent = real.name || a.name;
+  ov.querySelector(".tr-name").textContent = a.name;
   ov.querySelector(".tr-img img").src = real.src;
-  ov.querySelector(".tr-note").innerHTML = (real.note ? "<b>" + real.note.split("｜")[0] + "</b>｜" + real.note.split("｜").slice(1).join("｜") : "") +
-    '<br>高 ' + a.heightCm + " cm · " + (a.radiusCm * 2).toFixed(1) + " cm 口径参照（3D 复原尺寸）";
+  var noteHtml = real.note
+    ? "<b>" + real.note.split("｜")[0] + "</b>｜" + real.note.split("｜").slice(1).join("｜")
+    : "综合公开馆藏影像与权威资料整理，为数字复原示意参考。";
+  ov.querySelector(".tr-note").innerHTML = noteHtml +
+    "<br>通高约 " + a.heightCm + " cm · " + a.place + " · " + a.level;
   setTimeout(function () { ov.classList.add("on"); }, 20);
 }
 
-function closeT3DReal() {
+function closeReal() {
   var ov = document.getElementById("t3d-real");
   if (!ov) return;
   ov.classList.remove("on");

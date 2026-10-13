@@ -309,8 +309,12 @@
   }
 
   /* ================= HOME ================= */
-  /* 印章无规律漫游（点击随机换向 · M8.6） */
-  var sealRAF = 0, sealX = 0, sealY = 0, sealVX = 0, sealVY = 0, sealLast = 0;
+  /* 印章无规律漫游（点击随机换向 · 恒定速率 M8.7） */
+  var sealRAF = 0, sealX = 0, sealY = 0, sealVX = 0, sealVY = 0, sealSpeed = 60, sealLast = 0;
+  function normSealVel() {
+    var m = Math.sqrt(sealVX * sealVX + sealVY * sealVY) || 1;
+    sealVX = sealVX / m * sealSpeed; sealVY = sealVY / m * sealSpeed;
+  }
   function startSealRoam() {
     var el = $(".hero-seal");
     if (!el || REDUCED || sealRAF) return;
@@ -321,8 +325,8 @@
     sealX = Math.random() * (pw - w);
     sealY = Math.random() * (ph - h);
     var ang = Math.random() * Math.PI * 2;
-    var sp = Math.max(56, Math.min(150, (pw + ph) / 22));
-    sealVX = Math.cos(ang) * sp; sealVY = Math.sin(ang) * sp;
+    sealSpeed = Math.max(40, Math.min(88, (pw + ph) / 42));
+    sealVX = Math.cos(ang) * sealSpeed; sealVY = Math.sin(ang) * sealSpeed;
     sealLast = 0;
     el.style.left = sealX + "px"; el.style.top = sealY + "px";
     el.addEventListener("click", onSealClick);
@@ -331,11 +335,11 @@
       var dt = Math.min(0.05, (t - sealLast) / 1000);
       sealLast = t;
       sealX += sealVX * dt; sealY += sealVY * dt;
-      /* 边缘反弹 + 随机扰动，路径无规律 */
-      if (sealX <= 0) { sealX = 0; sealVX = Math.abs(sealVX) * (0.92 + Math.random() * 0.24); sealVY += (Math.random() - 0.5) * 46; }
-      if (sealX >= pw - w) { sealX = pw - w; sealVX = -Math.abs(sealVX) * (0.92 + Math.random() * 0.24); sealVY += (Math.random() - 0.5) * 46; }
-      if (sealY <= 0) { sealY = 0; sealVY = Math.abs(sealVY) * (0.92 + Math.random() * 0.24); sealVX += (Math.random() - 0.5) * 46; }
-      if (sealY >= ph - h) { sealY = ph - h; sealVY = -Math.abs(sealVY) * (0.92 + Math.random() * 0.24); sealVX += (Math.random() - 0.5) * 46; }
+      /* 边缘反弹：只偏转方向，速率恒定 */
+      if (sealX <= 0) { sealX = 0; sealVX = Math.abs(sealVX); sealVY += (Math.random() - 0.5) * 46; normSealVel(); }
+      if (sealX >= pw - w) { sealX = pw - w; sealVX = -Math.abs(sealVX); sealVY += (Math.random() - 0.5) * 46; normSealVel(); }
+      if (sealY <= 0) { sealY = 0; sealVY = Math.abs(sealVY); sealVX += (Math.random() - 0.5) * 46; normSealVel(); }
+      if (sealY >= ph - h) { sealY = ph - h; sealVY = -Math.abs(sealVY); sealVX += (Math.random() - 0.5) * 46; normSealVel(); }
       el.style.left = sealX + "px"; el.style.top = sealY + "px";
       el.style.transform = "rotate(" + (Math.sin(t / 900) * 2.6 + sealVX * 0.008) + "deg)";
       sealRAF = requestAnimationFrame(frame);
@@ -345,8 +349,7 @@
   function onSealClick(e) {
     e.stopPropagation();
     var ang = Math.random() * Math.PI * 2;
-    var sp = Math.max(56, Math.min(150, Math.sqrt(sealVX * sealVX + sealVY * sealVY) * (0.7 + Math.random() * 0.65)));
-    sealVX = Math.cos(ang) * sp; sealVY = Math.sin(ang) * sp;
+    sealVX = Math.cos(ang) * sealSpeed; sealVY = Math.sin(ang) * sealSpeed;
     var el = e.currentTarget;
     el.classList.remove("seal-pop");
     void el.offsetWidth;

@@ -319,34 +319,23 @@ main{position:relative}
     linear-gradient(0deg,rgba(33,29,24,.72) 0%,transparent 26%,transparent 70%,rgba(33,29,24,.35) 100%);
 }
 .hero-inner{max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,56px);width:100%}
-/* 非遗钤印 logo · 全屏漫游 */
+/* 非遗钤印 logo · JS 无规律漫游（点击随机换向） */
 .hero-seal{
-  position:absolute;top:6vh;left:3vw;
-  width:clamp(88px,8.5vw,120px);aspect-ratio:1;z-index:2;pointer-events:none;
+  position:absolute;left:0;top:0;z-index:5;
+  width:clamp(88px,8.5vw,120px);aspect-ratio:1;
+  pointer-events:auto;cursor:pointer;
+  will-change:left,top,transform;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,.38));
-  animation:sealRoam 26s linear infinite;
 }
 .hero-seal svg{width:100%;height:100%;display:block;overflow:visible}
-@keyframes sealRoam{
-  0%{transform:translate(0,0) rotate(-2deg)}
-  16%{transform:translate(76vw,-1vh) rotate(2deg)}
-  32%{transform:translate(83vw,66vh) rotate(-2deg)}
-  50%{transform:translate(44vw,78vh) rotate(2deg)}
-  68%{transform:translate(5vw,72vh) rotate(-2deg)}
-  84%{transform:translate(0,14vh) rotate(2deg)}
-  100%{transform:translate(0,0) rotate(-2deg)}
+.hero-seal.seal-pop{animation:sealPop .34s ease}
+@keyframes sealPop{
+  0%,100%{filter:drop-shadow(0 8px 22px rgba(0,0,0,.38))}
+  50%{filter:drop-shadow(0 0 28px rgba(240,212,146,.95))}
 }
-@media (max-width:760px){
-  .hero-seal{top:4vh;left:6vw;width:clamp(72px,20vw,96px);animation:sealRoamM 20s linear infinite}
-  @keyframes sealRoamM{
-    0%{transform:translate(0,0) rotate(-2deg)}
-    25%{transform:translate(60vw,2vh) rotate(2deg)}
-    50%{transform:translate(64vw,70vh) rotate(-2deg)}
-    75%{transform:translate(2vw,74vh) rotate(2deg)}
-    100%{transform:translate(0,0) rotate(-2deg)}
-  }
+@media (prefers-reduced-motion:reduce){
+  .hero-seal{left:clamp(20px,5vw,56px);top:7vh;pointer-events:none}
 }
-@media (prefers-reduced-motion:reduce){.hero-seal{animation:none}}
 .hero-tag{
   display:inline-flex;align-items:center;gap:12px;
   color:var(--gold-2);font-size:13px;letter-spacing:.5em;font-weight:500;

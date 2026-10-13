@@ -62,6 +62,7 @@
     /* 离开视图时停掉隐藏视图的常驻定时器（沉浸轮播 / AI 打字机） */
     clearInterval(immerseTimer);
     clearInterval(typingTimer);
+    stopSealRoam();
     $$(".view").forEach(function (v) { v.classList.remove("active"); });
     var el = $("#view-" + r.view);
     if (!el) { el = $("#view-home"); r.view = "home"; }
@@ -308,6 +309,54 @@
   }
 
   /* ================= HOME ================= */
+  /* 印章无规律漫游（点击随机换向 · M8.6） */
+  var sealRAF = 0, sealX = 0, sealY = 0, sealVX = 0, sealVY = 0, sealLast = 0;
+  function startSealRoam() {
+    var el = $(".hero-seal");
+    if (!el || REDUCED || sealRAF) return;
+    var host = el.parentElement;
+    var pw = host.clientWidth, ph = host.clientHeight;
+    if (!pw || !ph) return;
+    var w = el.offsetWidth || 88, h = el.offsetHeight || 88;
+    sealX = Math.random() * (pw - w);
+    sealY = Math.random() * (ph - h);
+    var ang = Math.random() * Math.PI * 2;
+    var sp = Math.max(56, Math.min(150, (pw + ph) / 22));
+    sealVX = Math.cos(ang) * sp; sealVY = Math.sin(ang) * sp;
+    sealLast = 0;
+    el.style.left = sealX + "px"; el.style.top = sealY + "px";
+    el.addEventListener("click", onSealClick);
+    function frame(t) {
+      if (!sealLast) sealLast = t;
+      var dt = Math.min(0.05, (t - sealLast) / 1000);
+      sealLast = t;
+      sealX += sealVX * dt; sealY += sealVY * dt;
+      /* 边缘反弹 + 随机扰动，路径无规律 */
+      if (sealX <= 0) { sealX = 0; sealVX = Math.abs(sealVX) * (0.92 + Math.random() * 0.24); sealVY += (Math.random() - 0.5) * 46; }
+      if (sealX >= pw - w) { sealX = pw - w; sealVX = -Math.abs(sealVX) * (0.92 + Math.random() * 0.24); sealVY += (Math.random() - 0.5) * 46; }
+      if (sealY <= 0) { sealY = 0; sealVY = Math.abs(sealVY) * (0.92 + Math.random() * 0.24); sealVX += (Math.random() - 0.5) * 46; }
+      if (sealY >= ph - h) { sealY = ph - h; sealVY = -Math.abs(sealVY) * (0.92 + Math.random() * 0.24); sealVX += (Math.random() - 0.5) * 46; }
+      el.style.left = sealX + "px"; el.style.top = sealY + "px";
+      el.style.transform = "rotate(" + (Math.sin(t / 900) * 2.6 + sealVX * 0.008) + "deg)";
+      sealRAF = requestAnimationFrame(frame);
+    }
+    sealRAF = requestAnimationFrame(frame);
+  }
+  function onSealClick(e) {
+    e.stopPropagation();
+    var ang = Math.random() * Math.PI * 2;
+    var sp = Math.max(56, Math.min(150, Math.sqrt(sealVX * sealVX + sealVY * sealVY) * (0.7 + Math.random() * 0.65)));
+    sealVX = Math.cos(ang) * sp; sealVY = Math.sin(ang) * sp;
+    var el = e.currentTarget;
+    el.classList.remove("seal-pop");
+    void el.offsetWidth;
+    el.classList.add("seal-pop");
+    setTimeout(function () { if (el.classList) el.classList.remove("seal-pop"); }, 380);
+  }
+  function stopSealRoam() {
+    if (sealRAF) { cancelAnimationFrame(sealRAF); sealRAF = 0; }
+  }
+
   var SEAL_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' +
     '<defs><linearGradient id="sealGrad" x1="0" y1="0" x2="1" y2="1">' +
     '<stop offset="0" stop-color="#C8452F"/><stop offset="1" stop-color="#8A2A1A"/></linearGradient></defs>' +
@@ -355,6 +404,7 @@
       '</div>' + homeCarouselHtml() + authorNoteHtml();
     initHeroParallax();
     initHomeCarousel();
+    startSealRoam();
     var hb = document.getElementById("btn-help");
     if (hb) hb.addEventListener("click", showHelp);
   }

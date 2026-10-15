@@ -60,12 +60,8 @@ EXPECTED_AUDIO_IDS = [
 # 这里尝试下载内联；下载失败就删除该 <script> 标签，不影响功能。
 LENIS_URL = "https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"
 
-# Feishu 字体 CDN（已知问题：断网回退系统宋体）。
-# 本脚本不处理字体子集化（独立任务 A1），只在校验日志里警告一次。
-FEISHU_FONT_HINT = (
-    "[warn] index.html 仍引用 Feishu CDN 字体，断网会回退系统宋体。"
-    "正式参赛包需做字体子集化内嵌（见 docs/技术文档.md）。"
-)
+# 字体子集化产物（scripts/subset_fonts.py 生成），bundle 时内联为 <style>。
+FONTS_CSS = os.path.join("assets", "fonts", "fonts-embed.css")
 
 
 # ---------- 工具函数 ----------
@@ -208,6 +204,28 @@ def step_inline_js(html_text, video_block):
     return out
 
 
+def step_inline_fonts(html_text):
+    """5a. 把 assets/fonts/fonts-embed.css 内联为 <style>（离线字体）。"""
+    log("5a/6", "内联子集化字体 CSS...")
+    p = os.path.join(ROOT, FONTS_CSS)
+    if not os.path.isfile(p):
+        fail("fonts", f"找不到 {FONTS_CSS}，先跑 py -3 scripts/subset_fonts.py")
+    css = read_text(p, "fonts")
+    pat = re.compile(
+        r'<link\s+rel=["\']stylesheet["\']\s+href=["\']'
+        + re.escape("assets/fonts/fonts-embed.css")
+        + r'["\']\s*>',
+        re.I,
+    )
+    replacement = "<style>/* fonts-embed.css (inline, offline) */\n" + css + "\n</style>"
+    out, n = pat.subn(lambda _m, r=replacement: r, html_text, count=1)
+    if n != 1:
+        fail("fonts", "index.html 中未找到 fonts-embed.css 引用标签")
+    size_kb = len(css.encode("utf-8")) / 1024
+    log("5a/6", f"OK，字体 CSS 已内联 ({size_kb:,.0f} KB)。")
+    return out
+
+
 def step_inline_lenis(html_text):
     """5. 处理 Lenis CDN：尝试下载内联，失败则删标签。"""
     log("5/6", "处理 Lenis CDN 脚本...")
@@ -257,12 +275,9 @@ def main():
     video_block = step_scan_videos()
     html = read_text(os.path.join(ROOT, "index.html"), "read-index")
     html = step_inline_js(html, video_block)
+    html = step_inline_fonts(html)
     html = step_inline_lenis(html)
     out_path, size_mb = step_write_output(html)
-
-    # 字体警告（不阻断构建）
-    print()
-    log("hint", FEISHU_FONT_HINT)
 
     print()
     print("=" * 60)

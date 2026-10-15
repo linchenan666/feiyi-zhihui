@@ -21,7 +21,18 @@ import io
 import os
 import re
 import sys
+import base64
 import urllib.request
+
+# 图片扩展 → MIME（这些类型在单文件里以内联 data URI 提供，保证零依赖）
+IMG_MIME = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+}
 
 # ---------- 路径与常量 ----------
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,6 +49,9 @@ LOCAL_JS = [
     "treasury-audio.js",
     "treasury-process.js",
     "treasury.js",
+    "vendor/three.min.js",
+    "vendor/OrbitControls.min.js",
+    "three-showcase.js",
     "evolution-data.js",
     "help-data.js",
     "app.js",
@@ -226,9 +240,69 @@ def step_inline_fonts(html_text):
     return out
 
 
+def step_inline_assets(html_text):
+    """5b. 把所有 assets/ 下被引用的图片转成 data URI 内联。
+
+    覆盖三类位置：
+      - JS 字符串："assets/yuju.jpg" / 'assets/yuju.jpg'
+      - CSS：url(assets/region/r-luoyang.jpg)
+      - HTML 属性：src="assets/guide-close.jpg"
+    字体（.woff2）由 fonts-embed.css 步骤处理，这里只处理图片。
+    引用了不存在的资源立即失败；替换后校验无图片相对路径残留。
+    """
+    log("5b/6", "内联 assets/ 图片为 data URI（离线零依赖）...")
+
+    refs = set()
+    # 1) 引号包裹的字符串（JS 数据层 / HTML 属性值）
+    refs.update(re.findall(r'["\'](assets/[^"\']+?)["\']', html_text))
+    # 2) CSS url(...)
+    refs.update(re.findall(r'url\(["\']?(assets/[^)"\']+)["\']?\)', html_text))
+
+    # 只保留图片扩展
+    img_refs = sorted(
+        r for r in refs if os.path.splitext(r)[1].lower() in IMG_MIME
+    )
+    skipped = sorted(set(r for r in refs if os.path.splitext(r)[1].lower() not in IMG_MIME))
+    if skipped:
+        log("5b/6", f"  非图片资源不内联（字体等另有处理）: {skipped}")
+
+    total_bytes = 0
+    for ref in img_refs:
+        local = os.path.join(ROOT, ref.replace("/", os.sep))
+        if not os.path.isfile(local):
+            fail("assets", f"引用了不存在的图片资源: {ref}")
+        ext = os.path.splitext(ref)[1].lower()
+        mime = IMG_MIME[ext]
+        with open(local, "rb") as f:
+            raw = f.read()
+        total_bytes += len(raw)
+        if ext == ".svg":
+            # SVG 是文本，需 URL 编码以安全放入属性 / url()
+            from urllib.parse import quote
+            uri = "data:" + mime + ";charset=utf-8," + quote(raw.decode("utf-8"))
+        else:
+            uri = "data:" + mime + ";base64," + base64.b64encode(raw).decode("ascii")
+        # 直接替换路径字面量：data URI 仅含 base64 安全字符，
+        # 在 JS 字符串、CSS url()、HTML 属性中均合法，且不含可被二次匹配的 assets/。
+        html_text = html_text.replace(ref, uri)
+
+    log("5b/6", f"OK，内联 {len(img_refs)} 张图片，原始合计 {total_bytes/1024/1024:.2f} MB。")
+
+    # 校验：替换后不应再残留图片相对路径
+    remain = set()
+    remain.update(re.findall(r'["\'](assets/[^"\']+?)["\']', html_text))
+    remain.update(re.findall(r'url\(["\']?(assets/[^)"\']+)["\']?\)', html_text))
+    remain_img = [r for r in remain if os.path.splitext(r)[1].lower() in IMG_MIME]
+    if remain_img:
+        fail("assets", f"仍有 {len(remain_img)} 处图片相对路径未内联: {remain_img[:5]}")
+
+    return html_text
+
+
 def step_inline_lenis(html_text):
-    """5. 处理 Lenis CDN：尝试下载内联，失败则删标签。"""
-    log("5/6", "处理 Lenis CDN 脚本...")
+    """5. 处理 Lenis 平滑滚动库：优先读本地 vendor/lenis.min.js（离线可复现）；
+    本地缺失时尝试下载；下载失败则删标签，代码已降级原生滚动，不影响功能。"""
+    log("5/6", "处理 Lenis 平滑滚动库...")
     pat = re.compile(
         r'<script\s+src=["\']' + re.escape(LENIS_URL) + r'["\']\s*>\s*</script>',
         re.I,
@@ -237,18 +311,24 @@ def step_inline_lenis(html_text):
         log("5/6", "index.html 中未找到 Lenis CDN 标签，跳过。")
         return html_text
 
-    # 尝试下载
-    try:
-        log("5/6", f"下载 {LENIS_URL} ...")
-        req = urllib.request.Request(LENIS_URL, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            js = resp.read().decode("utf-8", errors="replace")
-        log("5/6", f"下载成功 ({len(js)/1024:.0f} KB)，内联。")
-        replacement = "<script>/* lenis.min.js (inline) */\n" + js + "\n</script>"
-        return pat.sub(lambda _m, r=replacement: r, html_text, count=1)
-    except Exception as e:
-        log("5/6", f"[warn] Lenis 下载失败 ({e})，删除 CDN 标签。代码已降级原生滚动，不影响功能。")
-        return pat.sub("", html_text, count=1)
+    local_lenis = os.path.join(ROOT, "vendor", "lenis.min.js")
+    js = None
+    if os.path.isfile(local_lenis):
+        js = read_text(local_lenis, "lenis")
+        log("5/6", f"使用本地 vendor/lenis.min.js ({len(js)/1024:.0f} KB)，无需联网。")
+    else:
+        try:
+            log("5/6", f"本地无 vendor/lenis.min.js，尝试下载 {LENIS_URL} ...")
+            req = urllib.request.Request(LENIS_URL, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                js = resp.read().decode("utf-8", errors="replace")
+            log("5/6", f"下载成功 ({len(js)/1024:.0f} KB)，内联。建议保存到 vendor/ 以便离线复现。")
+        except Exception as e:
+            log("5/6", f"[warn] Lenis 不可用 ({e})，删除 CDN 标签。代码已降级原生滚动，不影响功能。")
+            return pat.sub("", html_text, count=1)
+
+    replacement = "<script>/* lenis.min.js (inline) */\n" + js + "\n</script>"
+    return pat.sub(lambda _m, r=replacement: r, html_text, count=1)
 
 
 def step_write_output(html_text):
@@ -276,6 +356,7 @@ def main():
     html = read_text(os.path.join(ROOT, "index.html"), "read-index")
     html = step_inline_js(html, video_block)
     html = step_inline_fonts(html)
+    html = step_inline_assets(html)
     html = step_inline_lenis(html)
     out_path, size_mb = step_write_output(html)
 

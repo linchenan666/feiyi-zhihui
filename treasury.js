@@ -19,7 +19,7 @@ var TH = {
   inited: false
 };
 
-var TH_SHORT = { junci: "钧瓷", ruci: "汝瓷", sancai: "唐三彩", nigugu: "泥咕咕", ninigou: "泥泥狗" };
+var TH_SHORT = { junci: "钧瓷", ruci: "汝瓷", sancai: "唐三彩", nigugu: "泥咕咕", ninigou: "泥泥狗", yuju: "豫剧", quju: "曲剧", zhuizi: "坠子", majie: "书会", shuixi: "水席", bianxiu: "汴绣", zhuxian: "年画", shaolin: "少林", taiji: "太极", dahuatie: "打铁花" };
 
 /* ---------- 工具 ---------- */
 function $q(sel, root) {
@@ -87,7 +87,7 @@ function treasuryHTML() {
   '<div class="treasury-wrap" id="th-wrap">' +
     '<div class="th-head">' +
       '<div class="th-kicker">数字讲解员 · 珍品馆</div>' +
-      '<h2 class="th-title">真人口播 · 镇馆五珍</h2>' +
+      '<h2 class="th-title">真人口播 · 珍宝十五讲</h2>' +
       '<p class="th-sub">数字讲解员「文昭」以真人真声逐件导览，口唇随音起伏，字幕与图文考据点同步呈现；可暂停、拖动进度、点段重听。</p>' +
     '</div>' +
     '<div class="th-main">' +
@@ -334,7 +334,7 @@ function loadArtifact(i, autoplay) {
       '<div class="ti-row"><span>名称</span><b>' + a.name + '</b></div>' +
       '<div class="ti-row"><span>产地</span><b>' + a.place + '</b></div>' +
       '<div class="ti-row"><span>级别</span><b>' + a.level + '</b></div>' +
-      '<div class="ti-row"><span>通高</span><b>约 ' + a.heightCm + ' cm</b></div>' +
+      (a.heightCm && a.heightCm > 0 ? '<div class="ti-row"><span>通高</span><b>约 ' + a.heightCm + ' cm</b></div>' : '') +
       '<div class="ti-row"><span>门类</span><b>' + a.cat + ' 类</b></div>';
   }
 

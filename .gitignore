@@ -1,6 +1,32 @@
+# === 打包产物（评委自己 build，不进 git）===
+dist/
+非遗智汇·多彩面板版.html
+*.zip
+*.7z
+
+# === 截图与临时目录 ===
 _shots/
 _backup/
-*.log
+_git_msgs/
+_audio_tmp/
+
+# === Python 临时 ===
+__pycache__/
+*.pyc
+*.pyo
+
+# === OS ===
 .DS_Store
 Thumbs.db
-_git_msgs/
+desktop.ini
+
+# === 日志与编辑器 ===
+*.log
+.vscode/
+.idea/
+*.swp
+
+# === 本地环境（绝不能提交）===
+.env
+.env.local
+config.local.js

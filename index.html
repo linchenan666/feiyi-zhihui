@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>非遗智汇 · 河南非遗 AI 数字展厅</title>
-<meta name="description" content="非遗智汇——河南非遗 AI 数字展厅。能看、能问、能关联、能生成、能沉浸，把非遗讲给你听。">
+<title>非遗智汇 · 河南非遗 智能数字展厅</title>
+<meta name="description" content="非遗智汇——河南非遗 智能数字展厅。能看、能问、能关联、能生成、能沉浸，把非遗讲给你听。">
 <meta name="theme-color" content="#F4EDDF">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%23F4EDDF'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' font-family='serif' font-weight='900' fill='%23B03A2E'%3E汇%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/fonts/fonts-embed.css">
@@ -250,7 +250,7 @@ main{position:relative}
 }
 @keyframes graphBreathe{0%,100%{opacity:.94}50%{opacity:1}}
 
-/* 问·AI —— 书案信笺：巨字「问」左侧 + 竖栏 + 右上墨块 + 底部一池墨 */
+/* 问·AI —— 书案信笺：巨字「问」左侧 + 竖栏 + 右上墨块 + 底部一池墨（离线知识库） */
 .view[data-view="ask"]::before{
   content:"问";
   top:42%;left:1.5%;
@@ -262,7 +262,7 @@ main{position:relative}
   background:radial-gradient(ellipse 46% 38% at 50% 112%, rgba(33,29,24,.12), transparent 68%);
 }
 
-/* 文创工坊 —— 印坊：巨字「印」左竖 + 暖光 + 朱砂印阵 */
+/* 文创工坊 —— 印坊：巨字「印」左竖 + 暖光 + 朱砂印阵（本地生成工坊） */
 .view[data-view="create"]::before{
   content:"印";
   writing-mode:vertical-rl;
@@ -1394,7 +1394,7 @@ body:has(.region-bg) footer .foot-meta b{color:#F3D9A4}
 .act-fav.on{background:var(--cinnabar);border-color:var(--cinnabar);color:var(--paper)}
 .fav-tip{display:block;font-size:11.5px;color:var(--ink-3);font-weight:300;margin-top:-24px;letter-spacing:.08em}
 
-/* ---------- 文创生成（AI 文创工坊 · M7 本地合成 + 远程接口预留） ---------- */
+/* ---------- 文创生成（本地生成工坊 · M7 本地合成 + 远程接口预留） ---------- */
 .create-view{padding:clamp(80px,12vh,140px) 0 clamp(60px,9vh,110px)}
 .create-layout{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,64px);align-items:start}
 .create-panel{border:1px solid var(--line);background:var(--card-bg);border-radius:2px;padding:26px}
@@ -2130,7 +2130,7 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
   <nav class="main-nav" id="main-nav" aria-label="主导航">
     <div class="nav-head">
       <span class="nh-logo">非遗智汇</span>
-      <span class="nh-sub">河南非遗 · AI 数字展厅</span>
+      <span class="nh-sub">河南非遗 · 智能数字展厅</span>
     </div>
     <a href="#/" data-nav="home"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10V20h11v-10"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="nav-no">01</span><span class="nav-tx">首页</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
     <a href="#/hall" data-nav="hall"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9.2L12 4l8 5.2V20"/><path d="M8.5 20v-5.5h7V20"/></svg></span><span class="nav-no">02</span><span class="nav-tx">展品总览</span><span class="nav-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5l6.5 6.5L9 18.5"/></svg></span></a>
@@ -2176,7 +2176,7 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
       <span class="brand-seal">汇</span>
       <div>
         <b>非遗智汇</b>
-        <p>河南非遗 AI 数字展厅 · HENAN ICH DIGITAL HALL</p>
+        <p>河南非遗 智能数字展厅 · HENAN ICH DIGITAL HALL</p>
       </div>
     </div>
     <div class="foot-meta">

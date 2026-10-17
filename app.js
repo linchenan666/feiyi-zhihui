@@ -9,7 +9,7 @@
      远程大模型接入位（双层架构）
      演示阶段 enabled=false，走内置知识库，保证离线可跑。
      接入豆包/千问时：enabled=true 并填写 url/key，
-     然后实现 fetchRemoteAnswer() 内的请求即可点亮"真·大模型回答"。
+     然后实现 fetchRemoteAnswer() 内的请求即可点亮"在线大模型回答"。
      （注意：file:// 协议下 fetch 会被浏览器拦截，
       接入远程 API 时需本地起服务或部署到线上）
      ---------------------------------------------------------- */
@@ -383,7 +383,7 @@
         '<div class="hero-veil"></div>' +
         '<div class="hero-seal" aria-hidden="true">' + SEAL_SVG + '</div>' +
         '<div class="hero-inner">' +
-          '<span class="hero-tag">河南非遗 AI 数字展厅 · 2026</span>' +
+          '<span class="hero-tag">河南非遗 智能数字展厅 · 2026</span>' +
           '<h1 class="hero-title">' +
             '<span class="row"><span>非遗智汇</span></span>' +
             '<span class="row"><span class="zh-hui">让非遗 · 开口说话</span></span>' +
@@ -420,8 +420,8 @@
     ["04 · 城市", "中原十八城、一城一脉；带「非遗」角标的城市藏有招牌项目。", "region"],
     ["05 · 知识图谱", "节点即非遗，连线即关联；拖拽平移、滚轮缩放，悬停高亮。", "graph"],
     ["06 · 珍品讲解", "数字讲解员真人真声逐件导览；口唇随音起伏、字幕图文同步，可点段重听。", "treasury"],
-    ["07 · 问·AI", "问任意非遗问题即答即读；配置 Key 可切换真·大模型。", "ask"],
-    ["08 · 创意工坊", "选非遗主题生成 AI 海报与文创文案，可收藏、可复制。", "create"],
+    ["07 · 问·AI", "内置离线知识库即答即读、永不掉线；预留豆包/千问接口，填 key 即用。", "ask"],
+    ["08 · 创意工坊", "选非遗主题，本地算法合成 4 风格海报与文创文案，可收藏、可复制。", "create"],
     ["09 · 演进馆", "十二轮开发时间轴：真实 Prompt 与落地文件，评委可一键复现。", "evolution"],
     ["10 · 沉浸演绎", "权威纪录片轮播，左右箭头或键盘切换，进入即播、悬停暂停。", "immerse"],
     ["通用 · 隐私", "纯本地运行、零上传、断网可用；收藏数据只存于你的浏览器。", ""]
@@ -872,7 +872,7 @@
               it.verify.map(function (v) { return "<p>· " + esc(v) + "</p>"; }).join("") +
             '</div>' : "") +
             '<div class="item-actions rv" style="--d:.5s">' +
-              '<a class="act act-primary mag" href="#/ask">问 AI 讲解</a>' +
+              '<a class="act act-primary mag" href="#/ask">问·AI 讲解</a>' +
               '<button class="act act-line act-fav mag ' + (isFav(it.id) ? "on" : "") + '" id="btn-fav" type="button" aria-pressed="' + isFav(it.id) + '"><i class="heart">' + (isFav(it.id) ? "♥" : "♡") + '</i>' + (isFav(it.id) ? "已收藏" : "收藏") + '</button>' +
               '<a class="act act-line mag" href="#/immerse">沉浸演绎</a>' +
             '</div>' +
@@ -1613,16 +1613,16 @@
     var el = $("#view-ask");
     var hot = ["什么是非物质文化遗产", "河南有多少项国家级非遗", "第一次来，推荐先看什么", "钧瓷为什么每件都不一样", "打铁花是怎么打的", "太极拳是陈家沟发明的吗"];
     var askModeLabel = (typeof REMOTE_API === "object" && REMOTE_API.key)
-      ? '<button class="mode-switch" id="ask-mode" type="button" aria-pressed="false" title="有 key 时点亮真·大模型回答">离线 ⇄ 在线</button>'
+      ? '<button class="mode-switch" id="ask-mode" type="button" aria-pressed="false" title="有 key 时切换在线大模型回答">离线 ⇄ 在线</button>'
       : '';
     el.innerHTML =
       '<div class="ask-bg" aria-hidden="true"></div>' +
       '<div class="ask-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap ask-view">' +
         '<div class="section-head rv">' +
-          '<div class="kicker">04 · AI 智能讲解</div>' +
+          '<div class="kicker">04 · 智能问答 · 离线知识库</div>' +
           '<h2 class="section-title">问它 · 河南非遗</h2>' +
-          '<p class="section-sub">内置知识库离线作答，随问随答；接入豆包/千问 API 后自动升级为真·大模型回答（双层架构已预留）。</p>' +
+          '<p class="section-sub">内置离线知识库随问随答、永不掉线；接入豆包/千问 API 后可升级在线大模型回答（双层架构已预留）。</p>' +
         '</div>' +
         '<div class="ask-layout">' +
           '<div class="ask-panel rv" style="--d:.1s">' +
@@ -2045,7 +2045,7 @@
     });
   }
 
-  /* ================= 文创生成（AI 文创工坊 · M7 本地合成，远程接口预留） ================= */
+  /* ================= 文创生成（本地生成工坊 · M7 本地合成，远程接口预留） ================= */
   var createIdx = 0, createStyle = "mogu", createSeed = Math.random();
   var CREATE_STYLES = [
     { id: "mogu", label: "水墨", veil: "rgba(33,29,24,.10)", frame: "#211D18" },
@@ -2065,9 +2065,9 @@
       '<div class="create-veil" aria-hidden="true"></div>' +
       '<div class="section-wrap create-view">' +
         '<div class="section-head rv">' +
-          '<div class="kicker">06 · AI 文创工坊</div>' +
+          '<div class="kicker">06 · 本地生成工坊</div>' +
           '<h2 class="section-title">生成一张非遗海报</h2>' +
-          '<p class="section-sub">选一件珍宝、定一种风格，本地算法即时合成可下载的文创海报；接入图像生成 API 后可升级为真·AI 创作（接口已预留）。</p>' +
+          '<p class="section-sub">选一件珍宝、定一种风格，本地算法即时合成可下载的文创海报；接入图像生成 API 后可升级为在线 AI 创作（接口已预留）。</p>' +
         '</div>' +
         '<div class="create-layout">' +
           '<div class="create-panel rv" style="--d:.1s">' +
@@ -2178,7 +2178,7 @@
     if (shareBtn) shareBtn.addEventListener("click", function () {
       var it = byId[createIdx] || byId[0];
       var st = CREATE_STYLES.filter(function (s) { return s.id === createStyle; })[0] || CREATE_STYLES[0];
-      copyText("我在「非遗智汇 · 河南非遗 AI 数字展厅」用 AI 生成了一张「" + it.name + "」" + st.label +
+      copyText("我在「非遗智汇 · 河南非遗 智能数字展厅」用本地生成工坊合成了一张「" + it.name + "」" + st.label +
         "文创海报——15 项河南招牌非遗、6 大门类、9 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
         "（传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
     });
@@ -2303,7 +2303,7 @@
     ctx.fillStyle = ink;
     ctx.textAlign = "left";
     ctx.font = "600 22px 'Noto Serif SC', serif";
-    ctx.fillText("非遗智汇 · 河南非遗 AI 数字展厅", 76, y + 12);
+    ctx.fillText("非遗智汇 · 河南非遗 智能数字展厅", 76, y + 12);
     ctx.fillStyle = sub;
     ctx.font = "400 16px 'Noto Sans SC', sans-serif";
     ctx.fillText(it.category + " · " + it.region + " · " + it.level, 76, y + 42);

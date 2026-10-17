@@ -31,3 +31,6 @@ desktop.ini
 .env.local
 config.local.js
 assets/fonts/_chars.txt
+
+# === 图片源素材（仅本地存档，最终图已内联进 JS/单文件）===
+assets/treasury_real/

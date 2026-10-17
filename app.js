@@ -535,6 +535,7 @@
             byId.map(function (it) {
               return '<a class="hc-slide" href="#/item/' + it.id + '">' +
                 '<span class="hc-img"><img src="' + it.img + '" alt="' + it.name + '" loading="lazy" decoding="async">' +
+                '<span class="ai-tag hc">AI 示意</span>' +
                 '<span class="hc-cat">' + it.category + '</span>' +
                 '<span class="hc-name">' + it.name + '</span></span>' +
                 '<span class="hc-meta"><p>' + esc(it.tagline.slice(0, 40)) + '…</p></span>' +
@@ -724,6 +725,7 @@
         '<div class="frame"><span class="num">' + pad(g + 1) + '</span>' +
         '<button class="fav-ghost' + (isFav(it.id) ? " on" : "") + '" data-fav="' + it.id + '" aria-label="收藏/取消收藏" title="收藏"><span>藏</span></button>' +
         '<img src="' + it.img + '" alt="' + it.name + '" loading="lazy" decoding="async">' +
+        '<span class="ai-tag">AI 示意</span>' +
         '<span class="cat">' + it.category + '</span>' +
         '<span class="more">查看详情</span></div>' +
         '<div class="meta"><h3>' + it.name + '</h3>' +
@@ -886,6 +888,7 @@
               related.map(function (r) {
                 return '<a class="hc-slide" href="#/item/' + r.id + '">' +
                   '<span class="hc-img"><img src="' + r.img + '" alt="' + r.name + '" loading="lazy" decoding="async">' +
+                  '<span class="ai-tag hc">AI 示意</span>' +
                   '<span class="hc-cat">' + r.category + '</span>' +
                   '<span class="hc-name">' + r.name + '</span></span>' +
                   '<span class="hc-meta"><p>' + esc(r.tagline.slice(0, 40)) + '…</p></span>' +
@@ -1859,7 +1862,7 @@
       mediaHtml = '<video class="stage-video" id="stage-media" src="' + esc(m.src) +
         '" autoplay muted loop playsinline preload="metadata"></video>';
     } else {
-      mediaHtml = '<div class="stage-img" id="stage-media" style="background-image:url(' + it.img + ')"></div>';
+      mediaHtml = '<div class="stage-img" id="stage-media" style="background-image:url(' + it.img + ')"><span class="ai-tag stage">AI 示意</span></div>';
     }
     var ctrl =
       '<button id="st-prev" aria-label="上一项">‹</button>' +
@@ -2308,6 +2311,7 @@
     ctx.font = "400 16px 'Noto Sans SC', sans-serif";
     ctx.fillText(it.category + " · " + it.region + " · " + it.level, 76, y + 42);
     ctx.textAlign = "right";
+    ctx.fillText("AI 工笔示意 · 非原物", W - 76, y + 12);
     ctx.fillText("HENAN ICH · 2026", W - 76, y + 42);
   }
 

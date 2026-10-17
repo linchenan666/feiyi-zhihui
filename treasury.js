@@ -104,7 +104,7 @@ function treasuryHTML() {
         '</div>' +
         '<div class="th-showcase">' +
           '<div class="ts-halo"></div>' +
-          '<div class="ts-case"><img id="ts-img" alt="当前讲解的实物影像"></div>' +
+          '<div class="ts-case"><img id="ts-img" alt="当前讲解的实物影像"><span class="ts-ai-tag" id="ts-ai-tag" style="display:none">AI 示意</span></div>' +
           '<div class="ts-plinth">' +
             '<div class="ts-name" id="ts-name"></div>' +
             '<div class="ts-meta" id="ts-meta"></div>' +
@@ -335,6 +335,11 @@ function loadArtifact(i, autoplay) {
     img.src = real && real.src ? real.src : "assets/" + a.id + ".jpg";
     img.alt = a.name + " 实物影像";
   }
+  var illusTag = $q("#ts-ai-tag");
+  if (illusTag) {
+    var isIllus = !!(real && real.note && real.note.indexOf("示意") !== -1);
+    illusTag.style.display = isIllus ? "" : "none";
+  }
   var nameEl = $q("#ts-name");
   if (nameEl) nameEl.textContent = a.name;
   var metaEl = $q("#ts-meta");
@@ -527,13 +532,18 @@ function openReal() {
     });
   }
   ov.style.display = "flex";
+  var isIllus = !!(real && real.note && real.note.indexOf("示意") !== -1);
   ov.querySelector(".tr-name").textContent = a.name;
+  ov.querySelector(".tr-seal").textContent = isIllus ? "绘" : "真";
   ov.querySelector(".tr-img img").src = real.src;
   var noteHtml = real.note
     ? "<b>" + real.note.split("｜")[0] + "</b>｜" + real.note.split("｜").slice(1).join("｜")
     : "综合公开馆藏影像与权威资料整理，为数字复原示意参考。";
   ov.querySelector(".tr-note").innerHTML = noteHtml +
     "<br>通高约 " + a.heightCm + " cm · " + a.place + " · " + a.level;
+  ov.querySelector(".tr-hint").textContent = isIllus
+    ? "AI 工笔淡彩示意图 · 非实拍、非文物扫描 · 仅作科普展示"
+    : "真实文物影像 · 与讲解员所述逐件对照 · 影像仅作展示与科普";
   setTimeout(function () { ov.classList.add("on"); }, 20);
 }
 

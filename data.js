@@ -16,6 +16,7 @@ var FEIYI_DATA = [
     region: "郑州",
     level: "国家级非遗 · 2006 首批",
     img: "assets/yuju.jpg",
+    replica: true,
     accent: "#B5402B",
     tagline: "流传最广的地方大戏之一，唱腔铿锵慷慨，乡土气息浓烈，有「中国第一大地方剧种」之称。",
     points: [
@@ -47,6 +48,7 @@ var FEIYI_DATA = [
     region: "洛阳",
     level: "国家级非遗 · 2006 首批",
     img: "assets/quju.jpg",
+    replica: true,
     accent: "#8A7A5C",
     tagline: "河南第二大剧种，由「高跷曲」走上戏台，唱腔婉转如诉，长于演绎市井人情。",
     points: [
@@ -77,6 +79,7 @@ var FEIYI_DATA = [
     region: "郑州",
     level: "国家级非遗 · 2006 首批",
     img: "assets/zhuizi.jpg",
+    replica: true,
     accent: "#6B7A6A",
     tagline: "说唱相间的曲艺形式，一坠一简、一人千面，市井烟火尽在说唱之间。",
     points: [
@@ -107,6 +110,7 @@ var FEIYI_DATA = [
     region: "平顶山",
     level: "国家级非遗 · 2006 首批",
     img: "assets/majie.jpg",
+    replica: true,
     accent: "#9A7B4F",
     tagline: "说书艺人的年度盛会：正月十三宝丰开棚，天作幕、地作台，千棚竞响。",
     points: [
@@ -230,6 +234,7 @@ var FEIYI_DATA = [
     region: "洛阳",
     level: "国家级非遗 · 2008 第二批",
     img: "assets/shuixi.jpg",
+    replica: true,
     accent: "#A33B2E",
     tagline: "「汤汤水水」的宴席艺术，二十四道菜如流水次第而上，酸辣鲜香。",
     points: [
@@ -260,6 +265,7 @@ var FEIYI_DATA = [
     region: "开封",
     level: "国家级非遗 · 2008 第二批",
     img: "assets/bianxiu.jpg",
+    replica: true,
     accent: "#B05A7A",
     tagline: "源于宋绣，以针代笔、以线为墨，绣出宋韵之美。",
     points: [
@@ -290,6 +296,7 @@ var FEIYI_DATA = [
     region: "开封",
     level: "国家级非遗 · 2006 首批",
     img: "assets/zhuxian.jpg",
+    replica: true,
     accent: "#B03A2E",
     tagline: "素有「木版年画鼻祖」之称，刀刻线劲、色彩浓烈，门神一对镇守千年。",
     points: [
@@ -383,6 +390,7 @@ var FEIYI_DATA = [
     region: "郑州",
     level: "国家级非遗 · 2006 首批",
     img: "assets/shaolin.jpg",
+    replica: true,
     accent: "#4E5B4E",
     tagline: "禅武合一，拳禅一体，动静之间是千年的少林寺。",
     points: [
@@ -413,6 +421,7 @@ var FEIYI_DATA = [
     region: "焦作",
     level: "国家级非遗 · 2006 首批",
     img: "assets/taiji.jpg",
+    replica: true,
     accent: "#5A6B72",
     tagline: "以缠丝劲为核心，阴阳开合，是太极拳诸流派的源头。",
     points: [
@@ -443,6 +452,7 @@ var FEIYI_DATA = [
     region: "驻马店",
     level: "国家级非遗 · 2008 第二批",
     img: "assets/dahuatie.jpg",
+    replica: true,
     accent: "#C2702D",
     tagline: "「火树银花不夜天」的民间绝技，千度铁水击上长空，化作漫天金雨。",
     points: [

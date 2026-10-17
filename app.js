@@ -848,6 +848,7 @@
         '<a class="item-back rv" href="#/hall">返回展品总览</a>' +
         '<div class="item-layout">' +
           '<div class="item-figure rv"><div class="frame"><img src="' + it.img + '" alt="' + it.name + '" decoding="async">' +
+            (it.replica ? '<span class="replica-tag">示意 · 非原物</span>' : '') +
             '<span class="seal">' + it.name.charAt(0) + '</span></div>' +
           '</div>' +
           '<div class="item-body">' +
@@ -866,9 +867,10 @@
             '<div class="item-section rv" style="--d:.38s"><h4>值得深挖 · GO DEEPER</h4>' +
               '<ul class="deep-list">' + it.deep.map(function (d) { return "<li>" + esc(d) + "</li>"; }).join("") + '</ul>' +
             '</div>' +
+            (it.verify && it.verify.length ?
             '<div class="verify-box rv" style="--d:.44s"><h5>待核清单 · TO VERIFY</h5>' +
               it.verify.map(function (v) { return "<p>· " + esc(v) + "</p>"; }).join("") +
-            '</div>' +
+            '</div>' : "") +
             '<div class="item-actions rv" style="--d:.5s">' +
               '<a class="act act-primary mag" href="#/ask">问 AI 讲解</a>' +
               '<button class="act act-line act-fav mag ' + (isFav(it.id) ? "on" : "") + '" id="btn-fav" type="button" aria-pressed="' + isFav(it.id) + '"><i class="heart">' + (isFav(it.id) ? "♥" : "♡") + '</i>' + (isFav(it.id) ? "已收藏" : "收藏") + '</button>' +

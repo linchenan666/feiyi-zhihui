@@ -189,7 +189,7 @@ function buildBowlPanel() {
     '<label class="fp-row"><input type="checkbox" id="f3d-auto" checked> 自动环绕</label>' +
     '<label class="fp-row"><input type="checkbox" id="f3d-crack"> 开片纹理</label>' +
     '<div class="fp-hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 双击复位</div>' +
-    '<div class="fp-note">汝瓷为宋代五大名窑之首，釉色如雨过天青；釉面开片本为烧造缺陷，却成独特审美。本器以 LatheGeometry 沿碗壁截面曲线旋转生成。</div>' +
+    '<div class="fp-note">汝瓷为宋代五大名窑之首，釉色如雨过天青；釉面开片本为烧造缺陷，却成独特审美。本器以 LatheGeometry 沿碗壁截面曲线旋转生成。<b>数字化复原示意，非文物扫描</b>。</div>' +
   '</aside>';
 }
 
@@ -331,7 +331,7 @@ function buildMortisePanel() {
     '<label class="fp-row"><input type="checkbox" id="f3d-label" checked> 结构标注</label>' +
     '<label class="fp-row"><input type="checkbox" id="f3d-auto2" checked> 自动环绕</label>' +
     '<div class="fp-hint">拖拽旋转 · 滑块控制开合 · 滑块松手可自由停留</div>' +
-    '<div class="fp-note">榫卯不用一钉一铆，以木件凹凸咬合，是中国传统木作（国家级非遗）的核心结构。凸出为<b>榫</b>，凹入为<b>卯</b>；拖动滑块可见榫头沿轴向滑出卯眼的全过程。</div>' +
+    '<div class="fp-note">榫卯不用一钉一铆，以木件凹凸咬合，是中国传统木作（国家级非遗）的核心结构。凸出为<b>榫</b>，凹入为<b>卯</b>；拖动滑块可见榫头沿轴向滑出卯眼的全过程。<b>数字化复原示意，非文物扫描</b>。</div>' +
   '</aside>';
 }
 

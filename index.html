@@ -1987,6 +1987,8 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
 .th-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .th-btn{padding:9px 4px;font-size:12px;border-radius:9px;border:1px solid rgba(166,124,66,.45);background:var(--paper);color:var(--ink);cursor:pointer;transition:.16s;font-family:var(--sans)}
 .th-btn:hover{border-color:var(--gold);color:var(--cinnabar)}
+.th-btn-3d{background:linear-gradient(145deg,#2a2018,#1c1510);color:#e8c96a;border-color:rgba(232,201,106,.55);font-weight:600;letter-spacing:.08em}
+.th-btn-3d:hover{background:linear-gradient(145deg,#3a2d1e,#241a10);color:#f2dc8a;border-color:#e8c96a}
 @media(max-width:900px){
   .th-main{flex-direction:column}
   .th-stage{min-height:0;grid-template-columns:1fr;grid-template-rows:380px auto auto auto}
@@ -2204,6 +2206,9 @@ body:has(.immerse-bg) footer .foot-meta b,body:has(.item-bg) footer .foot-meta b
 <script src="treasury-audio.js"></script>
 <script src="treasury-process.js"></script>
 <script src="treasury.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.min.js"></script>
+<script src="three-showcase.js"></script>
 <script src="evolution-data.js"></script>
 <script src="help-data.js"></script>
 <script src="app.js"></script>

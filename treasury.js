@@ -137,6 +137,8 @@ function treasuryHTML() {
           '<button class="th-btn" id="th-real" type="button">实物影像</button>' +
           '<button class="th-btn" id="th-proc" type="button">工艺流程</button>' +
           '<button class="th-btn" id="th-know" type="button">工艺知识</button>' +
+          '<button class="th-btn th-btn-3d" id="th-3d-bowl" type="button">3D 汝瓷展柜</button>' +
+          '<button class="th-btn th-btn-3d" id="th-3d-mortise" type="button">榫卯拆解</button>' +
         '</div>' +
       '</aside>' +
     '</div>' +
@@ -243,6 +245,17 @@ function bindTreasuryUI() {
   $q("#th-know", root).addEventListener("click", function () {
     if (typeof openKnow === "function") openKnow();
   });
+
+  /* WebGL 3D 展柜（懒初始化，移动端隐藏） */
+  var btnBowl = $q("#th-3d-bowl", root);
+  var btnMortise = $q("#th-3d-mortise", root);
+  if (FY3D.isMobile) {
+    if (btnBowl) btnBowl.style.display = "none";
+    if (btnMortise) btnMortise.style.display = "none";
+  } else {
+    if (btnBowl) btnBowl.addEventListener("click", function () { open3DShowcase("bowl"); });
+    if (btnMortise) btnMortise.addEventListener("click", function () { open3DShowcase("mortise"); });
+  }
 
   /* 离开珍品馆时暂停讲解（全局只绑一次） */
   if (!TH.inited) {

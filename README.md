@@ -6,6 +6,8 @@
 
 把非遗讲给你听——一个「能看、能问、能关联、能生成、能沉浸」的河南非遗 智能数字展厅。**离线优先**：内置知识库离线问答永不掉线，预留豆包/千问大模型接口（填 key 即用）。
 
+**文档目录**：一、解决的问题 · 二、功能模块 · 三、代码仓库 · 四、[10 分钟极速复现指南](#四10-分钟极速复现指南)（[4.1 环境要求](#41-环境要求) / [4.2 运行](#42-运行) / [4.3 依赖清单](#43-依赖清单) / [4.4 环境变量模板](#44-环境变量模板可选接入在线大模型)） · 五、[目录结构](#五目录结构) · 六、演进记录 · 七、技术要点 · 八、赛事信息 · 九、[图片来源与许可声明](#九图片来源与许可声明)
+
 ---
 
 ## 一、项目解决什么问题
@@ -35,101 +37,192 @@
 
 ## 三、代码仓库（Public）
 
-> 托管平台：GitHub / Gitee（须 Public 或提供评审访问权限）
+> 托管平台：GitHub（Public）
 >
-> 仓库地址：<提交后在此填写仓库 URL>　← 推送到远程仓库后把链接粘贴到此处
+> 仓库地址：https://github.com/linchenan666/feiyi-zhihui
 
-演进保证：完整细粒度 Git 提交历史（**93 次**，每次对应一次 AI 核心对话或一个功能模块），
+演进保证：完整细粒度 Git 提交历史（**95 次**，每次对应一次 AI 核心对话或一个功能模块），
 禁止一次 initial commit 堆完全部功能——本仓库逐模块提交，评委可逐条对照 docs/Prompt历史.md 复核。
 
 ---
 ## 四、10 分钟极速复现指南
 
-### 4.0 最快路径（单文件版，30 秒跑起来）
+### 4.0 标准复现路径（评委推荐，clone 后三步走）
+
+仓库**不含**打包产物（`dist/` 已在 `.gitignore` 中），clone 下来需先跑一次打包脚本，一条命令即可生成单文件：
 
 ```bash
-# 推荐：直接双击「非遗智汇·多彩面板版.html」
-# 全部 JS / 数据 / 图片内联，零网络依赖，断网也能完整演示
+# 1. 克隆（或下载 ZIP 解压）
+git clone https://github.com/linchenan666/feiyi-zhihui.git
+cd feiyi-zhihui
+
+# 2. 一条命令打包（纯 Python 标准库，无需 pip、无需联网）
+py -3 scripts/bundle_single.py          # Windows
+# python3 scripts/bundle_single.py      # macOS / Linux
+
+# 3. 双击打开产物
+dist/非遗智汇·多彩面板版.html
 ```
+
+正常输出末尾应看到：
+
+```
+[6/6] OK: dist\非遗智汇·多彩面板版.html (约 34-35 MB)
+打包完成。
+```
+
+打包脚本幂等：同一份源码重复运行，产物字节一致（不写时间戳、不写随机数），可反复验证。
 
 ### 4.1 环境要求
 
 | 项 | 要求 |
 |----|------|
 | 操作系统 | Windows / macOS / Linux 任一 |
+| Python | **3.8 及以上**（仅打包脚本需要；本机 Python 3.14 验证通过，只用标准库） |
 | 浏览器 | Chrome / Edge 114+（推荐最新版） |
-| 网络 | 源码版首次打开需联网加载字体；断网自动降级（功能完整） |
+| 网络 | **完全离线可跑**：字体、three.js、图片、音频全部本地内联，断网功能完整 |
+| 其它 | 无 Node、无 npm、无包管理器、无任何 pip 安装步骤 |
 
-**无任何构建步骤、无 Node 依赖、无包管理器。**
-
-### 4.2 运行
+### 4.2 运行方式
 
 ```bash
-# 方式一：直接双击
-双击 index.html              # 源码版（多文件，依赖同目录 assets/ 与 data.js / app.js）
-双击 非遗智汇·多彩面板版.html  # 单文件版（全内联，推荐演示用）
+# 方式一：打包单文件（推荐，演示与评审用）
+py -3 scripts/bundle_single.py
+# 然后双击 dist/非遗智汇·多彩面板版.html —— 全部 JS/数据/图片/字体/音频内联，零网络依赖
 
-# 方式二：本地服务（可选，浏览器安全策略更宽松）
-python -m http.server 8000
+# 方式二：直接跑源码版（多文件，便于阅读源码与调试）
+双击 index.html        # 依赖同目录的 assets/、vendor/ 与各 *.js
+
+# 方式三：本地静态服务（可选，浏览器安全策略更宽松；接在线大模型时必须用）
+py -3 -m http.server 8000
 # 访问 http://localhost:8000
 ```
 
-> 单文件版由 `scripts/bundle_single.py` 合成（依次内联 data.js → map-data.js → regions-data.js → app.js → 图片/字体/音频，幂等可复现），源码改动后重新合成即可保持同步。
+> 单文件版由 `scripts/bundle_single.py` 合成，依次内联 data.js → map-data.js → regions-data.js → treasury-*.js → vendor/three → three-showcase → evolution-data.js → help-data.js → app.js，再内联子集化字体与 assets/ 图片，幂等可复现。源码改动后重新运行脚本即可保持产物与源码同步。
 
-### 4.3 依赖清单（CDN，只读、无追踪）
+### 4.3 依赖清单
 
-| 资源 | 来源 | 用途 | 失败兜底 |
-|------|------|------|----------|
-| Noto Serif SC / Noto Sans SC | miaoda.feishu.cn 自托管镜像 | 字体 | 系统字体栈 |
+依赖分两层：**评委复现只需要第一层**；第二层是作者从原始素材重新生成数据层才用得到的工具，打包单文件不需要。
 
-> Lenis 平滑滚动库已从运行时禁用（保持原生滚动，滚轮性能最优），单文件版已完全移除。除字体外，页面**不引入任何第三方脚本、不发任何网络请求**——这是"零上传"隐私卖点的根基。
+#### 第一层：评委复现必需（无需 pip 安装）
+
+| 依赖 | 版本 / 来源 | 用途 | 为何不用额外安装 |
+|------|------|------|------|
+| Python 标准库 | 3.8+（本机 3.14 验证） | `bundle_single.py` 文本内联、base64、校验 | 随 Python 自带，无需 pip |
+| 子集化字体 | 已入库 `assets/fonts/`（Noto Serif SC / Noto Sans SC 的 woff2 + `fonts-embed.css`） | 离线宋体/黑体，断网保持排版 | 产物已随仓库提供，无需重跑子集化 |
+| three.js | 已入库 `vendor/three.min.js`（r186 系列）、`OrbitControls.min.js`、`lenis.min.js` | WebGL 3D 展柜、轨道控制、平滑滚动 | 本地 vendor 文件，打包时内联，**不引 CDN** |
+| 浏览器 | Chrome / Edge 114+ | 运行单文件 HTML | 无安装步骤 |
+
+> 运行时**不向任何第三方域名发请求**；`index.html` 源码中保留的 Lenis CDN 标签在打包时会被本地 `vendor/lenis.min.js` 内联替换（本地缺失才尝试下载，下载失败则删除该标签并降级为原生滚动，均不影响功能）。
+
+#### 第二层：作者数据准备才用（评委通常不需要运行）
+
+| 依赖 | 安装命令 | 哪个脚本用 | 作用 |
+|------|------|------|------|
+| fonttools | `pip install fonttools` | `scripts/subset_fonts.py`（内部调用 `python -m fontTools.subset`） | 按页面实际用字对 Noto 字体做子集化、输出 woff2；产物已入库 |
+| Pillow | `pip install Pillow` | `scripts/compliance_images.py`、`scripts/_inject_real.py`、`scripts/_replace_photos.py` | 下载/压缩示意图片到展示分辨率 |
+| numpy | `pip install numpy` | `scripts/_inject_audio.py`、`scripts/_reinject_two.py` | 讲解员 WAV 音频重采样 |
+| （无） | —— | `scripts/build_three.py` | 仅用标准库 urllib 下载 three.js，`vendor/` 已入库，无需重跑 |
+
+> **不依赖 ffmpeg**：音频读写用 Python 标准库 `wave`，重采样用 numpy，不调用任何外部二进制。`scripts/` 下下划线开头的 `_inject_*.py`、`_replace_photos.py`、`_reinject_two.py`、`_check_keys.py`、`scan_videos.py` 是历史素材注入/校验的中间步骤，其核心逻辑已合并进 `bundle_single.py`，仅作过程存档。
 
 ### 4.4 环境变量模板（可选，接入在线大模型）
 
 **双层架构 = 内置知识库离线问答（永不掉线） + 预留豆包/千问大模型接口（填 key 即用）。**
 
 - **离线层（默认）**：`data.js` 中 `KB_ALL` 关键词打分匹配 + 多轮指代追问，纯本地作答，断网演示不断线，**不依赖任何远程服务**。
-- **在线层（可选）**：`app.js` 顶部 `REMOTE_API` 填入豆包 / 千问等兼容接口的 `url` 与 `key` 并置 `enabled: true`，回答即切换为大模型生成。
+- **在线层（可选）**：`app.js` 顶部 `REMOTE_API` 填入兼容 OpenAI Chat Completions 协议的接口并置 `enabled: true`，回答即切换为大模型生成。
 
 > 诚实声明：默认离线回答由**内置知识库检索匹配**产出，并非大模型生成；填 key 后才接入真·大模型。
 
+**配置位置（`app.js` 第 16–21 行）**：
+
 ```js
-// app.js 顶部 REMOTE_API 配置位
 var REMOTE_API = {
-  enabled: false,        // 置 true 启用远程大模型
-  url: "",               // 例如 https://ark.cn-beijing.volces.com/api/v3/chat/completions
-  key: "",               // API Key（请勿提交到公开仓库）
-  model: ""              // 例如 doubao-seed-1-6-250615
+  enabled: false,        // ① 开关：true 才走远程大模型
+  url: "",               // ② 接口地址（chat/completions 全路径）
+  key: "",               // ③ API Key
+  model: ""              // ④ 模型 / 推理接入点 ID
 };
 ```
 
-> 注意：`file://` 协议下 `fetch` 会被浏览器拦截，接入远程 API 时请用 `python -m http.server` 起本地服务。
+各字段填法（以火山方舟豆包为例，其它兼容 OpenAI 协议的服务同理）：
+
+| 字段 | 填什么 | 示例 |
+|------|------|------|
+| `url` | 服务商的 Chat Completions 完整地址 | `https://ark.cn-beijing.volces.com/api/v3/chat/completions` |
+| `key` | 在服务商控制台申请的 API Key | `sk-xxxxxxxx`（**仅本地填写，切勿提交公开仓库**） |
+| `model` | 模型 ID 或推理接入点 ID | `doubao-seed-1-6-250615` |
+| `enabled` | 三字段填齐后改为 `true` | `true` |
+
+**不填会怎样（默认行为）**：`enabled:false` 或 `key` 为空时，问·AI 完全走内置离线知识库，界面顶部不出现「离线 ⇄ 在线」切换按钮，纯本地作答、永不掉线。
+
+> 安全与运行提示：
+> 1. 本项目为纯前端、无构建步骤，**不读取 `.env`**；接入方式是直接编辑 `app.js` 顶部 `REMOTE_API`。改完本地重新打包即可，**含 key 的文件不要提交**（`.gitignore` 已排除 `.env`、`config.local.js`）。
+> 2. `file://` 协议下 `fetch` 会被浏览器拦截，启用远程 API 时请用 `py -3 -m http.server 8000` 起本地服务再访问。
 
 ## 五、目录结构
 
 ```
 feiyi-zhihui/
-├── index.html              # 结构 + 设计系统（CSS 变量）+ 质感动效层
-├── 非遗智汇·多彩面板版.html  # 单文件交付版（全内联，零依赖，演示推荐）
-├── data.js                 # 数据层：15 项非遗 × 4 维 + 知识库 + 图谱
-├── map-data.js             # 地图层：写实河南轮廓 + 地市坐标
-├── regions-data.js         # 十八城介绍 + 地标 + 地市 → 非遗映射
-├── app.js                  # 视图与交互层：9 视图渲染 + 问答匹配 + 图谱 / 地图
+├── index.html                  # 入口：结构 + 设计系统（CSS 变量）+ 质感动效层，按序引用各 JS
+├── app.js                      # 应用/交互层：10 视图渲染、路由、离线问答匹配、图谱/地图/海报逻辑（含 REMOTE_API 配置位）
+├── data.js                     # 核心数据层：15 项非遗 × 多维字段 + 离线知识库 KB_ALL + 图谱连边 + HALL_VIDEOS
+├── map-data.js                 # 地图层：写实河南 SVG 轮廓 + 地市坐标
+├── regions-data.js             # 十八城介绍 + 地标 + 城市 → 非遗映射
+├── treasury-data.js            # 藏库文字层：15 件藏品的级别、产地、口径、讲解词
+├── treasury-real.js            # 藏库影像层：15 件实物图 base64 内联（含 AI 示意图/实拍标注）
+├── treasury-audio.js           # 藏库讲解音频层：10 段表演类 WAV base64 内联（约 17MB，器物类无音频）
+├── treasury-process.js         # 工艺流程层：5 件代表非遗的分步工序数据与图文
+├── treasury.js                 # 藏库视图层：展柜、真人讲解播放器、实物影像弹窗、3D 展柜接入
+├── three-showcase.js           # WebGL 3D 层：汝瓷碗 LatheGeometry + 榫卯 BoxGeometry 拆解（懒初始化、关闭 dispose）
+├── treasury-mats.js            # 历史材质数据，当前未被引用，保留存档
+├── evolution-data.js           # 演进馆数据：12 轮 AI 协同迭代的关键 Prompt/协作要点/引导修复
+├── help-data.js                # 图文使用说明数据（含引导配图 base64，约 470KB）
+├── README.md                   # 本文件
+├── .gitignore                  # 排除 dist/、单文件、zip、临时目录、环境文件、本地存档图
+│
 ├── assets/
-│   ├── hero.jpg + 15 项水墨图.jpg   # 主视觉与展品意象（16 张）
-│   ├── cats/               # 六门类氛围图（6 张）
-│   ├── mapbg/              # 地图页文化背景图（4 张）
-│   └── region/             # 十八城地标实拍（18 张）
+│   ├── hero.jpg + <key>.jpg×15 # 主视觉 + 15 项招牌主图（均为 AI 工笔淡彩示意图，带角标）
+│   ├── fonts/                  # 离线字体（已入库）：NotoSerifSC/SansSC 子集 woff2 + fonts-embed.css
+│   ├── cats/                   # 六门类氛围图（6 张）
+│   ├── mapbg/                  # 地图页文化背景图（4 张）
+│   ├── region/                 # 十八城地标图（18 张）
+│   ├── video/                  # 沉浸演绎视频位（仅含放置说明.md，无视频时离线降级为静态海报）
+│   └── treasury_real/          # 博物馆官网原始存档图（.gitignore 排除、不入库，仅本地核对）
+│
+├── vendor/                     # 第三方库本地化，打包内联，零 CDN
+│   ├── three.min.js            # three.js r186（WebGL 3D 展柜）
+│   ├── three.core.min.js / three.module.min.js  # three.js 同版本组件（备查）
+│   ├── OrbitControls.min.js    # 轨道控制（旋转/缩放/平移）
+│   └── lenis.min.js            # 平滑滚动（可选，失败自动降级原生滚动）
+│
+├── scripts/
+│   ├── bundle_single.py        # ★ 一键打包：clone 后评委只需跑它（纯标准库、幂等、不碰 git）
+│   ├── subset_fonts.py         # 作者用：fontTools 字体子集化（产物已入库）
+│   ├── compliance_images.py    # 作者用：Pillow 压缩示意图到展示分辨率
+│   ├── build_three.py          # 作者用：下载 three.js 到 vendor/（已入库）
+│   ├── _inject_audio.py / _reinject_two.py       # 作者用：numpy 处理讲解 WAV 并注入（历史中间态）
+│   ├── _inject_real.py / _replace_photos.py      # 作者用：Pillow 注入/替换实物图（历史中间态）
+│   ├── _compliance_data.py / _compliance_treasury.py / _inspect_real.py  # 合规标注与检查脚本
+│   ├── _check_keys.py / scan_videos.py           # 已并入 bundle_single.py，仅存档
+│
 ├── docs/
-│   ├── 技术文档.html / 技术文档.pdf   # 意图控制 / 架构 / 可复现性论证
-│   ├── Prompt历史.md                  # 核心模块完整 Prompt 链
-│   └── 演示视频脚本.md                # 5-8 分钟演示分镜（含 AI 协同复现段）
-└── README.md               # 本文件
+│   ├── 技术文档.html / 技术文档.pdf              # 意图控制 / 架构 / 可复现性论证（≤30 页）
+│   ├── Prompt历史.md                             # 核心模块完整 Prompt 链（可复现证据）
+│   ├── 演示视频脚本.md                           # 5-8 分钟演示分镜（含 AI 协同复现段）
+│   ├── 3D实物对齐清单.md                         # 3D 展柜与实物/口径对照
+│   └── 3D非遗数字化系统·工程落地方案.html        # WebGL 方案设计稿
+│
+└── dist/                       # 打包产物（.gitignore 排除、不入库）：bundle 生成的单文件 HTML
+    └── 非遗智汇·多彩面板版.html
 ```
+
+> 根目录可能存在的 `非遗智汇·多彩面板版.html`、`_shots/`、`_backup/`、`_git_msgs/`、`_audio_tmp/` 均为本地构建产物或临时目录，已被 `.gitignore` 排除，**不属于仓库内容**，删除不影响重新构建。
 
 ## 六、演进记录（Git 提交 ↔ AI 协同模块）
 
-> 开发全程为 AI 协同（Vibe Coding）：每次提交对应一个功能模块的落地或一次核心 AI 对话，Git 历史保留全部细粒度提交（**共 93 次**），完整 Prompt 链见 `docs/Prompt历史.md`。
+> 开发全程为 AI 协同（Vibe Coding）：每次提交对应一个功能模块的落地或一次核心 AI 对话，Git 历史保留全部细粒度提交（**共 95 次**），完整 Prompt 链见 `docs/Prompt历史.md`。
 
 | 阶段 | 模块 | 内容 |
 |------|------|------|
@@ -140,11 +233,11 @@ feiyi-zhihui/
 
 ## 七、技术要点（供评审速览）
 
-- **架构**：数据与视图严格分离（`data.js` / `map-data.js` / `regions-data.js` 纯数据，`app.js` 纯逻辑，`index.html` 纯结构与样式），hash 路由驱动 9 视图，无框架无构建。
+- **架构**：数据与视图严格分离（`data.js` / `map-data.js` / `regions-data.js` / `treasury-*.js` 纯数据，`app.js` / `treasury.js` / `three-showcase.js` 纯逻辑，`index.html` 纯结构与样式），hash 路由驱动 10 视图，无框架、无构建步骤。
 - **双层问答架构**：**离线优先**——本地知识库关键词打分匹配（离线可用、演示不断线、永不掉线）+ 多轮上下文指代消解（「它 / 这个 / 那」自动回指上一主题）+ 远程大模型 API 预留位（豆包/千问兼容接口，填 key 即升级）。
 - **图谱**：力导向布局 + 六门类着色 + 氛围画布（纸纹 / 晕染 / 水印）+ 节点分批入场 + 滚轮 / 中心缩放（窄屏保持物理宽可横滑）。
 - **地图**：写实河南 SVG 轮廓 + 9 地市标点 + 放大模态交互 + 悬浮聚焦单显 + 城市介绍联动。
-- **安全**：全部用户内容经 `esc()` 转义防 XSS；零第三方脚本（除字体 CDN）；localStorage 读写全部 try/catch。
+- **安全**：全部用户内容经 `esc()` 转义防 XSS；运行时零第三方网络请求（three.js / OrbitControls / Lenis / 子集化字体均已本地化、打包内联，断网完整可用）；localStorage 读写全部 try/catch。
 - **性能**：指针动效单监听 + rAF 节流；合成层 hover 才开；隐藏视图定时器即切即停；Lenis 已禁用回退原生滚动。
 - **无障碍**：键盘可达（地图标点 / 图谱节点 / 收藏按钮）、`prefers-reduced-motion` 全量兜底、语义化标签 + aria。
 

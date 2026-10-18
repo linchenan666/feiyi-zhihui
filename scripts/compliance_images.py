@@ -34,7 +34,13 @@ IMAGES = {
     "dapindiao": "https://aka.doubaocdn.com/s/hE10u0h92s",
     "dadiquzi": "https://aka.doubaocdn.com/s/AO2p2Nmor0",
     "heluodagu": "https://aka.doubaocdn.com/s/pS0Mp8D4LH",
-    "taihao": "https://aka.doubaocdn.com/s/ejkXuUqud7"
+    "taihao": "https://aka.doubaocdn.com/s/ejkXuUqud7",
+    # 第三批新增（2026-10 扩数据）：技艺/美术/体育，AI 工笔淡彩示意图
+    "dangyangyu": "https://aka.doubaocdn.com/s/JrilcRoXgV",
+    "xinyangmaojian": "https://aka.doubaocdn.com/s/J5iIQBqIWn",
+    "lingbaojianzhi": "https://aka.doubaocdn.com/s/ioNr3n4U1L",
+    "zhenpingyudiao": "https://aka.doubaocdn.com/s/NxTg2dGHpJ",
+    "dongbeizhuang": "https://aka.doubaocdn.com/s/We89JgxA2e"
 }
 
 MAX_SIDE = 1600

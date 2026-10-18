@@ -421,6 +421,72 @@ var FEIYI_DATA = [
     ]
   },
   {
+    id: "dangyangyu",
+    embed: "",
+    name: "当阳峪绞胎瓷",
+    en: "Dangyangyu Twisted-body Porcelain",
+    category: "技艺",
+    place: "焦作 · 当阳峪窑群（修武、山阳一带）",
+    region: "焦作",
+    level: "国家级非遗 · 2014 第四批",
+    img: "assets/dangyangyu.jpg",
+    replica: true,
+    accent: "#85755F",
+    tagline: "多色瓷泥绞揉成胎，花纹由胎而生、表里如一，当阳峪窑烧出的「透花瓷」。",
+    points: [
+      "多色瓷泥（白、褐、灰）相绞揉叠成胎，花纹由胎而生、内外通透、表里如一",
+      "又称「透花瓷」，瓷泥绞合后纹路如羽毛、席编、菊花，故名绞胎",
+      "源于唐、兴于宋，以焦作当阳峪窑群为中心，可与定窑、磁州窑比肩",
+      "2014 年以焦作市申报列入第四批国家级非遗（序号 1331，Ⅷ-217）"
+    ],
+    deep: [
+      "绞胎瓷「表里如一」的绞泥工艺与三十余道工序",
+      "当阳峪窑的绞胎、剔花、釉下彩绘谱系",
+      "绞胎瓷的失传与复烧：成品率极低的柴窑难题"
+    ],
+    verify: [],
+    rel: { genre: "技艺", city: "焦作", kin: ["junci", "ruci"] },
+    qa: [
+      { q: "什么是绞胎瓷", a: "绞胎瓷是把不同颜色的瓷泥绞揉在一起制成的瓷器，花纹由胎而生、内外通透，切开后表里纹路一致，故又称「透花瓷」，以焦作当阳峪窑最负盛名。" },
+      { q: "绞胎瓷和钧瓷、汝瓷有什么不同", a: "汝瓷、钧瓷的美在釉色，绞胎瓷的美在胎体——花纹是瓷泥本身绞出来的，不是画在釉面上的，因此表里如一。" },
+      { q: "绞胎瓷为什么珍贵", a: "绞胎需经三十多道工序，瓷泥绞合、拉坯、烧制都极易变形开裂，成品率很低，宋代以后一度失传，当代才复烧成功。" }
+    ],
+    note: "国家级非遗名录（当阳峪绞胎瓷烧制技艺）：2014 年第四批新增（序号 1331，Ⅷ-217，申报河南省焦作市）。中国非物质文化遗产网 https://www.ihchina.cn/project_details/14740.html"
+  },
+  {
+    id: "xinyangmaojian",
+    embed: "",
+    name: "绿茶制作技艺（信阳毛尖茶制作技艺）",
+    en: "Xinyang Maojian Tea",
+    category: "技艺",
+    place: "信阳 · 大别山、桐柏山北麓茶区",
+    region: "信阳",
+    level: "国家级非遗 · 2014 第四批扩展（绿茶制作技艺）",
+    img: "assets/xinyangmaojian.jpg",
+    replica: true,
+    accent: "#66833F",
+    tagline: "细圆紧直、白毫满披，生锅杀青、熟锅理条，一盏毛尖泡出大别山云雾。",
+    points: [
+      "分生锅、熟锅两锅：生锅高温杀青、熟锅做条理条，再经烘焙、拣剔，全凭手感",
+      "干茶细圆紧直、白毫满披，冲泡后汤色嫩绿明亮、滋味鲜爽，俗称「细圆紧直多白毫」",
+      "产于大别山、桐柏山北麓的信阳茶区，「五云两潭一寨」高山茶闻名",
+      "2014 年以信阳市申报列入第四批国家级非遗扩展项目（绿茶制作技艺，序号 931，Ⅷ-148）"
+    ],
+    deep: [
+      "生锅杀青与熟锅理条：毛尖「细圆紧直」的手上功夫",
+      "信阳毛尖「白毫」的形成与高山云雾茶的品质",
+      "从「淮南茶信阳第一」到中国传统制茶技艺入选人类非遗"
+    ],
+    verify: [],
+    rel: { genre: "技艺", city: "信阳", kin: [] },
+    qa: [
+      { q: "信阳毛尖是怎么做出来的", a: "信阳毛尖属绿茶，经摊晾、生锅杀青、熟锅理条做条、烘焙、拣剔等工序制成，细圆紧直、白毫满披，2014 年作为「绿茶制作技艺」列入第四批国家级非遗扩展项目。" },
+      { q: "信阳毛尖为什么有白毫", a: "白毫是茶叶嫩芽背面的天然茸毛，毛尖采的是细嫩芽头，加之手工理条不损茸毛，所以干茶满披白毫，是鲜嫩的标志。" },
+      { q: "信阳毛尖产在哪里", a: "主要产于河南信阳大别山、桐柏山北麓的高山茶区，核心产区有「五云两潭一寨」之说，终年云雾、茶树生长缓慢、内含物质丰富。" }
+    ],
+    note: "国家级非遗名录（绿茶制作技艺·信阳毛尖茶制作技艺）：2014 年第四批扩展（序号 931，Ⅷ-148，申报河南省信阳市）。中国非物质文化遗产网 https://www.ihchina.cn/project_details/14615"
+  },
+  {
     id: "bianxiu",
     embed: "https://player.bilibili.com/player.html?bvid=BV11r4y1c7uz&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "汴绣",
@@ -545,6 +611,72 @@ var FEIYI_DATA = [
     ]
   },
   {
+    id: "lingbaojianzhi",
+    embed: "",
+    name: "剪纸（灵宝剪纸）",
+    en: "Lingbao Paper-cutting",
+    category: "美术",
+    place: "三门峡 · 灵宝",
+    region: "三门峡",
+    level: "国家级非遗 · 2008 第二批扩展（剪纸）",
+    img: "assets/lingbaojianzhi.jpg",
+    replica: true,
+    accent: "#B8392E",
+    tagline: "朱红团花、粗犷如汉画像石，灵宝人把窗花喜花剪成了豫西大地的千年祈愿。",
+    points: [
+      "品类有窗花、喜花、团花、礼花等，逢春节、婚娶、寿庆张贴于窗棂、门楣、箱柜",
+      "线条粗犷浑厚、造型夸张，保留近似汉代画像石的古拙风格",
+      "灵宝地处豫晋陕交界，剪纸兼融中原、关中、晋南的题材与刀法",
+      "2008 年以灵宝市申报列入第二批国家级非遗扩展项目（剪纸，序号 315，Ⅶ-16）"
+    ],
+    deep: [
+      "灵宝剪纸的「团花」结构与阴阳刻技法",
+      "窗花、喜花里的祈子、纳吉、避邪符号体系",
+      "豫晋陕交界剪纸带：灵宝与中阳、库车等剪纸的谱系比较"
+    ],
+    verify: [],
+    rel: { genre: "美术", city: "三门峡", kin: ["zhenpingyudiao"] },
+    qa: [
+      { q: "灵宝剪纸有什么特点", a: "灵宝剪纸属黄河流域剪纸，以窗花、喜花、团花为主，朱红单色，线条粗犷浑厚、造型夸张，保留了近汉代画像石的古拙风格，2008 年作为「剪纸」列入第二批国家级非遗扩展项目。" },
+      { q: "灵宝剪纸什么时候贴", a: "春节时贴窗花、门笺，婚娶时贴喜花、团花，寿庆时贴礼花，把对五谷丰登、人丁兴旺、避邪纳福的愿望剪进红纸。" },
+      { q: "灵宝剪纸为什么有汉画像石的味道", a: "灵宝地处豫晋陕交界，深受中原、关中文化影响，其剪纸线条厚重、构图饱满，与当地出土的汉代画像石、砖雕在审美上一脉相承。" }
+    ],
+    note: "国家级非遗名录（剪纸·灵宝剪纸）：2008 年第二批扩展（序号 315，Ⅶ-16，申报河南省灵宝市）。中国非物质文化遗产网 https://www.ihchina.cn/project_details/13959.html"
+  },
+  {
+    id: "zhenpingyudiao",
+    embed: "",
+    name: "玉雕（镇平玉雕）",
+    en: "Zhenping Jade Carving",
+    category: "美术",
+    place: "南阳 · 镇平石佛寺（中华玉都）",
+    region: "南阳",
+    level: "国家级非遗 · 2008 第二批（玉雕）",
+    img: "assets/zhenpingyudiao.jpg",
+    replica: true,
+    accent: "#4F7A6D",
+    tagline: "六千年独山玉，巧施俏色、化瑕为瑜，镇平玉雕刀下见山水。",
+    points: [
+      "以南阳独山玉为主要原料，独山玉色泽斑斓、质地坚韧，当地玉雕史可追溯至新石器时代",
+      "长于俏色、透雕、镂雕，讲究因材施艺、化瑕为瑜，把玉料瑕疵转化为点睛之笔",
+      "镇平石佛寺是全国知名玉雕集散地，有「中华玉都」之称，从业人员众多",
+      "2008 年以镇平县申报列入第二批国家级非遗（玉雕，序号 833，Ⅶ-57），与北京、苏州、广州玉雕同批"
+    ],
+    deep: [
+      "独山玉「玉色斑斓」与「俏色」设计的逻辑",
+      "镇平玉雕的「化瑕为瑜」：镂雕、透雕、链子活技法",
+      "从石佛寺到「中华玉都」：一个县域玉雕产业的传承生态"
+    ],
+    verify: [],
+    rel: { genre: "美术", city: "南阳", kin: ["lingbaojianzhi"] },
+    qa: [
+      { q: "镇平玉雕用什么玉", a: "镇平玉雕主要用南阳独山玉，独山玉是中国四大名玉之一，玉色丰富、质地坚韧，当地琢玉史可追溯到新石器时代，2008 年镇平玉雕列入第二批国家级非遗。" },
+      { q: "什么是俏色和化瑕为瑜", a: "俏色是顺着玉料天然的颜色、纹理来设计；化瑕为瑜是把玉料上的瑕疵、杂色巧妙雕琢成画面中合理的一部分，甚至成为亮点，是镇平玉雕的核心功力。" },
+      { q: "镇平玉雕的规模有多大", a: "南阳镇平石佛寺一带是全国知名的玉雕加工和集散地，有「中华玉都」之称，玉雕从业人数众多，形成了从开采、设计、加工到销售的完整链条。" }
+    ],
+    note: "国家级非遗名录（玉雕·镇平玉雕）：2008 年第二批新增（序号 833，Ⅶ-57，申报河南省镇平县）。中国非物质文化遗产网 https://www.ihchina.cn/project_details/14127.html"
+  },
+  {
     id: "shaolin",
     embed: "https://player.bilibili.com/player.html?bvid=BV19d4y1d7fJ&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "少林功夫",
@@ -608,6 +740,40 @@ var FEIYI_DATA = [
     ]
   },
   {
+    id: "dongbeizhuang",
+    embed: "",
+    name: "东北庄杂技",
+    en: "Dongbeizhuang Acrobatics",
+    category: "体育",
+    catFull: "传统体育、游艺与杂技",
+    place: "濮阳 · 岳村镇东北庄",
+    region: "濮阳",
+    level: "国家级非遗 · 2008 第二批",
+    img: "assets/dongbeizhuang.jpg",
+    replica: true,
+    accent: "#BC7430",
+    tagline: "与河北吴桥并称「南北杂技两故里」，草帽、晃板、顶碗之间，是豫北乡野的硬功夫。",
+    points: [
+      "濮阳市岳村镇东北庄与河北吴桥并称「南北杂技两故里」，杂技传承可追溯至清代",
+      "清代乔家班等杂技班社辈出，东北庄素有「杂技之乡」的声誉",
+      "草帽、晃板、排椅、顶碗等节目融武术、气功于杂技，惊险与灵巧并重",
+      "2008 年以濮阳市申报列入第二批国家级非遗（序号 821，Ⅵ-49）"
+    ],
+    deep: [
+      "东北庄「乔家班」与南北杂技两故里的历史",
+      "晃板、顶碗、排椅：民间杂技的道具与力学",
+      "从撂地卖艺到舞台杂技：豫北乡村的活态传承"
+    ],
+    verify: [],
+    rel: { genre: "体育", city: "濮阳", kin: ["shaolin"] },
+    qa: [
+      { q: "东北庄杂技是什么", a: "东北庄杂技是河南濮阳岳村镇东北庄村的民间杂技，与河北吴桥并称「南北杂技两故里」，清代乔家班等班社闻名，以草帽、晃板、排椅、顶碗等节目见长，2008 年列入第二批国家级非遗。" },
+      { q: "东北庄和吴桥什么关系", a: "两地同属中国杂技重要发源地，民间有「南北杂技两故里」之称，吴桥在河北、东北庄在河南濮阳，都曾班社林立、名家辈出。" },
+      { q: "东北庄杂技有哪些绝活", a: "常见节目有晃板、顶碗、排椅、车技、草帽飞舞等，许多动作融合武术与气功功底，强调稳、准、险。" }
+    ],
+    note: "国家级非遗名录（东北庄杂技）：2008 年第二批新增（序号 821，Ⅵ-49，申报河南省濮阳市）。中国非物质文化遗产网 https://www.ihchina.cn/project_details/13859.html"
+  },
+  {
     id: "dahuatie",
     embed: "https://player.bilibili.com/player.html?bvid=BV1JPrLYDEXP&page=1&high_quality=1&danmaku=0&autoplay=1",
     name: "确山铁花",
@@ -662,7 +828,9 @@ var HENAN_CITIES = {
   "焦作":   { x: 49, y: 34 },
   "驻马店": { x: 56, y: 76 },
   "南阳":   { x: 40, y: 75 },
-  "濮阳":   { x: 70, y: 22 }
+  "濮阳":   { x: 70, y: 22 },
+  "信阳":   { x: 57, y: 88 },
+  "三门峡": { x: 27, y: 46 }
 };
 
 /* 知识图谱节点与连边：项目—门类、项目—地域、项目—项目（亲缘） */
@@ -671,22 +839,27 @@ var GRAPH_KIN = {
   "quju":   ["yuju"],
   "zhuizi": ["majie"],
   "majie":  ["zhuizi", "dahuatie"],
-  "junci":  ["ruci"],
-  "ruci":   ["junci"],
+  "junci":  ["ruci", "dangyangyu"],
+  "ruci":   ["junci", "dangyangyu"],
   "sancai": ["shuixi"],
   "shuixi": ["sancai"],
   "bianxiu":["zhuxian"],
   "zhuxian":["bianxiu"],
   "nigugu": ["ninigou"],
   "ninigou":["nigugu","taihao"],
-  "shaolin":["taiji"],
+  "shaolin":["taiji", "dongbeizhuang"],
   "taiji":  ["shaolin"],
   "dahuatie":["majie"],
   "yuediao":["dapindiao"],
   "dapindiao":["yuediao"],
   "dadiquzi":["heluodagu"],
   "heluodagu":["dadiquzi"],
-  "taihao":["ninigou"]
+  "taihao":["ninigou"],
+  "dangyangyu":["junci","ruci"],
+  "xinyangmaojian":[],
+  "lingbaojianzhi":["zhenpingyudiao"],
+  "zhenpingyudiao":["lingbaojianzhi"],
+  "dongbeizhuang":["shaolin"]
 };
 
 /* ============================================================
@@ -703,7 +876,7 @@ var KB_GLOBAL = [
   {
     q: "河南有多少项国家级非遗",
     keywords: ["多少", "几项", "数量", "国家级非遗", "河南"],
-    a: "河南省已公布的国家级非物质文化遗产代表性项目超过一百项（以文化和旅游部历批公布为准）。本展厅招牌深挖 20 项，覆盖戏曲、曲艺、技艺、美术、体育、民俗六大门类，更多项目正在陆续收录。"
+    a: "河南省已公布的国家级非物质文化遗产代表性项目超过一百项（以文化和旅游部历批公布为准）。本展厅招牌深挖 25 项，覆盖戏曲、曲艺、技艺、美术、体育、民俗六大门类，更多项目正在陆续收录。"
   },
   {
     q: "第一次来，推荐先看什么",
@@ -766,7 +939,12 @@ var ITEM_THEME = {
   dapindiao: { bg: "linear-gradient(160deg,#241210 0%,#5E3024 45%,#180C0A 100%)", mark: "梆", tint: "#D8A088" },
   dadiquzi:  { bg: "linear-gradient(160deg,#181A28 0%,#3E4260 45%,#10121C 100%)", mark: "曲", tint: "#B0B8D8" },
   heluodagu: { bg: "linear-gradient(160deg,#241A10 0%,#5E4022 45%,#181008 100%)", mark: "鼓", tint: "#E0BC8A" },
-  taihao:    { bg: "linear-gradient(160deg,#281808 0%,#7A4620 48%,#1C1004 100%)", mark: "羲", tint: "#F0C888" }
+  taihao:    { bg: "linear-gradient(160deg,#281808 0%,#7A4620 48%,#1C1004 100%)", mark: "羲", tint: "#F0C888" },
+  dangyangyu: { bg: "linear-gradient(160deg,#221D16 0%,#5E5240 45%,#141008 100%)", mark: "绞", tint: "#C4B49A" },
+  xinyangmaojian: { bg: "linear-gradient(160deg,#161F10 0%,#3E5528 45%,#0E1408 100%)", mark: "茶", tint: "#B0C888" },
+  lingbaojianzhi: { bg: "linear-gradient(160deg,#26100E 0%,#7A2A22 45%,#180808 100%)", mark: "剪", tint: "#E89088" },
+  zhenpingyudiao: { bg: "linear-gradient(160deg,#101E1A 0%,#345248 45%,#081210 100%)", mark: "玉", tint: "#98C0B0" },
+  dongbeizhuang: { bg: "linear-gradient(160deg,#241808 0%,#7A4E20 45%,#160E04 100%)", mark: "技", tint: "#E8B078" }
 };
 
 /* 沉浸演绎 · 本地权威视频清单（由 scan_videos.py 扫描 assets/video 自动生成；也可手工登记 "id":"路径"） */

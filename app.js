@@ -375,8 +375,18 @@
     '<text x="60" y="112" text-anchor="middle" font-family="&quot;Noto Serif SC&quot;,&quot;STSong&quot;,&quot;SimSun&quot;,serif" font-size="20" font-weight="900" fill="#F6ECD9">汇</text>' +
     '</svg>';
 
+  function ichStats() {
+    var cat = {}, city = {};
+    FEIYI_DATA.forEach(function (i) {
+      if (i.category) cat[i.category] = 1;
+      if (i.region) city[i.region] = 1;
+    });
+    return { item: FEIYI_DATA.length, cat: Object.keys(cat).length, city: Object.keys(city).length };
+  }
+
   function renderHome() {
     var el = $("#view-home");
+    var homeN = ichStats();
     el.innerHTML =
       '<div class="hero">' +
         '<div class="hero-bg-zone"><div class="hero-bg" role="img" aria-label="河南非遗水墨长卷"></div></div>' +
@@ -397,9 +407,9 @@
           '</div>' +
         '</div>' +
         '<div class="hero-metrics">' +
-          '<div class="m"><b>15<i>项</i></b><span>招牌深挖</span></div>' +
-          '<div class="m"><b>6<i>门类</i></b><span>全类覆盖</span></div>' +
-          '<div class="m"><b>9<i>地市</i></b><span>河南版图</span></div>' +
+          '<div class="m"><b>' + homeN.item + '<i>项</i></b><span>招牌深挖</span></div>' +
+          '<div class="m"><b>' + homeN.cat + '<i>门类</i></b><span>全类覆盖</span></div>' +
+          '<div class="m"><b>' + homeN.city + '<i>地市</i></b><span>河南版图</span></div>' +
           '<div class="m"><b>0<i>上传</i></b><span>纯本地运行</span></div>' +
         '</div>' +
         '<div class="hero-side">把非遗讲给你听 · HENAN ICH</div>' +
@@ -414,8 +424,8 @@
 
   /* ================= 使用说明浮层（M8.43 可点击跳详情） ================= */
   var HELP_ITEMS = [
-    ["01 · 首页", "下滑读「作者的话」，看十二件非遗轮播。", "home"],
-    ["02 · 展品总览", "十五件河南珍宝按门类筛选；点卡片右上「藏」章一键收藏。", "hall"],
+    ["01 · 首页", "下滑读「作者的话」，看" + ichStats().item + "件非遗轮播。", "home"],
+    ["02 · 展品总览", ichStats().item + "件河南珍宝按门类筛选；点卡片右上「藏」章一键收藏。", "hall"],
     ["03 · 舆图", "地市红点即非遗分布；悬停只亮单项，点击看城市介绍。", "map"],
     ["04 · 城市", "中原十八城、一城一脉；带「非遗」角标的城市藏有招牌项目。", "region"],
     ["05 · 知识图谱", "节点即非遗，连线即关联；拖拽平移、滚轮缩放，悬停高亮。", "graph"],
@@ -498,7 +508,7 @@
   var AUTHOR_PARAS = [
     "我在洛阳读书。这座城随手一抓就是历史——龙门的佛、唐三彩的釉、老城的水席；可我慢慢发现，身边的同学、远道来的朋友，大多只是路过拍张照，说不出这些东西究竟好在哪。非遗在资料里、在玻璃柜里、在长辈的记忆里，离我们这代人的手机屏幕，隔着一段不近的距离。",
     "我没有本事把它们一一「复活」，但我至少想做一个入口：让你被一张好看的画面留住，愿意点进去读三分钟，随口问一句、立刻有人答，还能看见它们在中原大地上怎样彼此牵连。这就是「非遗智汇」。",
-    "为什么是这十五项？我没贪多。豫剧、钧瓷、唐三彩、打铁花……这十五项覆盖戏曲、曲艺、技艺、美术、体育、民俗六个门类，是我想先讲深、讲透的河南底气；其余的我会一项项补，而不是堆一个看着热闹、点进去空泛的清单。",
+    "为什么是这二十五项？我没贪多。豫剧、钧瓷、唐三彩、打铁花……这二十五项覆盖戏曲、曲艺、技艺、美术、体育、民俗六个门类，是我想先讲深、讲透的河南底气；其余的我会一项项补，而不是堆一个看着热闹、点进去空泛的清单。",
     "也请允许我留一份诚实：凡我还没核实到确凿出处的内容，都标了「待核」，没有为了好看去硬编。这个应用纯本地运行、不上传任何数据——我希望它干净，就像我希望这些故事被讲得干净。",
     "如果它让你对某一项非遗，多了三分钟的兴趣，那我做这件事的意义，就已经满了。"
   ];
@@ -527,7 +537,7 @@
       '<div class="hc-wrap">' +
         '<div class="hc-head rv">' +
           '<div class="kicker">招 牌 速 览</div>' +
-          '<h2 class="hc-title">十五项河南非遗</h2>' +
+          '<h2 class="hc-title">' + ichStats().item + '项河南非遗</h2>' +
           '<p class="hc-sub">轻点一张，走进它的故事</p>' +
         '</div>' +
         '<div class="hc-viewport" id="hc-viewport">' +
@@ -689,8 +699,8 @@
           '<span class="hh-seal" aria-hidden="true"><b>珍</b><b>宝</b></span>' +
           '<div class="section-head">' +
             '<div class="kicker">01 · 展品总览</div>' +
-            '<h2 class="section-title">十五件河南珍宝</h2>' +
-            '<p class="section-sub">从一声梆子腔到一窑窑变的火，六大门类、十五项国家级非遗，每一件都值得停下来看三分钟。</p>' +
+            '<h2 class="section-title">' + ichStats().item + '件河南珍宝</h2>' +
+            '<p class="section-sub">从一声梆子腔到一窑窑变的火，' + ichStats().cat + '大门类、' + ichStats().item + '项国家级非遗，每一件都值得停下来看三分钟。</p>' +
           '</div>' +
         '</div>' +
         '<div class="filter-bar rv" style="--d:.1s" id="filter-bar">' +
@@ -1041,7 +1051,7 @@
         '<div class="section-head rv">' +
           '<div class="kicker">02 · 非遗地图</div>' +
           '<h2 class="section-title">河南版图上的文化坐标</h2>' +
-          '<p class="section-sub">十五项招牌非遗分布在中原大地的九个地市。悬停标点查看项目，点击进入详情。</p>' +
+          '<p class="section-sub">' + ichStats().item + '项招牌非遗分布在中原大地的' + ichStats().city + '个地市。悬停标点查看项目，点击进入详情。</p>' +
         '</div>' +
         '<div class="map-layout">' +
           '<div class="rv" style="--d:.1s">' +
@@ -1788,12 +1798,17 @@
     return t;
   }
   function matchAnswer(q) {
-    var query = resolveAsk(q);
+    var query = resolveAsk(q).replace(/^[？?\s]+|[？?\s]+$/g, "");
     var best = null, bestScore = 0;
     KB_ALL.forEach(function (k) {
       var score = 0;
       k.keywords.forEach(function (kw) {
-        if (query.indexOf(kw) >= 0) score += kw.length >= 4 ? 3 : 2;
+        if (query.indexOf(kw) >= 0) {
+          score += kw.length >= 4 ? 3 : 2;
+        } else if (query.length >= 2 && kw.indexOf(query) >= 0) {
+          // 反向子串匹配：输入短词（如“绞胎瓷/东北庄”）也能命中长名称与完整问句；单字不反向加分防误命中
+          score += query.length >= 3 ? 3 : 2;
+        }
       });
       if (score > bestScore) { bestScore = score; best = k; }
     });
@@ -2183,8 +2198,9 @@
     if (shareBtn) shareBtn.addEventListener("click", function () {
       var it = byId[createIdx] || byId[0];
       var st = CREATE_STYLES.filter(function (s) { return s.id === createStyle; })[0] || CREATE_STYLES[0];
+      var shareN = ichStats();
       copyText("我在「非遗智汇 · 河南非遗 智能数字展厅」用本地生成工坊合成了一张「" + it.name + "」" + st.label +
-        "文创海报——15 项河南招牌非遗、6 大门类、9 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
+        "文创海报——" + shareN.item + " 项河南招牌非遗、" + shareN.cat + " 大门类、" + shareN.city + " 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
         "（传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
     });
     var items = $("#create-items"), styles = $("#create-styles");

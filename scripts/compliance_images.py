@@ -29,6 +29,12 @@ IMAGES = {
     "shaolin":  "https://aka.doubaocdn.com/s/1EH9iEoXYo",
     "taiji":    "https://aka.doubaocdn.com/s/TNDkIfreGZ",
     "dahuatie": "https://aka.doubaocdn.com/s/V9jWnNrEWH",
+    # 第二批新增（2026-10 扩数据）：戏曲/曲艺/民俗，AI 工笔淡彩示意图
+    "yuediao": "https://aka.doubaocdn.com/s/7KhVdBjTpn",
+    "dapindiao": "https://aka.doubaocdn.com/s/hE10u0h92s",
+    "dadiquzi": "https://aka.doubaocdn.com/s/AO2p2Nmor0",
+    "heluodagu": "https://aka.doubaocdn.com/s/pS0Mp8D4LH",
+    "taihao": "https://aka.doubaocdn.com/s/ejkXuUqud7"
 }
 
 MAX_SIDE = 1600
@@ -53,7 +59,7 @@ def main():
         kb = os.path.getsize(out) // 1024
         total += kb
         print("  -> %s (%dKB, %dx%d)" % (out, kb, im.size[0], im.size[1]), flush=True)
-    print("[done] 15 images, total %d KB" % total, flush=True)
+    print("[done] %d images, total %d KB" % (len(IMAGES), total), flush=True)
 
 
 if __name__ == "__main__":

@@ -873,6 +873,8 @@
             '<div class="verify-box rv" style="--d:.44s"><h5>待核清单 · TO VERIFY</h5>' +
               it.verify.map(function (v) { return "<p>· " + esc(v) + "</p>"; }).join("") +
             '</div>' : "") +
+            (it.note ?
+            '<div class="item-section rv" style="--d:.44s"><h4>官方来源 · SOURCE</h4><p style="font-size:12px;line-height:1.8;opacity:.8;word-break:break-all">' + esc(it.note) + '</p></div>' : "") +
             '<div class="item-actions rv" style="--d:.5s">' +
               '<a class="act act-primary mag" href="#/ask">问·AI 讲解</a>' +
               '<button class="act act-line act-fav mag ' + (isFav(it.id) ? "on" : "") + '" id="btn-fav" type="button" aria-pressed="' + isFav(it.id) + '"><i class="heart">' + (isFav(it.id) ? "♥" : "♡") + '</i>' + (isFav(it.id) ? "已收藏" : "收藏") + '</button>' +

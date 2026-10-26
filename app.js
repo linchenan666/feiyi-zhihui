@@ -2127,26 +2127,40 @@
   function renderEvolution() {
     var el = $("#view-evolution");
     var cards = EVOLUTION.map(function (e) {
-      var pr = e.prompt
-        ? '<div class="evo-pr"><p>' + esc(e.prompt) + '</p><small>关键 Prompt</small></div>'
+      // 四步叙事：① 我要什么(brief) ② 我对AI说(prompt) ③ AI给的方案(ai) ④ 结果如何(fix+verify)
+      var step1 = '<div class="evo-step">' +
+        '<span class="evo-dot">1</span>' +
+        '<div class="evo-step-body"><span class="evo-step-label">我要什么</span>' +
+        '<p>' + esc(e.brief) + '</p></div></div>';
+      var step2 = e.prompt
+        ? '<div class="evo-step">' +
+          '<span class="evo-dot evo-dot-q">2</span>' +
+          '<div class="evo-step-body"><span class="evo-step-label">我对 AI 说</span>' +
+          '<div class="evo-quote"><p>' + esc(e.prompt) + '</p></div></div></div>'
         : "";
-      var ai = e.ai
-        ? '<div class="evo-ai"><p>' + esc(e.ai) + '</p><small>AI 协作要点</small></div>'
+      var step3 = e.ai
+        ? '<div class="evo-step">' +
+          '<span class="evo-dot evo-dot-a">3</span>' +
+          '<div class="evo-step-body"><span class="evo-step-label">AI 给的方案</span>' +
+          '<p>' + esc(e.ai) + '</p></div></div>'
         : "";
-      var fix = e.fix
-        ? '<div class="evo-fix"><p>' + esc(e.fix) + '</p><small>引导修复</small></div>'
-        : "";
-      var vfy = (e.verify || []).map(function (v) {
-        return '<span>' + esc(v) + '</span>';
+      var badges = (e.verify || []).map(function (v) {
+        return '<span class="evo-badge">' + esc(v) + '</span>';
       }).join("");
+      var step4 = (e.fix || badges)
+        ? '<div class="evo-step">' +
+          '<span class="evo-dot evo-dot-r">4</span>' +
+          '<div class="evo-step-body"><span class="evo-step-label">结果如何</span>' +
+          (e.fix ? '<p class="evo-fix-note"><em>后来修了：</em>' + esc(e.fix) + '</p>' : "") +
+          (badges ? '<div class="evo-badges">' + badges + '</div>' : "") +
+          '</div></div>'
+        : "";
       return '<div class="evo-row rv" style="--d:' + (0.04 * (+e.n % 6)) + 's">' +
         '<div class="evo-no">' + e.n + '</div>' +
         '<div class="evo-node" aria-hidden="true"></div>' +
         '<div class="evo-card">' +
           '<div class="evo-head"><h3>' + esc(e.t) + '</h3><span class="evo-tag">迭代 ' + e.n + '</span></div>' +
-          '<p class="evo-brief">' + esc(e.brief) + '</p>' +
-          pr + ai + fix +
-          (vfy ? '<div class="evo-vfy">' + vfy + '</div>' : "") +
+          step1 + step2 + step3 + step4 +
         '</div>' +
       '</div>';
     }).join("");
@@ -2155,16 +2169,27 @@
         '<div class="evo-hero rv">' +
           '<div class="kicker">09 · 演进馆</div>' +
           '<h2>从一句 <em>Prompt</em><br>到一方展厅</h2>' +
-          '<p class="evo-sub">Vibe Coding 全链路可复现：每一次功能迭代的提问、AI 建议、引导修复与验证方式，与仓库 Git 提交日志、AI 对话快照一一对应。评委可一键复现。</p>' +
+          '<p class="evo-sub">每一轮都是「我要什么 → 我怎么说 → AI 做了什么 → 结果如何」四步链路，与仓库 Git 提交、对话快照一一对应。评委可一键复现。</p>' +
         '</div>' +
         '<div class="evo-stats rv" style="--d:.08s">' +
           '<div class="evo-stat"><b>12</b><span>核心迭代</span></div>' +
-          '<div class="evo-stat"><b>12</b><span>Prompt 链</span></div>' +
+          '<div class="evo-stat"><b>100+</b><span>Git 提交</span></div>' +
           '<div class="evo-stat"><b>8+</b><span>Bug 引导修复</span></div>' +
           '<div class="evo-stat"><b>0</b><span>线上依赖</span></div>' +
         '</div>' +
-        '<p class="evo-note">完整材料见仓库 <code>README.md</code>：Git 提交历史 · Prompt 快照 · 10 分钟极速复现指南 · 环境清单</p>' +
+        '<p class="evo-note">完整材料见仓库 <code>README.md</code> 与 <code>docs/Prompt历史.md</code>：Git 提交历史 · Prompt 快照 · 10 分钟极速复现指南 · 环境清单</p>' +
         '<div class="evo-timeline">' + cards +
+          '<div class="evo-row"><div class="evo-no"></div><div class="evo-node" aria-hidden="true"></div>' +
+            '<div class="evo-guide"><h3>评委如何一键复现这条演进</h3>' +
+              '<ol>' +
+                '<li><code>git log --oneline</code> 看 100 次细粒度提交，时间跨度 2026-09-09 → 2026-10-26；</li>' +
+                '<li><code>docs/Prompt历史.md</code> 看每条 Prompt 的原始提问、AI 方案、修复原话；</li>' +
+                '<li><code>python scripts/bundle_single.py</code> 一键重建单文件产物；</li>' +
+                '<li>断网双击 <code>dist/</code> HTML，功能完整可演示。</li>' +
+              '</ol>' +
+              '<p class="evo-guide-end">不是一次性堆出来的——每一轮都有提交、有对话、有验证。</p>' +
+            '</div>' +
+          '</div>' +
           '<div class="evo-row"><div class="evo-no"></div><div class="evo-node" aria-hidden="true"></div>' +
             '<div class="evo-end"><h3>交付即验收</h3><p>三重思维检查：技术可行性（断网渲染 / 帧率）/ 交互与内容深度（看全·看细·拆得开·讲得清·讲得出怎么做）/ 工程质量与交付合规（真离线 · 可复现 · 合规授权）。</p></div>' +
           '</div>' +

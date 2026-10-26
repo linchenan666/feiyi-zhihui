@@ -4,343 +4,294 @@
 <meta charset="UTF-8">
 <title>非遗智汇 · 技术文档</title>
 <style>
-  :root{
-    --paper:#FBF7EE; --ink:#211D18; --ink-2:#4A443B; --ink-3:#8A8272;
-    --cinnabar:#B03A2E; --gold:#A67C2E; --line:#D8CEB8;
+  @page { size: A4; margin: 22mm 20mm 20mm 20mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
+    font-size: 10.5pt; line-height: 1.75; color: #1a1a1a;
+    max-width: 180mm; margin: 0 auto; padding: 10mm 0;
   }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
-    color:var(--ink);line-height:1.85;font-size:14px;
-    background:var(--paper);
-  }
-  .page{max-width:800px;margin:0 auto;padding:56px 64px}
-  h1,h2,h3,h4{font-family:"Noto Serif SC","Songti SC","SimSun",serif;color:var(--ink)}
-  h1{font-size:30px;letter-spacing:.06em;line-height:1.4}
-  h2{
-    font-size:21px;letter-spacing:.08em;margin:44px 0 18px;
-    padding-bottom:10px;border-bottom:2px solid var(--cinnabar);
-  }
-  h3{font-size:16.5px;letter-spacing:.04em;margin:26px 0 12px}
-  h4{font-size:14.5px;margin:18px 0 8px}
-  p{margin:10px 0;color:var(--ink-2)}
-  ul,ol{margin:10px 0 10px 2px;padding-left:22px;color:var(--ink-2)}
-  li{margin:6px 0}
-  strong{color:var(--ink)}
-  code{
-    font-family:Consolas,monospace;font-size:12.5px;background:#F0EADA;
-    padding:1px 6px;border-radius:3px;color:var(--cinnabar-2,#8E2B22);
-  }
-  pre{
-    background:#211D18;color:#EDE3CE;padding:16px 20px;border-radius:4px;
-    font-size:12.5px;line-height:1.7;overflow-x:auto;margin:12px 0;
-    font-family:Consolas,monospace;
-  }
-  pre code{background:none;color:inherit;padding:0}
-  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
-  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
-  th{background:#F0EADA;font-weight:600;color:var(--ink);letter-spacing:.04em}
-  td{color:var(--ink-2)}
-  .cover{text-align:center;padding:120px 40px 80px;page-break-after:always}
-  .cover .seal{
-    display:inline-grid;place-items:center;width:72px;height:72px;
-    background:var(--cinnabar);color:#FBF7EE;font-size:36px;font-weight:900;
-    font-family:"Noto Serif SC",serif;transform:rotate(-4deg);margin-bottom:36px;
-    border-radius:4px;
-  }
-  .cover h1{font-size:38px;letter-spacing:.1em}
-  .cover .sub{font-size:16px;color:var(--ink-3);letter-spacing:.4em;margin-top:14px}
-  .cover .meta{margin-top:64px;font-size:13px;color:var(--ink-2);line-height:2.2;letter-spacing:.1em}
-  .cover .line{width:60px;height:2px;background:var(--gold);margin:28px auto}
-  .toc{page-break-after:always}
-  .toc h2{border-bottom-color:var(--gold)}
-  .toc ol{list-style:none;padding:0}
-  .toc li{padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;color:var(--ink-2)}
-  .toc li b{color:var(--ink);font-weight:600;margin-right:10px;font-family:"Noto Serif SC",serif}
-  .num{font-family:"Noto Serif SC",serif;color:var(--cinnabar);font-weight:700;margin-right:8px}
-  .box{
-    background:#F7F1E2;border-left:3px solid var(--gold);padding:14px 18px;
-    margin:14px 0;font-size:13.5px;color:var(--ink-2);border-radius:0 4px 4px 0;
-  }
-  .box b{color:var(--gold)}
-  .pagebreak{page-break-before:always}
-  .foot{text-align:center;color:var(--ink-3);font-size:12px;margin-top:48px;letter-spacing:.14em}
-  @media print{
-    body{background:#fff}
-    .page{padding:0 8mm;max-width:none}
-    h2{page-break-after:avoid}
-    pre,table,.box{page-break-inside:avoid}
-  }
+  h1 { font-size: 22pt; font-weight: 700; text-align: center; margin: 0 0 4mm; letter-spacing: 2px; }
+  h2 { font-size: 16pt; font-weight: 700; margin: 10mm 0 4mm; padding-bottom: 2mm; border-bottom: 2px solid #8b0000; color: #8b0000; }
+  h3 { font-size: 12.5pt; font-weight: 700; margin: 6mm 0 2mm; color: #2c2c2c; }
+  h4 { font-size: 11pt; font-weight: 700; margin: 4mm 0 1mm; color: #444; }
+  p { margin: 2mm 0; text-align: justify; }
+  ul, ol { margin: 2mm 0 2mm 6mm; padding: 0; }
+  li { margin: 1mm 0; }
+  code { font-family: "JetBrains Mono", "Consolas", monospace; font-size: 9pt; background: #f4f1ea; padding: 0.5mm 1.5mm; border-radius: 1mm; }
+  pre { background: #f4f1ea; border: 1px solid #d8d0c0; border-radius: 1.5mm; padding: 3mm 4mm; font-family: "JetBrains Mono", "Consolas", monospace; font-size: 8.5pt; line-height: 1.6; overflow-x: auto; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #bbb; padding: 1.5mm 2.5mm; text-align: left; vertical-align: top; }
+  th { background: #8b0000; color: #fff; font-weight: 600; }
+  tr:nth-child(even) { background: #faf8f3; }
+  .meta { text-align: center; color: #666; font-size: 10pt; margin-bottom: 8mm; }
+  .cover { text-align: center; padding-top: 30mm; page-break-after: always; }
+  .cover .sub { font-size: 13pt; color: #555; margin-top: 6mm; }
+  .cover .info { margin-top: 20mm; font-size: 10pt; color: #666; line-height: 2; }
+  .chapter { page-break-before: always; }
+  .note { background: #fdf6ec; border-left: 3px solid #d4a017; padding: 2mm 3mm; margin: 3mm 0; font-size: 9.5pt; }
+  .fact { background: #f0f5f0; border-left: 3px solid #2e7d32; padding: 2mm 3mm; margin: 3mm 0; font-size: 9.5pt; }
+  .small { font-size: 9pt; color: #666; }
 </style>
 </head>
 <body>
 
-<!-- ============ 封面 ============ -->
-<div class="page cover">
-  <div class="seal">汇</div>
-  <h1>非遗智汇</h1>
-  <div class="sub">河南非遗 AI 数字展厅</div>
-  <div class="line"></div>
-  <div class="meta">
-    <strong>全国高校 Vibe Coding 开发挑战赛 · 技术文档</strong><br>
-    组别：B 组（非 985/211 本科）· 个人赛<br>
-    选题方向 #5 · AI 驱动的高交互教育与可视化<br>
-    2026
+<!-- 封面 -->
+<div class="cover">
+  <h1>非遗智汇 · 河南非遗智能数字展厅</h1>
+  <div class="sub">技术文档</div>
+  <div class="sub">意图控制 · 架构设计 · 可复现性论证</div>
+  <div class="info">
+    全国高校 Vibe Coding 开发挑战赛 · B 组<br>
+    选题方向 #5「AI 驱动的高交互教育与可视化」<br>
+    作者：李宇航 &nbsp;|&nbsp; 仓库：github.com/linchenan666/feiyi-zhihui<br>
+    数据截至：2026-10-26
   </div>
 </div>
 
-<!-- ============ 目录 ============ -->
-<div class="page toc">
-  <h2>目录</h2>
-  <ol>
-    <li><b>01</b>项目概述：定位 · 痛点 · 产品闭环</li>
-    <li><b>02</b>意图控制策略：上下文 / 红线 / Bug 三件套 / 验收驱动</li>
-    <li><b>03</b>架构设计：AI 生成代码如何被约束（含全视口背景层架构）</li>
-    <li><b>04</b>工程质量：安全 · 性能 · 无障碍</li>
-    <li><b>05</b>可复现性论证：演进链路与验证体系</li>
-    <li><b>06</b>附录：环境 · 依赖 · 目录结构</li>
-  </ol>
+<!-- 摘要 -->
+<h2>摘要</h2>
+<p>本文档说明《非遗智汇》在 Vibe Coding 模式下的工程实践：人如何通过 Prompt 约束 AI 产出可维护的代码，架构上如何做到模块化源码与单文件编译双轨、离线优先与双层 AI 并存，以及如何用细粒度 Git 历史、构建脚本与演进记录证明作品不是一次性堆砌。</p>
+<p>截至 2026-10-26，仓库共 <b>100 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-26 约 7 周；收录 <b>25 项河南国家级非遗</b>、<b>56 张入库图片</b>、<b>10 段讲解音频</b>；构建脚本一键产出 <b>39.01 MB</b> 单文件 HTML，断网功能完整。</p>
+
+<!-- ============ 第一章 ============ -->
+<div class="chapter">
+<h2>第一章　意图控制策略</h2>
+<p class="small">——人如何驾驭 AI 写代码，而不是被 AI 带着跑</p>
+
+<h3>1.1　上下文先于提问</h3>
+<p>每次向 AI 提问前，先在对话开头给三件事：项目是什么、数据在哪里、硬约束是什么。AI 不靠猜，上下文给足了，输出才不会跑偏。</p>
+<p>具体做法：</p>
+<ul>
+  <li><b>项目定位</b>：一句话说清"纯本地、零后端、单文件、断网可跑"，AI 就不会引入 CDN 依赖。</li>
+  <li><b>数据位置</b>：告诉 AI 数据在 <code>data.js</code> 的 <code>FEIYI_DATA</code> 数组里，新增项沿用现有字段结构（name/category/place/region/level/points/deep/qa），AI 就不会自创字段。</li>
+  <li><b>硬约束</b>：设计系统是宣纸/墨/朱砂/金 60/30/10 配色，字体是子集化内嵌 woff2，hash 路由多视图——这些写进 Prompt，AI 按约束产出，不自由发挥。</li>
+</ul>
+<div class="note">
+  <b>反例</b>：早期某轮 Prompt 只说"首页要好看"，AI 产出了全站 fade-in-up 动效 + 外部字体 CDN，观感廉价且断网降级。修复方式是下一轮明确"动效只在首页一处入场编排，内容区按需揭示，字体全部内嵌"。
 </div>
 
-<!-- ============ 01 项目概述 ============ -->
-<div class="page">
-  <h2>01 · 项目概述</h2>
+<h3>1.2　用 Prompt 锁死架构与代码风格</h3>
+<p>把架构决策写成 Prompt 约束，让 AI 在每一轮都遵守，而不是每次重新解释。</p>
+<table>
+  <tr><th>约束项</th><th>Prompt 写法</th><th>效果</th></tr>
+  <tr><td>数据与视图分离</td><td>"数据层只写数据，不操作 DOM；视图层只渲染，不写业务逻辑"</td><td>data.js 纯数据，app.js 纯逻辑，边界清晰</td></tr>
+  <tr><td>零 CDN</td><td>"不允许引入任何外部 script/link 标签，所有依赖本地 vendor/"</td><td>three.js、OrbitControls、Lenis 全部本地化</td></tr>
+  <tr><td>哈希路由</td><td>"用 hash 路由，#/home、#/list、#/detail 等视图切换"</td><td>10 视图无刷新切换，无框架</td></tr>
+  <tr><td>XSS 防护</td><td>"所有用户输入和数据渲染前过 esc() 函数"</td><td>收藏文案、分享文案均转义</td></tr>
+  <tr><td>样式规范</td><td>"CSS 变量统一在 :root，主色 #8b0000 朱砂、辅色 #2c2c2c 墨、点缀 #d4a017 金"</td><td>全项目配色一致，无随机色值</td></tr>
+</table>
+<p>这些约束不是一次写在某个文档里，而是每轮 Prompt 都带一句"保持现有架构和配色，不要引入新依赖"。AI 每次在同一份代码上下文里工作，约束持续生效。</p>
 
-  <h3>1.1 定位</h3>
-  <p>非遗智汇是一个<strong>「能看、能问、能关联、能生成、能沉浸」的河南非遗 AI 数字展厅</strong>——单页应用（SPA），纯本地运行、零上传、零后端。面向大众（学生/年轻人为主，兼顾长辈与游客），把散落在名录、地方志与短视频中的非遗知识，整合为一个"被美打动 → 选中读进去 → 与 AI 对话深挖 → 收藏 → 生成文创分享"的完整产品闭环。</p>
+<h3>1.3　拆需求喂 AI：一轮一功能</h3>
+<p>从 evolution-data.js 记录的早期 12 轮迭代看，每轮只做一个模块，不一次性塞全部需求。模块边界清晰，AI 才能聚焦产出可用代码。</p>
+<table>
+  <tr><th>轮次</th><th>模块</th><th>Prompt 核心指令</th></tr>
+  <tr><td>01</td><td>需求解构与骨架</td><td>"按赛道要求，把网页改进成终版，必须全程离线可运行"</td></tr>
+  <tr><td>02</td><td>首页视觉</td><td>"首页动态文化背景、水墨纸纹质感、可交互导航"</td></tr>
+  <tr><td>03</td><td>展品总览</td><td>"每件展品一个专属世界：豫剧=朱砂戏台、钧瓷=窑火金褐"</td></tr>
+  <tr><td>04</td><td>非遗地图</td><td>"把地图换成逼真河南地图，加可放大按键，悬停聚焦"</td></tr>
+  <tr><td>05</td><td>城市介绍</td><td>"大背景换成城市标志性建筑动态轮播，卡片小字白、大标题黄"</td></tr>
+  <tr><td>06</td><td>知识图谱</td><td>"图谱放大时直接在图谱框中央放大，加滚轮缩放"</td></tr>
+  <tr><td>07</td><td>问·AI 双层</td><td>"AI 回答流式逐字显现、思考过程可视化；离线无网也能回答"</td></tr>
+  <tr><td>08</td><td>文创生成</td><td>"九宫格智能文创生成，生成结果可收藏，加复制分享文案"</td></tr>
+  <tr><td>09</td><td>沉浸演绎</td><td>"把沉浸演绎里的播放图片换成权威视频，离线降级静态海报"</td></tr>
+  <tr><td>10</td><td>3D 珍品馆</td><td>"3D 建模太粗糙，要按实物一比一完全复刻、里面也是实心的"</td></tr>
+  <tr><td>11</td><td>性能优化</td><td>"页面滚轮很卡，加鼠标动态粒子，不要环绕改色"</td></tr>
+  <tr><td>12</td><td>合规交付</td><td>"严格按参赛要求，三重思维检查：技术可行性、内容深度、工程合规"</td></tr>
+</table>
+<p>这 12 轮是早期核心功能的迭代记录。全项目从 2026-09-09 至 2026-10-26 共 100 次提交，后续还包括数据扩充（15 项→25 项）、图片版权合规、字体子集化、three.js 本地化、性能修复等多轮打磨。</p>
 
-  <h3>1.2 痛点与价值</h3>
-  <table>
-    <tr><th>真实痛点</th><th>本项目解法</th></tr>
-    <tr><td>非遗知识散、难查、看不懂</td><td>15 项招牌非遗 × 4 维结构化内容（要点/深挖/待核清单/问答），覆盖 6 大门类、9 地市</td></tr>
-    <tr><td>缺少"能问"的入口</td><td>内置知识库离线问答（双层架构），随问随答、演示永不断线；支持多轮指代追问（「它 / 这个 / 那」自动回指上一主题）</td></tr>
-    <tr><td>缺少"能玩、能关联"的入口</td><td>非遗地图（地域坐标）+ 知识图谱（项目↔门类↔地域亲缘）</td></tr>
-    <tr><td>缺少"能带走"的传播物</td><td>AI 文创工坊本地合成 4 风格海报，一键下载分享</td></tr>
-    <tr><td>隐私顾虑</td><td>纯本地、零上传、无第三方脚本，收藏与主题偏好仅存于本地浏览器</td></tr>
-  </table>
-
-  <h3>1.3 内容范围</h3>
-  <p>招牌 15 项深挖：豫剧、曲剧、河南坠子、马街书会、钧瓷、汝瓷、唐三彩、洛阳水席、汴绣、朱仙镇年画、浚县泥咕咕、淮阳泥泥狗、少林功夫、陈氏太极拳、打铁花。每项均基于国家级非遗名录与公开资料核对，不确定条目全部显式标注在"待核清单"中——<strong>数据诚实，不编造</strong>。</p>
+<h3>1.4　引导修复与验证闭环</h3>
+<p>AI 产出后人工审查、指出问题、让 AI 修复、再验证。每轮记录"Prompt → AI 建议 → 引导修复 → 验证"四步，形成可追溯的演进证据链。</p>
+<p>典型修复案例：</p>
+<ul>
+  <li><b>动效泛滥</b>：AI 首轮全站 fade-in-up，人工审查认为观感廉价，收敛为首页一处入场编排 + 内容区按需揭示。</li>
+  <li><b>收藏按钮不可见</b>：AI 在深色背景上用灰色图标，人工审查发现点击后图标消失，改为常显朱砂色实底 + 状态切换保留图标。</li>
+  <li><b>打字机定时器泄漏</b>：AI 实现流式打字机但未在视图切换时停掉定时器，人工审查发现跨视图残留，统一在视图切换时停掉隐藏视图常驻定时器。</li>
+  <li><b>窄屏图谱不可读</b>：AI 为适配移动端把 1000px 图谱压成 390px 导致节点字被压缩，人工审查回退并固化"窄屏最小 1000px + 横滑"规则。</li>
+  <li><b>3D 模型粗糙</b>：AI 程序化几何再精也缺真实质感，人工审查后加入实物影像模态，一键切换真实文物影像与 3D 模型对照。</li>
+</ul>
+<p>验证方式不依赖"感觉"：断网实测、双端截图、console 零报错、滚轮帧率观察、node --check 语法校验。每轮 verify 字段记录在 evolution-data.js 中，评委可对照复核。</p>
 </div>
 
-<!-- ============ 02 意图控制策略 ============ -->
-<div class="page pagebreak">
-  <h2>02 · 意图控制策略</h2>
-  <p>本项目的核心命题：<strong>代码由 AI 生成，人类负责定义问题、约束行为、验证结果。</strong>以下为贯穿全程的六条 Prompt 工程原则，每条均附真实案例。</p>
+<!-- ============ 第二章 ============ -->
+<div class="chapter">
+<h2>第二章　架构设计</h2>
+<p class="small">——双轨产物、离线优先、双层 AI</p>
 
-  <h3>2.1 原则一：上下文先于提问</h3>
-  <p>每次向 AI 提问前，先声明三件事：<strong>项目是什么、数据在哪里、硬约束是什么</strong>。AI 不靠猜。</p>
-  <pre><code>我要参加传智杯「AI 创新应用挑战赛」（Vibe Coding 方向，B 组个人赛），
-做一个河南非遗 AI 数字展厅网页。要求：
-1. 数据与视图分离：data.js 存数据，app.js 管渲染，本地双击即可运行；
-2. 新中式设计体系：宣纸·墨·朱砂·金（60/30/10），衬线标题+无衬线正文；
-3. 视觉素材用统一水墨风格的生成图，15 项招牌非遗每项一张；
-4. 纯本地、零上传、无第三方脚本（CDN 除外），隐私是卖点。
-请先给设计计划，再分模块实现。</code></pre>
-  <p>效果：AI 一次性给出与题材匹配的设计 token 体系与数据模型，而非通用模板。</p>
+<h3>2.1　模块化源码 vs 单文件编译双轨</h3>
+<p>开发态是 14 个 JS 文件 + HTML 结构，便于阅读调试；交付态是 <code>bundle_single.py</code> 内联成一个单文件 HTML，双击即运行。源码与产物分离，评委 clone 后跑一条命令得到可演示产物。</p>
 
-  <h3>2.2 原则二：把红线写进 Prompt（防 AI slop）</h3>
-  <p>对审美与工程风险，用祈使句显式声明，杜绝"生成味"与性能隐患：</p>
-  <pre><code>注意：不要用毛玻璃、glow 边框、粒子网背景、data-aos 全站铺淡入、
-渐变按钮这些 AI 生成味很重的套路。动效克制：每个区块一次编排过的入场，
-不要每张卡片都来一套 hover 动画。</code></pre>
-  <p>同样的方式约束性能：<code>pointermove 监听必须 rAF 节流</code>、<code>will-change 只在 hover 时开</code>、<code>隐藏视图定时器必须清理</code>——把工程红线前置，比事后修复成本低一个数量级。</p>
+<h4>开发态（模块化源码）</h4>
+<pre>index.html          # 结构 + 设计系统 + 质感动效层
+app.js              # 应用/交互层：10 视图渲染、路由、问答逻辑
+data.js             # 核心数据层：25 项非遗 + 离线知识库 + 图谱连边
+map-data.js         # 河南 SVG 轮廓 + 地市坐标
+regions-data.js     # 十八城介绍 + 地标
+treasury-data.js    # 藏库文字层：15 件藏品
+treasury-real.js    # 藏库影像层：实物图 base64
+treasury-audio.js   # 藏库讲解音频：10 段 WAV base64
+treasury-process.js # 工艺流程：5 件分步工序
+treasury.js         # 藏库视图层：展柜、讲解播放器
+three-showcase.js   # WebGL 3D：汝瓷碗 + 榫卯拆解
+evolution-data.js   # 演进记录：12 轮迭代
+help-data.js        # 图文使用说明
+vendor/             # three.js r186 + OrbitControls + Lenis（本地化）</pre>
 
-  <h3>2.3 原则三：Bug 报告三件套</h3>
-  <p>发现缺陷时，报告结构固定为<strong>现象 → 已排查的原因 → 期望行为</strong>。AI 一次定位，不瞎改、不扩散改动范围。真实案例（问答引擎 0 命中）：</p>
-  <pre><code>知识库问答有 bug：问"豫剧"和"钧瓷有什么特点"都命中不了。
-排查：KB_ITEMS 的关键词数组是 [itemName].concat(question.split(" "))
-拼出的整句关键词，没有分词，单项目名或短问题匹配不上。
-请改成关键词数组 = [项目名] 与问题分词结果的并集，再验证
-"豫剧""钧瓷有什么特点""第一次来先看什么"三类问题。</code></pre>
+<h4>交付态（单文件编译）</h4>
+<p>一条命令产出：</p>
+<pre>py -3 scripts/bundle_single.py
+# 输出：dist/非遗智汇·多彩面板版.html（39.01 MB）</pre>
+<p>产物将全部 JS、字体 CSS、图片 base64、音频 base64 内联到一个 HTML 文件中，双击用浏览器打开即可运行，无需任何本地服务器、无网络请求。</p>
+<p>双轨设计的好处：开发时可以按模块阅读、调试、修改；交付时一条命令编译成评委可直接打开的单文件。源码改动后重新运行脚本即可保持产物与源码同步。</p>
 
-  <h3>2.4 原则四：验证闭环</h3>
-  <p>每个功能模块落地后，用三条验证链回归，发现问题立即补 Prompt 修复链：</p>
-  <ul>
-    <li><strong>语法层</strong>：<code>node --check</code> 全量 JS 语法</li>
-    <li><strong>渲染层</strong>：Edge 无头浏览器逐视图截图 + DOM 断言</li>
-    <li><strong>自检层</strong>：官方 shot.py 自检（consoleErrors / 横向溢出 / 响应式）</li>
-  </ul>
+<h3>2.2　数据/视图严格解耦</h3>
+<p>数据层纯数据，视图层纯逻辑，结构与样式分离。数据扩展时视图自动适配，不需要逐处改硬编码。</p>
 
-  <h3>2.5 原则五：验收驱动扩散（克制与收敛）</h3>
-  <p>视觉类改动每处独立提交 + 用户验收，<strong>验收通过才扩散到其他页面，未通过即 revert 并保留提交记录</strong>。M8 系列真实记录：展品卡片文化图（revert）、其余页面标题区动态背景（revert）、导航置顶（revert）——评委看到的不是一帆风顺，而是"尝试 → 验收 → 收敛"的完整决策证据，这比"一次做对"更可信。</p>
+<h4>分层结构</h4>
+<table>
+  <tr><th>层</th><th>文件</th><th>职责</th><th>不做什么</th></tr>
+  <tr><td>数据层</td><td>data.js / map-data.js / regions-data.js / treasury-*.js</td><td>25 项非遗字段、地市坐标、藏库文字/影像/音频、工艺流程</td><td>不操作 DOM、不写事件监听</td></tr>
+  <tr><td>视图层</td><td>app.js / treasury.js / three-showcase.js</td><td>10 视图渲染、路由、问答匹配、图谱/地图/海报逻辑、WebGL 场景</td><td>不写业务数据、不硬编码字段</td></tr>
+  <tr><td>结构层</td><td>index.html</td><td>HTML 结构 + CSS 变量 + 动效层</td><td>不写业务逻辑</td></tr>
+</table>
 
-  <h3>2.6 原则六：把评审标准翻译成产品细节</h3>
-  <p>评审点名的交互体验，主动前置到需求里：</p>
-  <pre><code>评审标准里有一条"AI 响应状态提示友好（如流式、思考可视化）"。
-问·AI 目前只有流式打字。请加"思考中"状态：发送后先出现三个呼吸点的
-思考气泡（约 0.5s），再切换为流式作答；reduced-motion 用户直接出结果。</code></pre>
-  <p>产出：思考状态气泡 + 流式打字 + 无障碍兜底，形成完整的"响应状态语言"。</p>
+<h4>数据扩展实例</h4>
+<p>项目从 15 项非遗扩充到 25 项时，只需要在 <code>data.js</code> 的 <code>FEIYI_DATA</code> 数组里追加新条目，视图层的统计函数 <code>ichStats()</code> 自动计算"25 项 / 6 门类 / 13 地市"，首页数据条、图谱节点、地图标点、收藏计数全部自动更新，无需逐处修改。</p>
+<p>新增 5 项非遗时，同步在 <code>HENAN_CITIES</code> 补城市坐标、在 <code>GRAPH_KIN</code> 补连边、在 <code>ITEM_THEME</code> 补主题色——这些都是数据层工作，视图层零改动。</p>
+
+<h3>2.3　离线优先：零网络依赖</h3>
+<p>项目的核心硬约束是"断网可跑"。所有外部依赖在构建阶段内联，运行时不向任何第三方域名发请求。</p>
+
+<h4>字体子集化</h4>
+<p>原始 Noto Serif SC / Noto Sans SC 全套字体约 16MB，用 fonttools/pyftsubset 按页面实际用到的汉字与符号子集化，输出 woff2 并 base64 内嵌，最终字体 CSS 约 1,475 KB。加 <code>font-display: swap</code> 和系统字体回退栈（<code>SimSun</code>、<code>Microsoft YaHei</code>），避免白屏。</p>
+
+<h4>第三方库本地化</h4>
+<table>
+  <tr><th>库</th><th>版本</th><th>本地路径</th><th>用途</th></tr>
+  <tr><td>three.js</td><td>r186</td><td>vendor/three.min.js</td><td>WebGL 3D 展柜（汝瓷碗 + 榫卯拆解）</td></tr>
+  <tr><td>OrbitControls</td><td>r186 同版</td><td>vendor/OrbitControls.min.js</td><td>轨道旋转/缩放/平移</td></tr>
+  <tr><td>Lenis</td><td>1.1.18</td><td>vendor/lenis.min.js</td><td>平滑滚动（可选，失败降级原生滚动）</td></tr>
+</table>
+
+<h4>图片与音频内联</h4>
+<p>56 张入库图片全部转 base64 data URI 内联到 HTML，10 段讲解 WAV 音频（约 17MB）base64 内联到 treasury-audio.js。运行时零外部请求，断网功能完整。</p>
+
+<h4>断网验证方法</h4>
+<ol>
+  <li>打开 dist/ 单文件 HTML；</li>
+  <li>DevTools → Network → 勾选 "Offline"；</li>
+  <li>刷新页面，应看到：首页水墨长卷、25 项展品卡片、地图标点、知识图谱、问答可答、3D 场景可渲染、音频可播放；</li>
+  <li>console 应零报错（Lenis 如不可用会静默降级，不影响功能）。</li>
+</ol>
+
+<h3>2.4　双层 AI：离线知识库 ⇄ 预留大模型接口</h3>
+<p>问·AI 模块采用双层架构：默认离线知识库作答，预留大模型接口填 key 即升级。诚实声明，不把关键词匹配冒充大模型。</p>
+
+<h4>离线层（默认，永不掉线）</h4>
+<p><code>data.js</code> 中 <code>KB_ALL</code> 内置 25 项非遗的问答对，采用关键词打分匹配 + 多轮指代追问。用户问"它的产地在哪"，系统自动回指上一主题。纯本地作答，断网演示不断线。</p>
+
+<h4>在线层（可选，填 key 即用）</h4>
+<p><code>app.js</code> 顶部 <code>REMOTE_API</code> 预留兼容 OpenAI Chat Completions 协议的接口：</p>
+<pre>var REMOTE_API = {
+  enabled: false,   // 开关：true 才走远程大模型
+  url: "",          // 接口地址
+  key: "",          // API Key
+  model: ""         // 模型 / 推理接入点 ID
+};</pre>
+<p>三字段填齐后改为 <code>enabled: true</code>，回答即切换为大模型生成。不填时界面不出现"离线 ⇄ 在线"切换按钮，纯本地作答。</p>
+<div class="note">
+  <b>诚实声明</b>：默认离线回答由内置知识库检索匹配产出，并非大模型生成；填 key 后才接入真·大模型。README 与界面均明确标注"离线知识库"，不夸大 AI 能力。
+</div>
 </div>
 
-<!-- ============ 03 架构设计 ============ -->
-<div class="page pagebreak">
-  <h2>03 · 架构设计</h2>
-  <p>AI 生成代码最怕"一次性屎山"。本项目通过三层约束保证架构质量：<strong>文件职责强制分离、hash 路由驱动视图、动效引擎统一收口</strong>。</p>
+<!-- ============ 第三章 ============ -->
+<div class="chapter">
+<h2>第三章　可复现性论证</h2>
+<p class="small">——为什么不是一次性屎山，如何一键复现、非伪造</p>
 
-  <h3>3.1 整体架构</h3>
-  <table>
-    <tr><th>层</th><th>文件</th><th>职责</th><th>约束方式</th></tr>
-    <tr><td>结构/样式</td><td>index.html</td><td>页面骨架、设计系统（CSS 变量）、动效质感层</td><td>设计 token 集中定义，主题切换只改变量</td></tr>
-    <tr><td>数据层</td><td>data.js</td><td>15 项非遗 × 4 维、知识库、图谱连边、地市坐标</td><td>纯数据、零逻辑，评委可逐条核对</td></tr>
-    <tr><td>交互层</td><td>app.js</td><td>10 视图渲染、hash 路由、问答匹配、动效引擎、持久化</td><td>IIFE 单作用域，模块按注释分区</td></tr>
-    <tr><td>素材层</td><td>assets/</td><td>15 张统一水墨风格生成图</td><td>统一风格 prompt 批量生成</td></tr>
-  </table>
+<h3>3.1　一键复现：幂等构建脚本</h3>
+<p>评委 clone 仓库后，一条命令产出可演示单文件：</p>
+<pre>git clone https://github.com/linchenan666/feiyi-zhihui.git
+cd feiyi-zhihui
+py -3 scripts/bundle_single.py
+# 双击 dist/非遗智汇·多彩面板版.html</pre>
 
-  <h3>3.2 路由与视图</h3>
-  <p>原生 hash 路由驱动 10 个视图（home/hall/item/map/region/graph/ask/create/evolution/treasury/immerse），无框架、无构建。视图切换采用 <strong>View Transitions API</strong>（原生支持时启用编排过渡，不支持自动回退），保证"页面切换"这一高频动作的流畅与优雅。</p>
-  <p><strong>地图视图</strong>：真实行政区划河南地图（公开 GeoJSON → Mercator 投影 → SVG path，独立 <code>map-data.js</code> 数据层），18 地市边界 + 15 项招牌非遗按经纬度精确定位；点击「放大」进入全屏交互模态（滚轮缩放 1x–5x 以光标为锚点、拖拽平移、三退出路径）；悬浮非遗红点其余点与名称 0.3s 淡出（聚焦模式）；点击地市板块直接进入对应城市介绍。画布与模态共用 <code>mapSvgHtml / bindMapInteractions</code>，一次实现双态生效。<strong>图谱视图</strong>：力导向布局（label 感知斥力按占用面积、亲缘/门类/地域弹簧分级、三环分层）+ 六门类扇区化 + 氛围画布（纸纹 / 晕染 / 水印），节点分批入场动画，SVG 最小渲染 1000px + 缩放控件保证任意窗口可读。<strong>城市介绍视图</strong>：18 地市城市档案（<code>regions-data.js</code>），地图点击板块/列表行跳转对应城市，卡片配标志性建筑图（<code>REGION_IMG</code> 映射）。</p>
+<h4>构建脚本六步流水线</h4>
+<table>
+  <tr><th>步骤</th><th>动作</th><th>失败即停条件</th></tr>
+  <tr><td>1/6</td><td>前置文件检查：确认 index.html + 14 个 JS 文件存在</td><td>任一文件缺失，立即退出</td></tr>
+  <tr><td>2/6</td><td>key 完整性校验：确认 treasury-real.js 15 件实物图 + treasury-audio.js 10 段音频全部对齐</td><td>缺 key 立即退出</td></tr>
+  <tr><td>3/6</td><td>扫描 assets/video/ 登记 HALL_VIDEOS（可选，无视频则跳过）</td><td>视频目录不存在不报错</td></tr>
+  <tr><td>4/6</td><td>内联 14 个本地 JS 文件到 HTML</td><td>任一 JS 标签未匹配，立即退出</td></tr>
+  <tr><td>5a/6</td><td>内联子集化字体 CSS</td><td>字体文件缺失立即退出</td></tr>
+  <tr><td>5b/6</td><td>内联 assets/ 图片为 base64 data URI</td><td>引用不存在的图片立即退出；替换后校验无图片相对路径残留</td></tr>
+  <tr><td>6/6</td><td>写出产物到 dist/</td><td>—</td></tr>
+</table>
 
-  <h3>3.3 全视口背景层架构（M8 系列视觉核心）</h3>
-  <p>地图 / 展品总览 / 城市介绍三个内容页采用统一的全视口动态背景架构，保证"背景与浏览器页面等宽等高、导航区保持原样、文字永远可读"：</p>
-  <pre><code>┌─────────────────────────────────────────────┐
-│ 导航栏（常驻纸色背景，文字永远可见）            │
-├─────────────────────────────────────────────┤
-│ 背景层 .xx-bg（fixed，top:var(--nav-h)）       │
-│   · 地图页：4 张河南地理风光 24s 轮播 + 慢缩放  │
-│   · 展品页：4 层 CSS 渐变轮播（紫靛/朱砂/青黛/绛红）│
-│   · 城市页：4 张标志性建筑 24s 轮播             │
-│ 遮罩层 .xx-veil（fixed，深色渐变，保证对比度）  │
-├─────────────────────────────────────────────┤
-│ 内容层 .xx-view/.xx-detail（relative，z-index:2）│
-│ 页脚 footer（relative，z-index:5，压过背景层）  │
-└─────────────────────────────────────────────┘</code></pre>
-  <div class="box"><b>关键约束</b>：①背景 <code>position:fixed</code> 且 <code>left/right/bottom:-5%</code> 微扩防露边，等宽等高；②<code>top</code> 严格 <code>var(--nav-h)</code>（曾踩 <code>calc(var(--nav-h) - 5%)</code> 百分比陷阱——5% 按视口高度计算会把背景顶回导航区，已修复并记录）；③页面内文字/卡片统一半透明深底 + 白字黄字规则（标题金黄 #F3D9A4、小字白色系），任意背景帧下可读；④背景轮播仅在对应视图渲染时注入 DOM，视图切换即释放。</div>
+<h4>幂等性保证</h4>
+<p>同一份源码重复运行脚本，产物字节一致（不写时间戳、不写随机数）。可通过 SHA256 验证：连续跑两次，产物哈希应相同。</p>
+<p>脚本只用 Python 标准库（io、os、re、sys、base64、urllib），不需要 pip 安装任何依赖。评委环境只需 Python 3.8+。</p>
 
-  <h3>3.4 双层问答架构（核心创新点）</h3>
-  <p>为解决"演示断线"与"真 AI"的矛盾，问答系统设计为双层架构：</p>
-  <pre><code>┌─────────────────────────────────────────────┐
-│  用户提问                                        │
-├─────────────────────────────────────────────┤
-│  第一层 · 内置知识库（离线，默认启用）            │
-│  关键词打分匹配：命中 ≥4 字词条 3 分、其余 2 分， │
-│  最高分 ≥2 命中，否则兜底话术                    │
-│  + 多轮上下文：记录上一主题，指代词自动回指       │
-│  → 保证演示 100% 不断线、支持连续追问            │
-├─────────────────────────────────────────────┤
-│  第二层 · 远程大模型（可选，一键点亮）            │
-│  app.js 顶部 REMOTE_API 填 url/key/model 即升级  │
-│  → 有 key 时回答切换为大模型生成                  │
-└─────────────────────────────────────────────┘</code></pre>
-  <div class="box"><b>设计意图</b>：离线层保证"任何时候都能演示"，在线层兑现"真·AI"；多轮上下文让离线问答也可连续追问，评审看到的是可解释、可升级、真能用的架构，而非黑盒。</div>
+<h3>3.2　细粒度 Git 历史</h3>
+<p>截至 2026-10-26，仓库共 <b>100 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-26 约 7 周。不是一次性 initial commit 堆完全部功能。</p>
 
-  <h3>3.5 动效引擎（统一收口）</h3>
-  <p>所有指针类动效收口为<strong>单一事件委托处理器</strong> <code>initPointerFX()</code>：磁性按钮 + 卡片 3D 倾斜共用一次 <code>pointermove</code> 监听，rAF 节流保证每帧至多一次布局读取；滚动揭示（IntersectionObserver）、页面过渡（View Transitions）各司其职；惯性平滑滚动库（Lenis）经实测性能权衡后<strong>已从运行时禁用</strong>，回退原生滚动（滚轮手感最稳、零额外开销）。<code>prefers-reduced-motion</code> 全局兜底，无障碍用户自动获得静止版。</p>
+<h4>提交时间分布</h4>
+<table>
+  <tr><th>日期</th><th>提交数</th><th>阶段</th></tr>
+  <tr><td>2026-09-09</td><td>7</td><td>项目初始化：数据层 + 骨架</td></tr>
+  <tr><td>2026-09-10</td><td>5</td><td>首页视觉 + 总览卡片</td></tr>
+  <tr><td>2026-09-11</td><td>39</td><td>核心功能密集开发：地图、图谱、问答、文创、沉浸</td></tr>
+  <tr><td>2026-09-12</td><td>11</td><td>交互打磨 + 3D 珍品馆</td></tr>
+  <tr><td>2026-09-13</td><td>5</td><td>性能优化 + 单文件编译</td></tr>
+  <tr><td>2026-10-05</td><td>6</td><td>数据真实性修正 + 图片版权合规</td></tr>
+  <tr><td>2026-10-13</td><td>7</td><td>字体子集化 + three.js 本地化</td></tr>
+  <tr><td>2026-10-14</td><td>1</td><td>AI 表述诚实化</td></tr>
+  <tr><td>2026-10-15</td><td>7</td><td>README 补全 + 目录结构</td></tr>
+  <tr><td>2026-10-16</td><td>2</td><td>数据扩充第一批</td></tr>
+  <tr><td>2026-10-17</td><td>4</td><td>数据扩充第二批 + 统计动态化</td></tr>
+  <tr><td>2026-10-18</td><td>5</td><td>赛事名统一 + 技术文档</td></tr>
+  <tr><td>2026-10-26</td><td>1</td><td>最终提交</td></tr>
+</table>
+<p>每次提交对应一次 AI 核心对话或一个功能模块。提交信息用 <code>feat:</code> / <code>fix:</code> / <code>chore:</code> / <code>docs:</code> 前缀分类，评委可逐条 <code>git log --oneline</code> 对照复核。</p>
+
+<h3>3.3　非伪造证据：Prompt 快照 + 演进记录</h3>
+<p>作品不是事后补的文档，而是全过程有可追溯的证据链。</p>
+
+<h4>三层证据</h4>
+<table>
+  <tr><th>证据层</th><th>位置</th><th>内容</th></tr>
+  <tr><td>Git 提交历史</td><td><code>git log</code></td><td>100 次提交，每次对应一个功能模块或一次 AI 对话，时间分布跨 7 周</td></tr>
+  <tr><td>Prompt 链快照</td><td><code>docs/Prompt历史.md</code></td><td>各模块完整 Prompt 原文，评委可查 AI 当时收到了什么指令</td></tr>
+  <tr><td>演进记录</td><td><code>evolution-data.js</code></td><td>早期 12 轮迭代的 prompt → AI 建议 → 引导修复 → 验证，四步完整记录</td></tr>
+</table>
+
+<h4>评委可验证的复核路径</h4>
+<ol>
+  <li><code>git log --oneline</code>：查看 100 次提交，确认每次对应一个模块；</li>
+  <li><code>git log --format='%ad %s' --date=short</code>：确认提交时间分布跨 7 周，不是最后一天挤出来的；</li>
+  <li>打开 <code>docs/Prompt历史.md</code>：对照某轮 Prompt，查看 AI 当时收到了什么约束；</li>
+  <li>打开演进馆页面（或 evolution-data.js）：查看每轮 AI 建议、人工修复、验证方式；</li>
+  <li>运行 <code>py -3 scripts/bundle_single.py</code>：确认一条命令产出单文件，连续跑两次产物哈希一致。</li>
+</ol>
+
+<h3>3.4　交付前自检流程</h3>
+<p>每次改动后固定流程，不依赖"感觉"判断质量。</p>
+<table>
+  <tr><th>步骤</th><th>命令/动作</th><th>通过标准</th></tr>
+  <tr><td>语法校验</td><td><code>node --check app.js</code></td><td>exit code 0，无语法错误</td></tr>
+  <tr><td>重新打包</td><td><code>py -3 scripts/bundle_single.py</code></td><td>6 步全过，产物写入 dist/</td></tr>
+  <tr><td>断网实测</td><td>DevTools → Network → Offline → 刷新</td><td>功能完整，console 零外部请求</td></tr>
+  <tr><td>浏览器实测</td><td>打开 dist/ 单文件，逐页点击 10 视图</td><td>路由切换正常、动效流畅、3D 可渲染</td></tr>
+  <tr><td>Git 提交</td><td><code>git add &lt;具体文件&gt;</code> + <code>git commit</code></td><td>不使用 <code>git add .</code>，避免带入 dist/ 和临时目录</td></tr>
+</table>
+<p>构建脚本内置失败即停：前置文件缺失、key 数量不对、图片路径未内联，任一条件不满足立即非零退出，不静默吞错。这保证了产物与源码的一致性——如果打包失败，说明源码有缺失，不会产出一个看似完整实则残缺的单文件。</p>
+
+<div class="fact" style="margin-top: 10mm;">
+  <b>工程结论</b>：本项目通过模块化源码与单文件编译双轨解耦开发态与交付态；通过数据/视图分层实现 25 项非遗的零改动扩展；通过字体子集化、第三方库本地化、图片音频 base64 内联实现断网功能完整；通过 100 次细粒度提交、Prompt 快照、演进记录和幂等构建脚本证明作品可复现、非伪造。
 </div>
 
-<!-- ============ 04 工程质量 ============ -->
-<div class="page pagebreak">
-  <h2>04 · 工程质量</h2>
-
-  <h3>4.1 安全</h3>
-  <table>
-    <tr><th>风险面</th><th>对策</th></tr>
-    <tr><td>XSS（所有动态内容经 innerHTML 注入）</td><td>统一 <code>esc()</code> 转义：<code>&amp; &lt; &gt; "</code>；所有用户输入、数据字段注入前必过</td></tr>
-    <tr><td>第三方脚本供应链</td><td>仅 1 个静态 CDN（字体镜像），零追踪、零遥测；Lenis 已移除，断网自动降级系统字体</td></tr>
-    <tr><td>本地存储</td><td>localStorage 读写全部 try/catch，隐私数据仅存本机</td></tr>
-    <tr><td>API 密钥泄露</td><td>REMOTE_API 默认关闭，文档明确"请勿提交密钥到公开仓库"</td></tr>
-  </table>
-
-  <h3>4.2 性能（本版本专项治理）</h3>
-  <table>
-    <tr><th>问题</th><th>治理</th><th>收益</th></tr>
-    <tr><td>3D tilt 与 CSS 过渡互相打架，每帧追 350ms 动画</td><td>激活时切 0.1s 快过渡、离开还原</td><td>倾斜跟手、不再持续重算</td></tr>
-    <tr><td>双 pointermove 监听无节流、强制同步布局</td><td>合并单监听 + rAF 节流</td><td>每帧至多一次布局读</td></tr>
-    <tr><td>毛玻璃滚动逐帧重绘</td><td>移除 backdrop-filter，提高背景不透明度</td><td>滚动不再卡顿</td></tr>
-    <tr><td>15 个常驻 GPU 合成层</td><td>will-change 改 hover 触发</td><td>GPU 内存释放</td></tr>
-    <tr><td>定时器泄漏</td><td>视图切换即清理（打字机 / 沉浸轮播 / 问答）</td><td>空闲 CPU 归零</td></tr>
-    <tr><td>图谱大图重绘卡顿</td><td>缩放控件只改 SVG 渲染宽度（transform 层），入场动画 opacity 过渡</td><td>滚动与缩放均不卡顿</td></tr>
-    <tr><td>窄屏图谱文字缩到不可读</td><td>SVG 最小渲染 1000px + 横向滚动 + 缩放控件（1x–3.2x）</td><td>任意窗口文字可读</td></tr>
-    <tr><td>滚轮滚动卡顿、拖拽进度条不卡（M8.1）</td><td>滚轮被 Lenis JS 插值接管，每帧 scrollTo 驱动，复杂合成层页面掉帧 → 动画收敛（kenburns 26s infinite→14s forwards）、移除常驻 will-change 合成层、视差滚动即清</td><td>合成层数量归零，滚动由浏览器接管</td></tr>
-    <tr><td>滚轮仍卡（M8.2，第二轮）</td><td>禁用 Lenis 回退浏览器原生硬件合成滚动（与拖拽进度条同路径，零 JS 开销）；保留接入位（RETURN_NOW=false 一行启用）</td><td>滚轮与进度条手感一致，彻底根治；决策可解释可回切</td></tr>
-  </table>
-
-  <h3>4.3 无障碍</h3>
-  <ul>
-    <li>键盘可达：地图标点、图谱节点、收藏按钮全部 <code>tabindex</code> + <code>aria</code> + Enter/Space 响应</li>
-    <li><code>:focus-visible</code> 全局焦点环，不隐藏 outline</li>
-    <li><code>prefers-reduced-motion</code>：动效、打字机、思考动画、视差、图谱入场动画全部关闭</li>
-    <li>语义化标签 + aria-label；对比度正文 ≥ 4.5:1</li>
-  </ul>
-</div>
-
-<!-- ============ 05 可复现性 ============ -->
-<div class="page pagebreak">
-  <h2>05 · 可复现性论证</h2>
-  <p>本赛项对"过程可复现"的权重为 25%，本项目将其作为第一工程约束来设计。</p>
-
-  <h3>5.1 一键复现（10 分钟极速指南）</h3>
-  <div class="box">环境：任意现代浏览器 + 首次联网加载字体/CDN（断网自动降级）→ <b>双击 index.html，即得与本文档截图完全一致的画面</b>。无构建、无依赖安装、无环境变量必填项。</div>
-
-  <h3>5.2 演进链路（Git 提交 ↔ Prompt 一一对应）</h3>
-  <p>开发全程 AI 协同，每次提交对应一个功能模块或一次核心对话（完整 Prompt 链见 <code>docs/Prompt历史.md</code>）：</p>
-  <table>
-    <tr><th>提交</th><th>模块</th><th>AI 协同内容</th><th>验证</th></tr>
-    <tr><td>001–002</td><td>数据层 + 骨架/详情</td><td>数据结构设计、视觉体系、素材统一风格</td><td>截图 + DOM 断言</td></tr>
-    <tr><td>003</td><td>问答引擎</td><td>关键词匹配实现 → Bug① 拼接修复 → Bug② 揭示时序修复 → 思考状态补强</td><td>15 类问题全命中回归</td></tr>
-    <tr><td>004</td><td>地图与图谱</td><td>力导向布局、标点偏移、键盘可达</td><td>无头截图 + 无障碍检查</td></tr>
-    <tr><td>005</td><td>沉浸 + 终版整合</td><td>沉浸舞台、收藏、双主题、文创工坊</td><td>9 视图全量回归</td></tr>
-    <tr><td>006</td><td>性能优化</td><td>7 项性能根因的修复链（见 4.2）</td><td>自检 consoleErrors 全空</td></tr>
-    <tr><td>007–011</td><td>地图全链路</td><td>真实行政区划地图 → 放大模态 → 悬浮聚焦 → 选中态三轮收敛 → 城市介绍</td><td>多视口无头截图 + 合成事件验证</td></tr>
-    <tr><td>012–024</td><td>图谱四连升级 + 导航面板 + 打磨</td><td>大字扇区 → 氛围画布 → 核心放大 → 窄屏可读（缩放控件）→ 入场动画；汉堡菜单品牌面板 → 多彩新中式升级 + 临时代码清理；AI 多轮上下文；单文件版合成</td><td>窄窗/宽屏/放大三态截图 + 多轮追问注入回归 + CSSOM 计算色验证</td></tr>
-    <tr><td>025–034</td><td>视觉打磨收敛（M8.17–M8.34）</td><td>地图整页动态背景十轮收敛（全视口/导航保留/百分比陷阱修复）→ 展品渐变背景 → 页脚层级 → 城市页全视口建筑轮播 + 18 城建筑图 + 白字黄字体系</td><td>每轮无头截图验收 + revert 保留提交</td></tr>
-    <tr><td>035–056</td><td>演进馆 / 使用说明 / 3D 珍品馆 / 图文帮助</td><td>12 轮 AI 协同迭代时间轴（每轮记录 Prompt 与修复）；首页图文使用说明（10 模块可点击、截图详解、跳转对应页）；3D 程序化 PBR 高模 + 实物影像双模态 + 真人自然声讲解（v3）+ 工艺分步播放器；收藏导出</td><td>逐轮 lint 全绿 + 浏览器实测 + 断网验证</td></tr>
-  </table>
-
-  <h3>5.3 数据可追溯</h3>
-  <p>15 项非遗内容基于国家级非遗名录与公开资料核对，<strong>不确定条目全部显式标注于"待核清单"</strong>（如批次表述、类别归属），数据诚实可溯源，拒绝编造。</p>
-
-  <h3>5.4 防伪设计</h3>
-  <ul>
-    <li>数据与视图分离：评委可逐条核对 <code>data.js</code> 的真实内容</li>
-    <li>代码非拼接：10 视图由同一套数据模型与渲染函数驱动，无复制粘贴痕迹</li>
-    <li>Prompt 历史 + 演进记录 + 演示视频（含 ≥2 分钟 AI 协同复现）三证齐备</li>
-  </ul>
-</div>
-
-<!-- ============ 06 附录 ============ -->
-<div class="page pagebreak">
-  <h2>06 · 附录</h2>
-
-  <h3>6.1 环境与依赖</h3>
-  <table>
-    <tr><th>项</th><th>说明</th></tr>
-    <tr><td>操作系统</td><td>Windows / macOS / Linux 任一</td></tr>
-    <tr><td>浏览器</td><td>Chrome / Edge 114+</td></tr>
-    <tr><td>字体</td><td>Noto Serif SC / Noto Sans SC（miaoda.feishu.cn 自托管镜像，失败回退系统字体）</td></tr>
-    <tr><td>平滑滚动</td><td>无（已禁用 Lenis，回退原生滚动，滚轮性能最优）</td></tr>
-    <tr><td>构建</td><td>无（原生 HTML/CSS/JS，无包管理器）</td></tr>
-    <tr><td>单文件版</td><td>非遗智汇·多彩面板版.html（全内联、零网络依赖，演示首选）</td></tr>
-  </table>
-
-  <h3>6.2 目录结构</h3>
-  <pre><code>feiyi-zhihui/
-├── index.html             # 骨架 + 设计系统 + 动效质感层 + 全视口背景层样式
-├── 非遗智汇·多彩面板版.html # 单文件交付版（全内联，零依赖，演示推荐）
-├── data.js                # 数据层：15 项非遗 + 知识库 + 图谱连边
-├── map-data.js            # 地图层：真实行政区划 SVG + 地市坐标
-├── regions-data.js        # 地域层：18 地市档案 + REGION_IMG 建筑图映射
-├── app.js                 # 视图与交互层：9 视图 + 动效引擎 + 问答 + 图谱
-├── assets/
-│   ├── hero.jpg           # 首页水墨长卷主视觉
-│   ├── cats/  items/      # 门类/展品视觉素材
-│   ├── mapbg/             # 地图页 4 张河南地理风光背景
-│   └── region/            # 18 城标志性建筑图（r-*.jpg，640px q60）
-├── docs/                  # 技术文档 / Prompt历史 / 演示脚本 / 设计规范
-└── README.md              # 10 分钟极速复现指南</code></pre>
-
-  <h3>6.3 环境变量模板</h3>
-  <pre><code>// app.js 顶部 REMOTE_API（默认关闭）
-var REMOTE_API = {
-  enabled: false,   // 置 true 启用远程大模型
-  url: "",          // https://ark.cn-beijing.volces.com/api/v3/chat/completions
-  key: "",          // API Key（请勿提交到公开仓库）
-  model: ""         // doubao-seed-1-6-250615
-};</code></pre>
-
-  <div class="box"><b>交付体积</b>：单文件版约 4.3MB（全内联含 18 城建筑图与地图背景），本地双击秒开、零网络请求，断网可完整演示。</div>
-
-  <div class="foot">非遗智汇 · 全国高校 Vibe Coding 开发挑战赛 · B 组 · 2026</div>
 </div>
 
 </body>

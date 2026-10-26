@@ -2201,7 +2201,7 @@
       var shareN = ichStats();
       copyText("我在「非遗智汇 · 河南非遗 智能数字展厅」用本地生成工坊合成了一张「" + it.name + "」" + st.label +
         "文创海报——" + shareN.item + " 项河南招牌非遗、" + shareN.cat + " 大门类、" + shareN.city + " 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
-        "（传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
+        "（全国高校 Vibe Coding 开发挑战赛 · B 组参赛作品）");
     });
     var items = $("#create-items"), styles = $("#create-styles");
     if (items) $$("button", items).forEach(function (b) {

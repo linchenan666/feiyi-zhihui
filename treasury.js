@@ -137,7 +137,9 @@ function treasuryHTML() {
           '<button class="th-btn" id="th-real" type="button">实物影像</button>' +
           '<button class="th-btn" id="th-proc" type="button">工艺流程</button>' +
           '<button class="th-btn" id="th-know" type="button">工艺知识</button>' +
-          '<button class="th-btn th-btn-3d" id="th-3d-bowl" type="button">3D 汝瓷展柜</button>' +
+          '<button class="th-btn th-btn-3d" id="th-3d-bowl" type="button" hidden>3D 汝瓷展柜</button>' +
+          '<button class="th-btn th-btn-3d" id="th-3d-junci" type="button" hidden>3D 钧瓷花浇</button>' +
+          '<button class="th-btn th-btn-3d" id="th-3d-sancai" type="button" hidden>3D 唐三彩罐</button>' +
           '<button class="th-btn th-btn-3d" id="th-3d-mortise" type="button">榫卯拆解</button>' +
         '</div>' +
       '</aside>' +
@@ -246,16 +248,35 @@ function bindTreasuryUI() {
     if (typeof openKnow === "function") openKnow();
   });
 
-  /* WebGL 3D 展柜（懒初始化，移动端隐藏） */
-  var btnBowl = $q("#th-3d-bowl", root);
-  var btnMortise = $q("#th-3d-mortise", root);
-  if (FY3D.isMobile) {
-    if (btnBowl) btnBowl.style.display = "none";
-    if (btnMortise) btnMortise.style.display = "none";
-  } else {
-    if (btnBowl) btnBowl.addEventListener("click", function () { open3DShowcase("bowl"); });
-    if (btnMortise) btnMortise.addEventListener("click", function () { open3DShowcase("mortise"); });
-  }
+  /* WebGL 3D 展柜（懒初始化，移动端隐藏；按藏品 id 显隐） */
+  var btnMap = {
+    bowl:    $q("#th-3d-bowl", root),
+    junci:   $q("#th-3d-junci", root),
+    sancai:  $q("#th-3d-sancai", root),
+    mortise: $q("#th-3d-mortise", root)
+  };
+  /* 藏品 id → 对应 3D 场景 type；榫卯是独立 demo 恒显 */
+  var ARTIFACT_3D = { ruci: "bowl", junci: "junci", sancai: "sancai" };
+  Object.keys(btnMap).forEach(function (type) {
+    var b = btnMap[type];
+    if (!b) return;
+    if (FY3D.isMobile) {
+      b.style.display = "none";
+    } else {
+      b.addEventListener("click", function () { open3DShowcase(type); });
+    }
+  });
+
+  /* 切藏品时按 id 显隐 3D 按钮（挂到 loadArtifact 尾部用 setTimeout 后查） */
+  window.__sync3DButtons = function () {
+    var a = TREASURY_ARTIFACTS[TH.idx];
+    if (!a) return;
+    var showType = ARTIFACT_3D[a.id] || "";
+    ["bowl", "junci", "sancai"].forEach(function (t) {
+      var b = btnMap[t];
+      if (b) b.hidden = (t !== showType);
+    });
+  };
 
   /* 离开珍品馆时暂停讲解（全局只绑一次） */
   if (!TH.inited) {
@@ -386,6 +407,9 @@ function loadArtifact(i, autoplay) {
   if (typeof onArtifactProcess === "function") {
     try { onArtifactProcess(); } catch (e) {}
   }
+
+  /* 按藏品 id 显隐 3D 按钮 */
+  if (typeof window.__sync3DButtons === "function") window.__sync3DButtons();
 
   if (autoplay) playAudio();
 }

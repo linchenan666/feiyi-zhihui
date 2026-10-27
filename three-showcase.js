@@ -1,7 +1,9 @@
 /* ============================================================
    FY3D · WebGL 3D 展柜（three.js 0.186.1 程序化，零外部模型）
    ① 汝瓷碗：LatheGeometry 旋转体 + OrbitControls + 釉色切换
-   ② 榫卯拆解：BoxGeometry 程序化木块 + 滑块控制爆炸视图
+   ② 钧瓷花浇：LatheGeometry 旋转体 + 窑变釉色切换
+   ③ 唐三彩三足罐：LatheGeometry 旋转体 + 三彩釉色切换
+   ④ 榫卯拆解：BoxGeometry 程序化木块 + 滑块控制爆炸视图
    全程离线：three.js 本地化，无 CDN、无 glTF 资源。
    懒初始化：打开弹窗才创建 renderer；关闭即 dispose 全部资源。
    ============================================================ */
@@ -16,6 +18,25 @@ var FY3D = {
 
 /* ---------------- 公共：打开 / 关闭 ---------------- */
 
+var F3D_TITLES = {
+  bowl:    "汝瓷天青 · 3D 展柜",
+  junci:   "钧瓷窑变 · 3D 展柜",
+  sancai:  "唐三彩 · 3D 三足罐",
+  mortise: "榫卯拆解 · 木作之智"
+};
+var F3D_BUILDERS = {
+  bowl:    buildBowlPanel,
+  junci:   buildJunciPanel,
+  sancai:  buildSancaiPanel,
+  mortise: buildMortisePanel
+};
+var F3D_INITS = {
+  bowl:    initBowl,
+  junci:   initJunci,
+  sancai:  initSancai,
+  mortise: initMortise
+};
+
 function open3DShowcase(type) {
   if (!window.THREE || !window.THREE.WebGLRenderer) {
     alert("当前浏览器不支持 WebGL，无法加载 3D 展柜。");
@@ -23,8 +44,8 @@ function open3DShowcase(type) {
   }
   if (FY3D.modal) close3DShowcase();
   inject3DStyle();
-  var title = type === "mortise" ? "榫卯拆解 · 木作之智" : "汝瓷天青 · 3D 展柜";
-  var body = type === "mortise" ? buildMortisePanel() : buildBowlPanel();
+  var title = F3D_TITLES[type] || F3D_TITLES.bowl;
+  var body = (F3D_BUILDERS[type] || buildBowlPanel)();
 
   var ov = document.createElement("div");
   ov.id = "fy3d-modal";
@@ -50,8 +71,7 @@ function open3DShowcase(type) {
 
   /* 等 DOM 渲染后初始化 WebGL（懒初始化） */
   setTimeout(function () {
-    if (type === "mortise") initMortise();
-    else initBowl();
+    (F3D_INITS[type] || initBowl)();
   }, 60);
 }
 
@@ -316,6 +336,198 @@ function makeCrackTexture() {
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(3, 2);
   return tex;
+}
+
+/* ---------------- ② 钧瓷窑变花浇 ---------------- */
+
+function buildJunciPanel() {
+  return '<aside class="f3d-panel">' +
+    '<div class="fp-title">窑变釉色</div>' +
+    '<div class="fp-colors" id="f3d-colors">' +
+      '<button class="fp-chip on" data-c="tianlan" style="--chip:#7FA8C9">天蓝</button>' +
+      '<button class="fp-chip" data-c="yuebai" style="--chip:#D8D2B8">月白</button>' +
+      '<button class="fp-chip" data-c="meigui" style="--chip:#B85C7A">玫瑰紫</button>' +
+    '</div>' +
+    '<label class="fp-row"><input type="checkbox" id="f3d-auto" checked> 自动环绕</label>' +
+    '<div class="fp-hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 双击复位</div>' +
+    '<div class="fp-note">钧瓷入窑一色、出窑万彩，铜红釉在窑内自然流淌形成窑变，是宋代五大名窑之一。本器以 LatheGeometry 沿花浇截面旋转生成。<b>数字化复原示意，非文物扫描</b>。</div>' +
+  '</aside>';
+}
+
+var JUNCI_GLAZES = {
+  tianlan: { color: 0x7FA8C9, name: "天蓝" },
+  yuebai:   { color: 0xD8D2B8, name: "月白" },
+  meigui:  { color: 0xB85C7A, name: "玫瑰紫" }
+};
+
+function initJunci() {
+  var THREE = window.THREE;
+  var container = document.getElementById("f3d-canvas");
+  var ctx = f3dCommon(container);
+  var scene = ctx.scene, camera = ctx.camera;
+
+  /* 花浇/尊截面：撇口 → 短颈 → 折肩 → 鼓腹 → 收底 → 圈足 */
+  var pts = [
+    [0.32, 0.00], [0.36, 0.02], [0.34, 0.08], [0.30, 0.16],
+    [0.36, 0.28], [0.52, 0.46], [0.62, 0.66], [0.64, 0.82],
+    [0.58, 0.96], [0.44, 1.06], [0.30, 1.10], [0.26, 1.12],
+    [0.24, 1.08], [0.26, 1.02], [0.34, 0.92], [0.44, 0.74],
+    [0.48, 0.54], [0.42, 0.36], [0.32, 0.20], [0.28, 0.10],
+    [0.30, 0.04], [0.32, 0.00]
+  ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+
+  var geo = new THREE.LatheGeometry(pts, 96);
+  geo.computeVertexNormals();
+
+  var mat = new THREE.MeshPhysicalMaterial({
+    color: JUNCI_GLAZES.tianlan.color,
+    roughness: 0.22,
+    metalness: 0.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.08,
+    ior: 1.5,
+    side: THREE.DoubleSide
+  });
+
+  var vase = new THREE.Mesh(geo, mat);
+  vase.position.y = 0.02;
+  vase.castShadow = true;
+  vase.receiveShadow = true;
+  scene.add(vase);
+  FY3D.disposables.push(geo, mat);
+
+  /* OrbitControls */
+  var controls = new THREE.OrbitControls(camera, FY3D.renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.target.set(0, 0.55, 0);
+  controls.minDistance = 1.4;
+  controls.maxDistance = 7;
+  controls.maxPolarAngle = Math.PI * 0.85;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.9;
+  FY3D.controls = controls;
+
+  var home = { pos: camera.position.clone(), tgt: controls.target.clone() };
+
+  var chips = document.querySelectorAll("#f3d-colors .fp-chip");
+  chips.forEach(function (c) {
+    c.addEventListener("click", function () {
+      chips.forEach(function (x) { x.classList.remove("on"); });
+      c.classList.add("on");
+      var g = JUNCI_GLAZES[c.getAttribute("data-c")];
+      mat.color.setHex(g.color);
+    });
+  });
+  var autoBox = document.getElementById("f3d-auto");
+  autoBox.addEventListener("change", function () { controls.autoRotate = autoBox.checked; });
+  FY3D.renderer.domElement.addEventListener("dblclick", function () {
+    camera.position.copy(home.pos);
+    controls.target.copy(home.tgt);
+    controls.update();
+  });
+}
+
+/* ---------------- ③ 唐三彩三足罐 ---------------- */
+
+function buildSancaiPanel() {
+  return '<aside class="f3d-panel">' +
+    '<div class="fp-title">三彩釉色</div>' +
+    '<div class="fp-colors" id="f3d-colors">' +
+      '<button class="fp-chip on" data-c="huanglv" style="--chip:#C9A84C">黄绿</button>' +
+      '<button class="fp-chip" data-c="green" style="--chip:#6B9E7A">翠绿</button>' +
+      '<button class="fp-chip" data-c="bai" style="--chip:#E8DCC0">乳白</button>' +
+    '</div>' +
+    '<label class="fp-row"><input type="checkbox" id="f3d-auto" checked> 自动环绕</label>' +
+    '<div class="fp-hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 双击复位</div>' +
+    '<div class="fp-note">唐三彩是唐代低温铅釉陶器，以黄、绿、白三色为主，洛阳为主要窑址。本器以 LatheGeometry 做罐身 + 三个锥状足拼接。<b>数字化复原示意，非文物扫描</b>。</div>' +
+  '</aside>';
+}
+
+var SANCAI_GLAZES = {
+  huanglv: { color: 0xC9A84C, name: "黄绿" },
+  green:   { color: 0x6B9E7A, name: "翠绿" },
+  bai:     { color: 0xE8DCC0, name: "乳白" }
+};
+
+function initSancai() {
+  var THREE = window.THREE;
+  var container = document.getElementById("f3d-canvas");
+  var ctx = f3dCommon(container);
+  var scene = ctx.scene, camera = ctx.camera;
+
+  /* 罐身截面：敛口 → 丰肩 → 鼓腹 → 收底 */
+  var pts = [
+    [0.30, 0.18], [0.38, 0.22], [0.48, 0.34], [0.56, 0.52],
+    [0.58, 0.68], [0.54, 0.84], [0.44, 0.96], [0.34, 1.02],
+    [0.30, 1.04], [0.28, 1.00], [0.32, 0.92], [0.40, 0.78],
+    [0.44, 0.62], [0.42, 0.46], [0.36, 0.32], [0.30, 0.24],
+    [0.28, 0.18]
+  ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+
+  var geo = new THREE.LatheGeometry(pts, 96);
+  geo.computeVertexNormals();
+
+  var mat = new THREE.MeshPhysicalMaterial({
+    color: SANCAI_GLAZES.huanglv.color,
+    roughness: 0.35,
+    metalness: 0.0,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.2,
+    ior: 1.45,
+    side: THREE.DoubleSide
+  });
+
+  var jar = new THREE.Mesh(geo, mat);
+  jar.position.y = 0.02;
+  jar.castShadow = true;
+  jar.receiveShadow = true;
+  scene.add(jar);
+  FY3D.disposables.push(geo, mat);
+
+  /* 三个锥状足 */
+  var footMat = new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 0.7 });
+  for (var i = 0; i < 3; i++) {
+    var ang = i * Math.PI * 2 / 3 + Math.PI / 6;
+    var foot = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.22, 24), footMat);
+    foot.position.set(Math.cos(ang) * 0.28, 0.11, Math.sin(ang) * 0.28);
+    foot.rotation.x = Math.PI; /* 锥尖朝下 */
+    foot.castShadow = true;
+    scene.add(foot);
+    FY3D.disposables.push(foot.geometry);
+  }
+  FY3D.disposables.push(footMat);
+
+  /* OrbitControls */
+  var controls = new THREE.OrbitControls(camera, FY3D.renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.target.set(0, 0.55, 0);
+  controls.minDistance = 1.4;
+  controls.maxDistance = 7;
+  controls.maxPolarAngle = Math.PI * 0.85;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.9;
+  FY3D.controls = controls;
+
+  var home = { pos: camera.position.clone(), tgt: controls.target.clone() };
+
+  var chips = document.querySelectorAll("#f3d-colors .fp-chip");
+  chips.forEach(function (c) {
+    c.addEventListener("click", function () {
+      chips.forEach(function (x) { x.classList.remove("on"); });
+      c.classList.add("on");
+      var g = SANCAI_GLAZES[c.getAttribute("data-c")];
+      mat.color.setHex(g.color);
+    });
+  });
+  var autoBox = document.getElementById("f3d-auto");
+  autoBox.addEventListener("change", function () { controls.autoRotate = autoBox.checked; });
+  FY3D.renderer.domElement.addEventListener("dblclick", function () {
+    camera.position.copy(home.pos);
+    controls.target.copy(home.tgt);
+    controls.update();
+  });
 }
 
 /* ---------------- ② 榫卯拆解 ---------------- */

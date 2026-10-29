@@ -45,14 +45,14 @@
     全国高校 Vibe Coding 开发挑战赛 · B 组<br>
     选题方向 #5「AI 驱动的高交互教育与可视化」<br>
     作者：李宇航 &nbsp;|&nbsp; 仓库：github.com/linchenan666/feiyi-zhihui<br>
-    数据截至：2026-10-26
+    数据截至：2026-10-30
   </div>
 </div>
 
 <!-- 摘要 -->
 <h2>摘要</h2>
 <p>本文档说明《非遗智汇》在 Vibe Coding 模式下的工程实践：人如何通过 Prompt 约束 AI 产出可维护的代码，架构上如何做到模块化源码与单文件编译双轨、离线优先与双层 AI 并存，以及如何用细粒度 Git 历史、构建脚本与演进记录证明作品不是一次性堆砌。</p>
-<p>截至 2026-10-26，仓库共 <b>100 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-26 约 7 周；收录 <b>25 项河南国家级非遗</b>、<b>56 张入库图片</b>、<b>10 段讲解音频</b>；构建脚本一键产出 <b>39.01 MB</b> 单文件 HTML，断网功能完整。</p>
+<p>截至 2026-10-30，仓库共 <b>111 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-29 约 7 周；收录 <b>25 项河南国家级非遗</b>、<b>56 张入库图片</b>、<b>10 段讲解音频</b>；构建脚本一键产出 <b>30.73 MB</b> 单文件 HTML，断网功能完整。</p>
 
 <!-- ============ 第一章 ============ -->
 <div class="chapter">
@@ -100,7 +100,7 @@
   <tr><td>11</td><td>性能优化</td><td>"页面滚轮很卡，加鼠标动态粒子，不要环绕改色"</td></tr>
   <tr><td>12</td><td>合规交付</td><td>"严格按参赛要求，三重思维检查：技术可行性、内容深度、工程合规"</td></tr>
 </table>
-<p>这 12 轮是早期核心功能的迭代记录。全项目从 2026-09-09 至 2026-10-26 共 100 次提交，后续还包括数据扩充（15 项→25 项）、图片版权合规、字体子集化、three.js 本地化、性能修复等多轮打磨。</p>
+<p>这 12 轮是早期核心功能的迭代记录。全项目从 2026-09-09 至 2026-10-29 共 111 次提交，后续还包括数据扩充（15 项→25 项）、图片版权合规、字体子集化、three.js 本地化、性能修复等多轮打磨。</p>
 
 <h3>1.4　引导修复与验证闭环</h3>
 <p>AI 产出后人工审查、指出问题、让 AI 修复、再验证。每轮记录"Prompt → AI 建议 → 引导修复 → 验证"四步，形成可追溯的演进证据链。</p>
@@ -132,9 +132,9 @@ regions-data.js     # 十八城介绍 + 地标
 treasury-data.js    # 藏库文字层：15 件藏品
 treasury-real.js    # 藏库影像层：实物图 base64
 treasury-audio.js   # 藏库讲解音频：10 段 WAV base64
-treasury-process.js # 工艺流程：5 件分步工序
+treasury-process.js # 工艺流程：15 件分步工序
 treasury.js         # 藏库视图层：展柜、讲解播放器
-three-showcase.js   # WebGL 3D：汝瓷碗 + 榫卯拆解
+three-showcase.js   # WebGL 3D：汝瓷碗 + 钧瓷花浇 + 唐三彩三足罐 + 榫卯拆解
 evolution-data.js   # 演进记录：12 轮迭代
 help-data.js        # 图文使用说明
 vendor/             # three.js r186 + OrbitControls + Lenis（本地化）</pre>
@@ -142,7 +142,7 @@ vendor/             # three.js r186 + OrbitControls + Lenis（本地化）</pre>
 <h4>交付态（单文件编译）</h4>
 <p>一条命令产出：</p>
 <pre>py -3 scripts/bundle_single.py
-# 输出：dist/非遗智汇·多彩面板版.html（39.01 MB）</pre>
+# 输出：dist/非遗智汇·多彩面板版.html（30.73 MB）</pre>
 <p>产物将全部 JS、字体 CSS、图片 base64、音频 base64 内联到一个 HTML 文件中，双击用浏览器打开即可运行，无需任何本地服务器、无网络请求。</p>
 <p>双轨设计的好处：开发时可以按模块阅读、调试、修改；交付时一条命令编译成评委可直接打开的单文件。源码改动后重新运行脚本即可保持产物与源码同步。</p>
 
@@ -170,7 +170,7 @@ vendor/             # three.js r186 + OrbitControls + Lenis（本地化）</pre>
 <h4>第三方库本地化</h4>
 <table>
   <tr><th>库</th><th>版本</th><th>本地路径</th><th>用途</th></tr>
-  <tr><td>three.js</td><td>r186</td><td>vendor/three.min.js</td><td>WebGL 3D 展柜（汝瓷碗 + 榫卯拆解）</td></tr>
+  <tr><td>three.js</td><td>r186</td><td>vendor/three.min.js</td><td>WebGL 3D 展柜（汝瓷碗、钧瓷花浇、唐三彩三足罐、榫卯拆解）</td></tr>
   <tr><td>OrbitControls</td><td>r186 同版</td><td>vendor/OrbitControls.min.js</td><td>轨道旋转/缩放/平移</td></tr>
   <tr><td>Lenis</td><td>1.1.18</td><td>vendor/lenis.min.js</td><td>平滑滚动（可选，失败降级原生滚动）</td></tr>
 </table>
@@ -235,24 +235,26 @@ py -3 scripts/bundle_single.py
 <p>脚本只用 Python 标准库（io、os、re、sys、base64、urllib），不需要 pip 安装任何依赖。评委环境只需 Python 3.8+。</p>
 
 <h3>3.2　细粒度 Git 历史</h3>
-<p>截至 2026-10-26，仓库共 <b>100 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-26 约 7 周。不是一次性 initial commit 堆完全部功能。</p>
+<p>截至 2026-10-30，仓库共 <b>111 次细粒度提交</b>，首末提交跨 2026-09-09 至 2026-10-29 约 7 周。不是一次性 initial commit 堆完全部功能。</p>
 
 <h4>提交时间分布</h4>
 <table>
   <tr><th>日期</th><th>提交数</th><th>阶段</th></tr>
-  <tr><td>2026-09-09</td><td>7</td><td>项目初始化：数据层 + 骨架</td></tr>
-  <tr><td>2026-09-10</td><td>5</td><td>首页视觉 + 总览卡片</td></tr>
-  <tr><td>2026-09-11</td><td>39</td><td>核心功能密集开发：地图、图谱、问答、文创、沉浸</td></tr>
-  <tr><td>2026-09-12</td><td>11</td><td>交互打磨 + 3D 珍品馆</td></tr>
-  <tr><td>2026-09-13</td><td>5</td><td>性能优化 + 单文件编译</td></tr>
-  <tr><td>2026-10-05</td><td>6</td><td>数据真实性修正 + 图片版权合规</td></tr>
-  <tr><td>2026-10-13</td><td>7</td><td>字体子集化 + three.js 本地化</td></tr>
-  <tr><td>2026-10-14</td><td>1</td><td>AI 表述诚实化</td></tr>
-  <tr><td>2026-10-15</td><td>7</td><td>README 补全 + 目录结构</td></tr>
-  <tr><td>2026-10-16</td><td>2</td><td>数据扩充第一批</td></tr>
-  <tr><td>2026-10-17</td><td>4</td><td>数据扩充第二批 + 统计动态化</td></tr>
-  <tr><td>2026-10-18</td><td>5</td><td>赛事名统一 + 技术文档</td></tr>
-  <tr><td>2026-10-26</td><td>1</td><td>最终提交</td></tr>
+  <tr><td>2026-09-09</td><td>7</td><td>项目初始化：M1 数据层 + M2/M3 骨架与设计系统 + 文档层</td></tr>
+  <tr><td>2026-09-10</td><td>5</td><td>滚动性能决策 + 真实行政区划地图 + 放大查看模态</td></tr>
+  <tr><td>2026-09-11</td><td>39</td><td>核心功能密集开发：地图、知识图谱、城市介绍、菜单、展品总览</td></tr>
+  <tr><td>2026-09-12</td><td>11</td><td>视觉闭环补全 + 图谱/总览/城市页交互精修</td></tr>
+  <tr><td>2026-09-13</td><td>5</td><td>性能优化 + 图谱窄屏可读性回归 + 单文件体积优化</td></tr>
+  <tr><td>2026-10-05</td><td>6</td><td>藏库真人讲解 v3 + 收藏导出管理 + 文档材料同步</td></tr>
+  <tr><td>2026-10-13</td><td>7</td><td>藏库真人讲解员图文导览 + 首页印章漫游动效</td></tr>
+  <tr><td>2026-10-14</td><td>1</td><td>讲解员形象与讲解声音性别对齐</td></tr>
+  <tr><td>2026-10-15</td><td>7</td><td>three.js 本地化 + 汝瓷碗/榫卯 WebGL 场景 + 一键打包脚本</td></tr>
+  <tr><td>2026-10-16</td><td>2</td><td>字体子集化内嵌 + 单文件图片离线内联修复</td></tr>
+  <tr><td>2026-10-17</td><td>4</td><td>名录事实核对纠偏 + AI 表述诚实化 + 3D 入口接线</td></tr>
+  <tr><td>2026-10-18</td><td>5</td><td>数据扩充两批共 10 项 + 图片版权合规 + README 补全</td></tr>
+  <tr><td>2026-10-26</td><td>2</td><td>技术文档三章十二节补全 + 赛事全称统一</td></tr>
+  <tr><td>2026-10-27</td><td>8</td><td>演进馆四步叙事 + 图片压缩与 WCAG AA + 问答补全 + 钧瓷/唐三彩 3D + 收藏 tooltip + Prompt 链定稿</td></tr>
+  <tr><td>2026-10-29</td><td>2</td><td>AI 对话历史导出材料 + 技术文档 PDF 提交</td></tr>
 </table>
 <p>每次提交对应一次 AI 核心对话或一个功能模块。提交信息用 <code>feat:</code> / <code>fix:</code> / <code>chore:</code> / <code>docs:</code> 前缀分类，评委可逐条 <code>git log --oneline</code> 对照复核。</p>
 
@@ -262,14 +264,14 @@ py -3 scripts/bundle_single.py
 <h4>三层证据</h4>
 <table>
   <tr><th>证据层</th><th>位置</th><th>内容</th></tr>
-  <tr><td>Git 提交历史</td><td><code>git log</code></td><td>100 次提交，每次对应一个功能模块或一次 AI 对话，时间分布跨 7 周</td></tr>
+  <tr><td>Git 提交历史</td><td><code>git log</code></td><td>111 次提交，每次对应一个功能模块或一次 AI 对话，时间分布跨 7 周</td></tr>
   <tr><td>Prompt 链快照</td><td><code>docs/Prompt历史.md</code></td><td>各模块完整 Prompt 原文，评委可查 AI 当时收到了什么指令</td></tr>
   <tr><td>演进记录</td><td><code>evolution-data.js</code></td><td>早期 12 轮迭代的 prompt → AI 建议 → 引导修复 → 验证，四步完整记录</td></tr>
 </table>
 
 <h4>评委可验证的复核路径</h4>
 <ol>
-  <li><code>git log --oneline</code>：查看 100 次提交，确认每次对应一个模块；</li>
+  <li><code>git log --oneline</code>：查看 111 次提交，确认每次对应一个模块；</li>
   <li><code>git log --format='%ad %s' --date=short</code>：确认提交时间分布跨 7 周，不是最后一天挤出来的；</li>
   <li>打开 <code>docs/Prompt历史.md</code>：对照某轮 Prompt，查看 AI 当时收到了什么约束；</li>
   <li>打开演进馆页面（或 evolution-data.js）：查看每轮 AI 建议、人工修复、验证方式；</li>
@@ -289,7 +291,7 @@ py -3 scripts/bundle_single.py
 <p>构建脚本内置失败即停：前置文件缺失、key 数量不对、图片路径未内联，任一条件不满足立即非零退出，不静默吞错。这保证了产物与源码的一致性——如果打包失败，说明源码有缺失，不会产出一个看似完整实则残缺的单文件。</p>
 
 <div class="fact" style="margin-top: 10mm;">
-  <b>工程结论</b>：本项目通过模块化源码与单文件编译双轨解耦开发态与交付态；通过数据/视图分层实现 25 项非遗的零改动扩展；通过字体子集化、第三方库本地化、图片音频 base64 内联实现断网功能完整；通过 100 次细粒度提交、Prompt 快照、演进记录和幂等构建脚本证明作品可复现、非伪造。
+  <b>工程结论</b>：本项目通过模块化源码与单文件编译双轨解耦开发态与交付态；通过数据/视图分层实现 25 项非遗的零改动扩展；通过字体子集化、第三方库本地化、图片音频 base64 内联实现断网功能完整；通过 111 次细粒度提交、Prompt 快照、演进记录和幂等构建脚本证明作品可复现、非伪造。
 </div>
 
 </div>

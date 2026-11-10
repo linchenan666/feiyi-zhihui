@@ -2172,7 +2172,7 @@
         '</div>' +
         '<div class="evo-stats rv" style="--d:.08s">' +
           '<div class="evo-stat"><b>12</b><span>核心迭代</span></div>' +
-          '<div class="evo-stat"><b>100+</b><span>Git 提交</span></div>' +
+          '<div class="evo-stat"><b>114</b><span>Git 提交</span></div>' +
           '<div class="evo-stat"><b>8+</b><span>Bug 引导修复</span></div>' +
           '<div class="evo-stat"><b>0</b><span>线上依赖</span></div>' +
         '</div>' +
@@ -2181,7 +2181,7 @@
           '<div class="evo-row"><div class="evo-no"></div><div class="evo-node" aria-hidden="true"></div>' +
             '<div class="evo-guide"><h3>评委如何一键复现这条演进</h3>' +
               '<ol>' +
-                '<li><code>git log --oneline</code> 看 100 次细粒度提交，时间跨度 2026-09-09 → 2026-10-26；</li>' +
+                '<li><code>git log --oneline</code> 看 114 次细粒度提交，时间跨度 2026-09-09 → 2026-11-10；</li>' +
                 '<li><code>docs/Prompt历史.md</code> 看每条 Prompt 的原始提问、AI 方案、修复原话；</li>' +
                 '<li><code>python scripts/bundle_single.py</code> 一键重建单文件产物；</li>' +
                 '<li>断网双击 <code>dist/</code> HTML，功能完整可演示。</li>' +
@@ -2225,7 +2225,7 @@
       var shareN = ichStats();
       copyText("我在「非遗智汇 · 河南非遗 智能数字展厅」用本地生成工坊合成了一张「" + it.name + "」" + st.label +
         "文创海报——" + shareN.item + " 项河南招牌非遗、" + shareN.cat + " 大门类、" + shareN.city + " 地市，纯本地 · 零上传 · 双击即开。一起来把非遗讲给你听！" +
-        "（全国高校 Vibe Coding 开发挑战赛 · B 组参赛作品）");
+        "（第九届传智杯 AI 创新应用挑战赛 · B 组参赛作品）");
     });
     var items = $("#create-items"), styles = $("#create-styles");
     if (items) $$("button", items).forEach(function (b) {
